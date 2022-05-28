@@ -3,3 +3,5 @@ out-dev/
 out-test/
 node_modules/
 .nyc_output/
+test/conformance_suite
+test/fileformat
