@@ -39,12 +39,27 @@ function repeatArray(array: number[], times: number): number[] {
   return result;
 }
 
-describe('decodeTga', () => {
-  it('should decoded', async () => {
-    const data = new Uint8Array(await fs.promises.readFile(join(suiteRoot, `utc24.tga`)));
-    const result = await decodeTga(data, {});
-    strictEqual(result.image.width, 128);
-    strictEqual(result.image.height, 128);
-    dataArraysEqual(Array.from(result.image.data), expectedColorImage);
-  });
+describe('conformance_suite', () => {
+  const testFiles = fs.readdirSync(suiteRoot);
+  for (const file of testFiles) {
+    if (!file.endsWith('tga')) {
+      continue;
+    }
+    // TODO: Don't skip any
+    const skipped = [
+      'cbw8.tga',
+      'ccm8.tga',
+      'ctc24.tga',
+      'ubw8.tga',
+      'ucm8.tga',
+      'utc16.tga',
+    ];
+    (skipped.includes(file) ? it.skip : it)(file, async () => {
+      const data = new Uint8Array(await fs.promises.readFile(join(suiteRoot, file)));
+      const result = await decodeTga(data, {});
+      strictEqual(result.image.width, 128);
+      strictEqual(result.image.height, 128);
+      dataArraysEqual(Array.from(result.image.data), expectedColorImage);
+    });
+  }
 });

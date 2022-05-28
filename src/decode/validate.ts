@@ -10,7 +10,8 @@ export function isValidBitDepthTga(bitDepth: number): bitDepth is BitDepthTga {
   // TODO: Support more bit depths
   return (
     bitDepth === 16 ||
-    bitDepth === 24
+    bitDepth === 24 ||
+    bitDepth === 32
   );
 }
 

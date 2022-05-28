@@ -48,6 +48,7 @@ export {
 
 import {
   BitDepth,
+  BitDepthTga,
   ColorType,
   DecodeWarning,
   EncodeWarning,
@@ -141,11 +142,38 @@ export interface ITgaHeaderDetails {
   width: number; // short
   height: number; // short
   // TODO: Support more pixel depths
-  pixelDepth: 16 | 24; // char
+  bitDepth: BitDepthTga; // char
   imageDescriptor: number; // char
   attributeBitsPerPixel: number;
   screenOrigin: ScreenOrigin;
   interleaving: InterleavingFlag;
+}
+
+export interface ITgaFooterDetails {
+  extensionAreaOffset: number;
+  developerDirectoryOffset: number;
+  signature: string;
+}
+
+export interface ITgaExtensionAreaDetails {
+  extensionSize: number;
+  authorName: string;
+  authorComments: string;
+  dateTimestamp: Date;
+  jobName: string;
+  jobTime: { hours: number, minutes: number, seconds: number };
+  softwareId: string;
+  softwareVersionNumber: number;
+  softwareVersionLetter: string;
+  keyColor: string;
+  aspectRatioNumerator: number;
+  aspectRatioDenominator: number;
+  gammaValueNumerator: number;
+  gammaValueDenominator: number;
+  colorCorrectionOffset: number;
+  postageStampOffset: number;
+  scanLineOffset: number;
+  attributesType: number;
 }
 
 export const enum ImageType {
