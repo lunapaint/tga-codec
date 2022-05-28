@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "types": [],
+    "composite": true,
+    "strict": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "pretty": true,
+    "incremental": true,
+    "noImplicitOverride": true,
+    "module": "CommonJS",
+    "target": "ES2020",
+    "rootDir": ".",
+    "outDir": "../../out-dev/shared",
+    "lib": [
+      "DOM",
+      "ES2020"
+    ]
+  },
+  "include": [
+    "./**/*"
+  ]
+}

@@ -1,0 +1,1 @@
+# @lunapaint/tga-codec
