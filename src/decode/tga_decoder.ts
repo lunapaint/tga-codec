@@ -153,11 +153,7 @@ function readPixel32Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffs
   imageData[imageOffset    ] = ctx.view.getUint8(viewOffset + 2);
   imageData[imageOffset + 1] = ctx.view.getUint8(viewOffset + 1);
   imageData[imageOffset + 2] = ctx.view.getUint8(viewOffset    );
-  if (ctx.header.attributeBitsPerPixel === 0) {
-    imageData[imageOffset + 3] = 255;
-  } else {
-    imageData[imageOffset + 3] = ctx.view.getUint8(viewOffset + 3);
-  }
+  imageData[imageOffset + 3] = ctx.view.getUint8(viewOffset + 3);
   return 4;
 }
 
