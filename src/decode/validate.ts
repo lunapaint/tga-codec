@@ -4,7 +4,15 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { BitDepth, ColorType, FilterMethod, InterlaceMethod } from '../shared/types.js';
+import { BitDepth, BitDepthTga, ColorType, FilterMethod, InterlaceMethod } from '../shared/types.js';
+
+export function isValidBitDepthTga(bitDepth: number): bitDepth is BitDepthTga {
+  // TODO: Support more bit depths
+  return (
+    bitDepth === 16 ||
+    bitDepth === 24
+  );
+}
 
 export function isValidBitDepth(bitDepth: number): bitDepth is BitDepth {
   return (

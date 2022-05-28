@@ -7,6 +7,7 @@
 // Re-export types from the api file which cannot be referenced in the out/ directory.
 export {
   BitDepth,
+  BitDepthTga,
   ColorType,
   DefaultParsedChunkTypes,
   IDecodedTga,
@@ -132,7 +133,7 @@ export interface ITgaHeaderDetails {
   width: number; // short
   height: number; // short
   // TODO: Support more pixel depths
-  pixelDepth: '16' | '24'; // char
+  pixelDepth: 16 | 24; // char
   imageDescriptor: number; // char
   attributeBitsPerPixel: number;
   screenOrigin: ScreenOrigin;

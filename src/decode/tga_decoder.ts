@@ -7,6 +7,7 @@
 import { IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
 import { DecodeError, DecodeErrorTga, DecodeWarning, handleTgaWarning, handleWarning } from './assert.js';
 import { readText, readTextTga } from './text.js';
+import { isValidBitDepthTga } from './validate.js';
 
 export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions = {}): Promise<IDecodedTga> {
   const ctx: ITgaInitialDecodeContext = {
@@ -29,7 +30,8 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
 
   ctx.image = parseImageData(ctx, offset);
 
-  console.log(ctx);
+  console.log('header', ctx.header);
+  console.log('image', ctx.image);
   return {
     image: ctx.image
   };
@@ -50,8 +52,8 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   const width = ctx.view.getInt16(0x0c, true);
   const height = ctx.view.getInt16(0x0e, true);
   const pixelDepth = ctx.view.getUint8(0x10);
-  if (![16, 24].includes(pixelDepth)) {
-    throw new DecodeErrorTga(ctx, `Unsupported TGA pixel depth "${pixelDepth}"`, offset);
+  if (!isValidBitDepthTga(pixelDepth)) {
+    throw new DecodeErrorTga(ctx, `Unsupported TGA pixel depth "${pixelDepth}"`, 0x10);
   }
   const imageDescriptor = ctx.view.getUint8(0x11);
   const attributeBitsPerPixel = imageDescriptor & 0b1111;
@@ -78,51 +80,6 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
     screenOrigin,
     interleaving
   };
-  // assertChunkDataLengthEquals(ctx, chunk, 13);
-
-  // let offset = chunk.offset + ChunkPartByteLength.Length + ChunkPartByteLength.Type;
-  // const width = ctx.view.getUint32(offset); offset += 4;
-  // const height = ctx.view.getUint32(offset); offset += 4;
-
-  // const bitDepth = ctx.view.getUint8(offset);
-  // if (!isValidBitDepth(bitDepth)) {
-  //   throw createChunkDecodeError(ctx, chunk, `Bit depth "${bitDepth}" is not valid`, offset);
-  // }
-  // offset++;
-
-  // const colorType = ctx.view.getUint8(offset);
-  // if (!isValidColorType(colorType, bitDepth)) {
-  //   throw createChunkDecodeError(ctx, chunk, `Color type "${colorType}" is not valid with bit depth "${bitDepth}"`, offset);
-  // }
-  // offset++;
-
-  // const compressionMethod = ctx.view.getUint8(offset);
-  // assertChunkCompressionMethod(ctx, chunk, compressionMethod, offset);
-  // offset++;
-
-  // let filterMethod = ctx.view.getUint8(offset);
-  // if (!isValidFilterMethod(filterMethod)) {
-  //   handleWarning(ctx, createChunkDecodeWarning(chunk, `Filter method "${filterMethod}" is not valid`, offset));
-  //   // Validation failed. If not in strict mode, continue with adaptive filter method
-  //   filterMethod = 0;
-  // }
-  // offset++;
-
-  // let interlaceMethod = ctx.view.getUint8(offset);
-  // if (!isValidInterlaceMethod(interlaceMethod)) {
-  //   handleWarning(ctx, createChunkDecodeWarning(chunk, `Interlace method "${interlaceMethod}" is not valid`, offset));
-  //   // Validation failed. If not in strict mode, continue with no interlace method
-  //   interlaceMethod = InterlaceMethod.None;
-  // }
-  // offset++;
-
-  // return {
-  //   width,
-  //   height,
-  //   bitDepth,
-  //   colorType,
-  //   interlaceMethod
-  // };
 }
 
 // TODO: Support color map
@@ -142,6 +99,9 @@ function parseImageData(ctx: ITgaInitialDecodeContext, offset: number): IImage32
   let readPixel: (ctx: ITgaInitialDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
   switch (ctx.header.pixelDepth) {
     case 16: readPixel = readPixel16Bit; break;
+    case 24: readPixel = readPixel24Bit; break;
+    default:
+      throw new Error('NYI'); // TODO: Implement
   }
   let imageOffset = 0;
   for (let y = 0; y < image.height; y++) {
@@ -156,10 +116,21 @@ function parseImageData(ctx: ITgaInitialDecodeContext, offset: number): IImage32
 let currentValue = 0;
 function readPixel16Bit(ctx: ITgaInitialDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
   currentValue = ctx.view.getUint16(viewOffset, true);
+  // Bits stored as 0bARRRRRGG 0bGGGBBBBB
   // TODO: How these colors are read differs across editors - does 0b11111 = 248 or 255?
   imageData[imageOffset    ] = (currentValue >> 10 & 0x1f) << 3;
   imageData[imageOffset + 1] = (currentValue >>  5 & 0x1f) << 3;
   imageData[imageOffset + 2] = (currentValue       & 0x1f) << 3;
   imageData[imageOffset + 3] = (1 - currentValue >> 15 & 0x01) * 255;
   return 2;
+}
+
+function readPixel24Bit(ctx: ITgaInitialDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
+  currentValue = ctx.view.getUint16(viewOffset, true);
+  // Bytes stored as BGR
+  imageData[imageOffset    ] = ctx.view.getUint8(viewOffset + 2);
+  imageData[imageOffset + 1] = ctx.view.getUint8(viewOffset + 1);
+  imageData[imageOffset + 2] = ctx.view.getUint8(viewOffset    );
+  imageData[imageOffset + 3] = 255;
+  return 3;
 }
