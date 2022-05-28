@@ -6,7 +6,7 @@
 
 // import * as pako from 'pako';
 import { createChunkDecodeWarning } from './assert.js';
-import { IDecodeContext, IPngChunk, ITgaInitialDecodeContext } from '../shared/types';
+import { IDecodeContext, IPngChunk, ITgaDecodeContext, ITgaInitialDecodeContext } from '../shared/types';
 
 export function readText(ctx: IDecodeContext, chunk: IPngChunk, textDecoder: TextDecoder | undefined, maxLength: number | undefined, offset: number, maxOffset: number, readTrailingNull: boolean, isCompressed?: boolean): { bytesRead: number, text: string } {
   const bytes = [];
@@ -49,7 +49,7 @@ export function readText(ctx: IDecodeContext, chunk: IPngChunk, textDecoder: Tex
   return { text: textDecoder ? textDecoder.decode(typedArray) : String.fromCharCode(...bytes), bytesRead: i + 1 };
 }
 
-export function readTextTga(ctx: ITgaInitialDecodeContext, textDecoder: TextDecoder | undefined, maxLength: number | undefined, offset: number, maxOffset: number, readTrailingNull: boolean, isCompressed?: boolean): { bytesRead: number, text: string } {
+export function readTextTga(ctx: ITgaDecodeContext, textDecoder: TextDecoder | undefined, maxLength: number | undefined, offset: number, maxOffset: number, readTrailingNull: boolean, isCompressed?: boolean): { bytesRead: number, text: string } {
   const bytes = [];
   let current = 0;
   let i = 0;

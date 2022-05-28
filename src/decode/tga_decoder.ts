@@ -4,18 +4,22 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
+import { IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, ITgaDecodeContext, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
 import { DecodeError, DecodeErrorTga, DecodeWarning, handleTgaWarning, handleWarning } from './assert.js';
 import { readText, readTextTga } from './text.js';
 import { isValidBitDepthTga } from './validate.js';
 
 export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions = {}): Promise<IDecodedTga> {
-  const ctx: ITgaInitialDecodeContext = {
+  const initialCtx: ITgaInitialDecodeContext = {
     view: new DataView(data.buffer, data.byteOffset, data.byteLength),
     options,
     warnings: []
   }
-  ctx.header = parseHeader(ctx);
+  const header = parseHeader(initialCtx);
+  const ctx: ITgaDecodeContext = {
+    ...initialCtx,
+    header
+  };
   const idField = readTextTga(ctx, undefined, ctx.header.idLength, 18, 18 + ctx.header.idLength, false);
   if (ctx.header.idLength !== idField.bytesRead) {
     // TODO: Warn
@@ -83,20 +87,16 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
 }
 
 // TODO: Support color map
-function parseColorMap(ctx: ITgaInitialDecodeContext) {
+function parseColorMap(ctx: ITgaDecodeContext) {
 }
 
-function parseImageData(ctx: ITgaInitialDecodeContext, offset: number): IImage32 {
-  // TODO: Narrow ctx to avoid this
-  if (!ctx.header) {
-    throw new Error('!');
-  }
+function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
   const image = {
     width: ctx.header.width,
     height: ctx.header.height,
     data: new Uint8Array(ctx.header.width * ctx.header.height * 4)
   }
-  let readPixel: (ctx: ITgaInitialDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
+  let readPixel: (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
   switch (ctx.header.pixelDepth) {
     case 16: readPixel = readPixel16Bit; break;
     case 24: readPixel = readPixel24Bit; break;
@@ -114,7 +114,7 @@ function parseImageData(ctx: ITgaInitialDecodeContext, offset: number): IImage32
 }
 
 let currentValue = 0;
-function readPixel16Bit(ctx: ITgaInitialDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
+function readPixel16Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
   currentValue = ctx.view.getUint16(viewOffset, true);
   // Bits stored as 0bARRRRRGG 0bGGGBBBBB
   // TODO: How these colors are read differs across editors - does 0b11111 = 248 or 255?
@@ -125,7 +125,7 @@ function readPixel16Bit(ctx: ITgaInitialDecodeContext, imageData: Uint8Array, im
   return 2;
 }
 
-function readPixel24Bit(ctx: ITgaInitialDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
+function readPixel24Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
   currentValue = ctx.view.getUint16(viewOffset, true);
   // Bytes stored as BGR
   imageData[imageOffset    ] = ctx.view.getUint8(viewOffset + 2);

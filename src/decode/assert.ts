@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { ChunkPartByteLength, IDecodeContext, IDecodedPng, IDecodedTga, IInitialDecodeContext, IPngChunk, ITgaInitialDecodeContext, KnownChunkTypes } from '../shared/types.js';
+import { ChunkPartByteLength, IDecodeContext, IDecodedPng, IDecodedTga, IInitialDecodeContext, IPngChunk, ITgaDecodeContext, ITgaInitialDecodeContext, KnownChunkTypes } from '../shared/types.js';
 
 /**
  * Assert the given chunk type already exists.
@@ -125,7 +125,7 @@ export class DecodeError extends Error {
 export class DecodeErrorTga extends Error {
   // readonly partiallyDecodedImage: Partial<IDecodedTga>;
   constructor(
-    ctx: ITgaInitialDecodeContext,
+    ctx: ITgaInitialDecodeContext | ITgaDecodeContext,
     message: string,
     readonly offset: number
   ) {

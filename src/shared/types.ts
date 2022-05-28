@@ -82,13 +82,21 @@ export interface IInitialDecodeContext extends IBaseDecodeContext {
   header?: IPngHeaderDetails;
 }
 
-export interface ITgaInitialDecodeContext {
+export interface ITgaBaseDecodeContext {
   image?: IImage32;
   view: DataView;
   warnings: DecodeWarning[];
   options: IDecodeTgaOptions;
   header?: ITgaHeaderDetails;
   identificationField?: string;
+}
+
+export interface ITgaInitialDecodeContext extends ITgaBaseDecodeContext {
+  header?: ITgaHeaderDetails;
+}
+
+export interface ITgaDecodeContext extends ITgaBaseDecodeContext {
+  header: ITgaHeaderDetails;
 }
 
 export interface IDecodeContext extends IBaseDecodeContext {

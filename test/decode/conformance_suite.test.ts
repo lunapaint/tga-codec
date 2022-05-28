@@ -38,13 +38,10 @@ function repeatArray(array: number[], times: number): number[] {
   }
   return result;
 }
-// const expectedColorImage = expectedColorImageLine;
 
 describe('decodeTga', () => {
   it('should decoded', async () => {
-    // const data = new Uint8Array(await fs.promises.readFile(join(suiteRoot, `utc16.tga`)));
     const data = new Uint8Array(await fs.promises.readFile(join(suiteRoot, `utc24.tga`)));
-    // This would throw if the offset DataView is not read correctly
     const result = await decodeTga(data, {});
     strictEqual(result.image.width, 128);
     strictEqual(result.image.height, 128);
