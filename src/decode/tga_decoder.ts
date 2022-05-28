@@ -32,16 +32,15 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
   }
   // TODO: Support color map
 
+  // Parse the footer before the image data as the extension area has important details on decoding
+  // the data.
+  ctx.footer = parseFooter(ctx);
+  ctx.extensionArea = parseExtensionArea(ctx, ctx.footer.extensionAreaOffset);
+
   ctx.image = parseImageData(ctx, offset);
   offset += ctx.header.width * ctx.header.height * (ctx.header.bitDepth / 8);
-  console.log('image data length', ctx.header.width * ctx.header.height * (ctx.header.bitDepth / 8));
 
-  const footer = parseFooter(ctx);
-  const extensionArea = parseExtensionArea(ctx, footer.extensionAreaOffset);
-  console.log('extensionArea', extensionArea);
-
-  console.log('header', ctx.header);
-  console.log('image', ctx.image);
+  console.log('ctx', ctx);
   return {
     image: ctx.image
   };
@@ -109,7 +108,7 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
     case 16: readPixel = readPixel16Bit; break;
     case 24: readPixel = readPixel24Bit; break;
     case 32:
-      if (ctx.header.attributeBitsPerPixel === 0) {
+      if (ctx.extensionArea?.attributesType === 2) {
         readPixel = readPixel32BitNoAlpha;
       } else {
         readPixel = readPixel32Bit;

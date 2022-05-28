@@ -90,6 +90,8 @@ export interface ITgaBaseDecodeContext {
   options: IDecodeTgaOptions;
   header?: ITgaHeaderDetails;
   identificationField?: string;
+  footer?: ITgaFooterDetails;
+  extensionArea?: ITgaExtensionAreaDetails;
 }
 
 export interface ITgaInitialDecodeContext extends ITgaBaseDecodeContext {
