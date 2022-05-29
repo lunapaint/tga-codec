@@ -1,7 +1,7 @@
 {
   "name": "@lunapaint/tga-codec",
   "version": "0.2.0",
-  "description": "Decode and encode tga files in web or node",
+  "description": "Decode tga files in web or node",
   "main": "out-dist/public/tga.js",
   "typings": "typings/api.d.ts",
   "scripts": {
@@ -9,8 +9,7 @@
     "watch": "tsc -b -w ./tsconfig.json --preserveWatchOutput",
     "lint": "eslint -c .eslintrc.json --max-warnings 0 --ext .ts src/ test/",
     "test": "mocha ./out-test/**/*.js",
-    "coverage": "nyc npm run test",
-    "encode": "node ./scripts/encode-image.js"
+    "coverage": "nyc npm run test"
   },
   "repository": {
     "type": "git",
@@ -18,7 +17,6 @@
   },
   "keywords": [
     "decoder",
-    "encoder",
     "graphics",
     "image",
     "tga",
