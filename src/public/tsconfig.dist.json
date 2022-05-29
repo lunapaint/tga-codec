@@ -7,7 +7,6 @@
   },
   "references": [
     { "path": "../decode/tsconfig.dist.json" },
-    { "path": "../encode/tsconfig.dist.json" },
     { "path": "../shared/tsconfig.dist.json" }
   ]
 }

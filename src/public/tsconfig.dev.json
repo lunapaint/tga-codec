@@ -22,7 +22,6 @@
   ],
   "references": [
     { "path": "../decode/tsconfig.dev.json" },
-    { "path": "../encode/tsconfig.dev.json" },
     { "path": "../shared/tsconfig.dev.json" }
   ]
 }

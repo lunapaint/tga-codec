@@ -4,12 +4,12 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { ColorMapDepth, ColorMapType, IByteStreamReader, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, IReadPixelDelegate, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
-import { DecodeError, DecodeErrorTga, DecodeWarning, handleTgaWarning, handleWarning } from './assert.js';
-import { readText, readTextTga } from './text.js';
-import { isValidBitDepthTga, isValidColorMapDepth } from './validate.js';
-import { ByteStreamReader } from './byteStreamReader.js';
 import { IExtensionArea } from '../../typings/api.js';
+import { ColorMapType, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, IReadPixelDelegate, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
+import { DecodeError, DecodeWarning, handleWarning } from './assert.js';
+import { ByteStreamReader } from './byteStreamReader.js';
+import { readText } from './text.js';
+import { isValidBitDepth, isValidColorMapDepth } from './validate.js';
 
 const enum ImageDescriptorMask {
   AttributeBits    = 0b00001111,
@@ -37,7 +37,7 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
     header
   };
 
-  ctx.identificationField = readTextTga(ctx, undefined, ctx.header.idLength);
+  ctx.identificationField = readText(ctx, undefined, ctx.header.idLength);
 
   if (ctx.header.colorMapType === ColorMapType.ColorMap) {
     // TODO: Support color map
@@ -86,7 +86,7 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   if (colorMapType === ColorMapType.ColorMap &&
       imageType !== ImageType.UncompressedColorMapped /*&&
       imageType !== ImageType.RunLengthEncodedColorMapped*/) {
-    handleTgaWarning(ctx, new DecodeWarning(`Image type "${imageType}" cannot have a color map`, ctx.reader.offset - 2));
+    handleWarning(ctx, new DecodeWarning(`Image type "${imageType}" cannot have a color map`, ctx.reader.offset - 2));
   }
   const colorMapOrigin = ctx.reader.readUint16();
   const colorMapLength = ctx.reader.readUint16();
@@ -94,10 +94,10 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   if (colorMapType === ColorMapType.ColorMap) {
     if (colorMapOrigin >= colorMapLength) {
       // This is just a warning as the origin is ignored anyway
-      handleTgaWarning(ctx, new DecodeWarning(`Color map origin "${colorMapOrigin}" is greater than color map length "${colorMapLength}"`, ctx.reader.offset - 5));
+      handleWarning(ctx, new DecodeWarning(`Color map origin "${colorMapOrigin}" is greater than color map length "${colorMapLength}"`, ctx.reader.offset - 5));
     }
     if (!isValidColorMapDepth(colorMapDepth)) {
-      throw new DecodeErrorTga(ctx, `Unsupported color map bit depth "${colorMapDepth}"`, ctx.reader.offset - 1);
+      throw new DecodeError(ctx, `Unsupported color map bit depth "${colorMapDepth}"`, ctx.reader.offset - 1);
     }
   }
   const xOrigin = ctx.reader.readUint16();
@@ -105,14 +105,14 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   const width = ctx.reader.readUint16();
   const height = ctx.reader.readUint16();
   const bitDepth = ctx.reader.readUint8();
-  if (!isValidBitDepthTga(bitDepth, imageType)) {
-    throw new DecodeErrorTga(ctx, `Unsupported TGA bit depth "${bitDepth}" with image type ${imageType}`, 0x10);
+  if (!isValidBitDepth(bitDepth, imageType)) {
+    throw new DecodeError(ctx, `Unsupported TGA bit depth "${bitDepth}" with image type ${imageType}`, 0x10);
   }
   const imageDescriptor = ctx.reader.readUint8();
   const attributeBitsPerPixel = imageDescriptor & ImageDescriptorMask.AttributeBits >> ImageDescriptorShift.AttributeBits;
   const reserved = imageDescriptor & ImageDescriptorMask.Reserved >> ImageDescriptorShift.Reserved;
   if (reserved !== 0) {
-    handleTgaWarning(ctx, new DecodeWarning(`Reserved bit "${reserved}" is not zero`, 0x11));
+    handleWarning(ctx, new DecodeWarning(`Reserved bit "${reserved}" is not zero`, 0x11));
   }
   const screenOrigin = (imageDescriptor & ImageDescriptorMask.ScreenOrigin >> ImageDescriptorShift.ScreenOrigin) as ScreenOrigin;
   const interleaving = (imageDescriptor & ImageDescriptorMask.InterleavingFlag >> ImageDescriptorShift.InterleavingFlag) as InterleavingFlag;
@@ -276,17 +276,17 @@ function parseExtensionArea(ctx: ITgaDecodeContext, offset: number): IExtensionA
   const extensionSize = ctx.reader.readUint16();
   if (extensionSize !== 495) {
     // TODO: Should this be info instead?
-    handleTgaWarning(ctx, new DecodeWarning('TGA file is a version other than v2', ctx.reader.offset - 2));
+    handleWarning(ctx, new DecodeWarning('TGA file is a version other than v2', ctx.reader.offset - 2));
   }
-  const authorName = readTextTga(ctx, undefined, 41);
-  const authorComments = readTextTga(ctx, undefined, 324);
+  const authorName = readText(ctx, undefined, 41);
+  const authorComments = readText(ctx, undefined, 324);
   const dateTimestamp = readDateTimestamp(ctx);
-  const jobName = readTextTga(ctx, undefined, 41);
+  const jobName = readText(ctx, undefined, 41);
   const jobTime = readTimestamp(ctx);
-  const softwareId = readTextTga(ctx, undefined, 41);
+  const softwareId = readText(ctx, undefined, 41);
   const softwareVersionNumber = ctx.reader.readUint8() / 100;
-  const softwareVersionLetter = readTextTga(ctx, undefined, 2);
-  const keyColor = readTextTga(ctx, undefined, 4);
+  const softwareVersionLetter = readText(ctx, undefined, 2);
+  const keyColor = readText(ctx, undefined, 4);
   const aspectRatioNumerator = ctx.reader.readUint16();
   const aspectRatioDenominator = ctx.reader.readUint16();
   const gammaValueNumerator = ctx.reader.readUint16();

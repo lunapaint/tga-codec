@@ -7,7 +7,7 @@
 import { deepStrictEqual, strictEqual } from 'assert';
 import { join } from 'path';
 import * as fs from 'fs';
-import { decodeTga } from '../../out-dev/public/png.js';
+import { decodeTga } from '../../out-dev/public/tga.js';
 import { dataArraysEqual } from '../shared/testUtil.js';
 import { IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
 
