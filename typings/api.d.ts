@@ -10,6 +10,7 @@ export interface IDecodedTga {
   image: IImage32;
   details: ITgaDetails;
   extensionArea: IExtensionArea;
+  developerDirectory: IDeveloperDirectoryEntry[];
 }
 
 /**
@@ -56,6 +57,12 @@ export interface IExtensionArea {
   postageStampOffset: number;
   scanLineOffset: number;
   attributesType: number;
+}
+
+export interface IDeveloperDirectoryEntry {
+  tag: number;
+  offset: number;
+  length: number;
 }
 
 export interface ITgaDetails {

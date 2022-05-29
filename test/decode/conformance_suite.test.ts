@@ -8,7 +8,7 @@ import { deepStrictEqual, strictEqual } from 'assert';
 import * as fs from 'fs';
 import { join } from 'path';
 import { decodeTga } from '../../out-dev/public/tga.js';
-import { IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
+import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
 import { dataArraysEqual } from '../shared/testUtil.js';
 
 const suiteRoot = 'test/conformance_suite';
@@ -65,7 +65,7 @@ function repeatArray(array: number[], times: number): number[] {
   return result;
 }
 
-const testFiles: { [file: string]: { image: IImage32, details: ITgaDetails, extensionArea: IExtensionArea }} = {
+const testFiles: { [file: string]: IDecodedTga } = {
   'ubw8': {
     image: expectedGreyscaleImage,
     details: {
@@ -90,7 +90,8 @@ const testFiles: { [file: string]: { image: IImage32, details: ITgaDetails, exte
       postageStampOffset: 16428,
       scanLineOffset: 0,
       attributesType: 0,
-    }
+    },
+    developerDirectory: []
   },
   'ucm8': {
     image: expectedColorImage,
@@ -116,7 +117,8 @@ const testFiles: { [file: string]: { image: IImage32, details: ITgaDetails, exte
       postageStampOffset: 16940,
       scanLineOffset: 0,
       attributesType: 0,
-    }
+    },
+    developerDirectory: []
   },
   'utc16': {
     image: expectedColorImage,
@@ -142,7 +144,8 @@ const testFiles: { [file: string]: { image: IImage32, details: ITgaDetails, exte
       postageStampOffset: 32812,
       scanLineOffset: 0,
       attributesType: 2,
-    }
+    },
+    developerDirectory: []
   },
   'utc24': {
     image: expectedColorImage,
@@ -168,7 +171,8 @@ const testFiles: { [file: string]: { image: IImage32, details: ITgaDetails, exte
       postageStampOffset: 49196,
       scanLineOffset: 0,
       attributesType: 0,
-    }
+    },
+    developerDirectory: []
   },
   'utc32': {
     image: expectedColorImage,
@@ -194,7 +198,8 @@ const testFiles: { [file: string]: { image: IImage32, details: ITgaDetails, exte
       postageStampOffset: 65580,
       scanLineOffset: 0,
       attributesType: 2,
-    }
+    },
+    developerDirectory: []
   }
 };
 
@@ -213,8 +218,9 @@ describe('conformance_suite', () => {
       strictEqual(result.image.width, testSpec.image.width);
       strictEqual(result.image.height, testSpec.image.height);
       dataArraysEqual(result.image.data, testSpec.image.data);
+      deepStrictEqual(result.details, testSpec.details);
       deepStrictEqual(result.extensionArea, testSpec.extensionArea);
-      deepStrictEqual(result.details.identificationField, testSpec.details.identificationField);
+      deepStrictEqual(result.developerDirectory, testSpec.developerDirectory);
     });
   }
 });

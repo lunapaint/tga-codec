@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { IExtensionArea } from '../../typings/api.js';
+import { IDeveloperDirectoryEntry, IExtensionArea } from '../../typings/api.js';
 import { ColorMapType, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, IReadPixelDelegate, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
 import { DecodeError, DecodeWarning, handleWarning } from './assert.js';
 import { ByteStreamReader } from './byteStreamReader.js';
@@ -40,10 +40,7 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
   ctx.identificationField = readText(ctx, undefined, ctx.header.idLength);
 
   if (ctx.header.colorMapType === ColorMapType.ColorMap) {
-    // TODO: Support color map
     ctx.colorMap = parseColorMap(ctx);
-
-    // throw new DecodeErrorTga(ctx, 'TGA images with color maps are not supported yet', ctx.reader.offset);
   }
 
   const dataOffset = ctx.reader.offset;
@@ -51,7 +48,8 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
   // Parse the footer before the image data as the extension area has important details on decoding
   // the data.
   ctx.footer = parseFooter(ctx);
-  ctx.extensionArea = parseExtensionArea(ctx, ctx.footer.extensionAreaOffset);
+  ctx.extensionArea = parseExtensionArea(ctx);
+  ctx.developerDirectory = parseDeveloperDirectory(ctx);
 
   ctx.reader.offset = dataOffset;
   ctx.image = parseImageData(ctx, ctx.reader.offset);
@@ -59,10 +57,11 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
   // console.log('ctx', ctx);
   return {
     image: ctx.image,
-    extensionArea: ctx.extensionArea!,
     details: {
       identificationField: ctx.identificationField
-    }
+    },
+    extensionArea: ctx.extensionArea!,
+    developerDirectory: ctx.developerDirectory
   };
 }
 
@@ -236,7 +235,6 @@ function readPixel16Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffs
   imageData[imageOffset + 1] = scaleToRange(currentValue >>  5 & 0x1f, 0x1f, 0xff);
   imageData[imageOffset + 2] = scaleToRange(currentValue       & 0x1f, 0x1f, 0xff);
   imageData[imageOffset + 3] = (1 - currentValue >> 15 & 0x01) * 255;
-  console.log('readpixel16bit', imageData.slice(imageOffset, imageOffset + 4));
   return 2;
 }
 
@@ -271,7 +269,7 @@ function readPixel32BitNoAlpha(ctx: ITgaDecodeContext, imageData: Uint8Array, im
   return 4;
 }
 
-function parseExtensionArea(ctx: ITgaDecodeContext, offset: number): IExtensionArea {
+function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea {
   ctx.reader.offset = ctx.footer!.extensionAreaOffset;
   const extensionSize = ctx.reader.readUint16();
   if (extensionSize !== 495) {
@@ -319,6 +317,22 @@ function parseExtensionArea(ctx: ITgaDecodeContext, offset: number): IExtensionA
     scanLineOffset,
     attributesType,
   };
+}
+
+function parseDeveloperDirectory(ctx: ITgaDecodeContext): IDeveloperDirectoryEntry[] {
+  if (ctx.footer!.developerDirectoryOffset === 0) {
+    return [];
+  }
+  ctx.reader.offset = ctx.footer!.developerDirectoryOffset;
+  const tagCount = ctx.reader.readUint16();
+  const directory: IDeveloperDirectoryEntry[] = [];
+  for (let i = 0; i < tagCount; i++) {
+    const tag = ctx.reader.readUint16();
+    const offset = ctx.reader.readUint32();
+    const length = ctx.reader.readUint32();
+    directory.push({ tag, offset, length });
+  }
+  return directory;
 }
 
 function readDateTimestamp(ctx: ITgaDecodeContext): Date {

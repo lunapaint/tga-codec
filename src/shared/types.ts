@@ -16,6 +16,7 @@ import {
   BitDepth,
   DecodeWarning,
   IDecodeTgaOptions,
+  IDeveloperDirectoryEntry,
   IExtensionArea,
   IImage32,
 } from '../../typings/api.js';
@@ -30,6 +31,7 @@ export interface ITgaBaseDecodeContext {
   footer?: ITgaFooterDetails;
   colorMap?: IReadPixelDelegate;
   extensionArea?: IExtensionArea;
+  developerDirectory?: IDeveloperDirectoryEntry[];
 }
 
 export type IReadPixelDelegate = (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
