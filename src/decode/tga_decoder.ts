@@ -73,12 +73,17 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
       imageType !== ImageType.RunLengthEncodedColorMapped*/) {
     handleTgaWarning(ctx, new DecodeWarning(`Image type "${imageType}" cannot have a color map`, ctx.reader.offset - 2));
   }
-  // TODO: Validate origin and length
   const colorMapOrigin = ctx.reader.readUint16();
   const colorMapLength = ctx.reader.readUint16();
   const colorMapDepth = ctx.reader.readUint8();
-  if (colorMapType === ColorMapType.ColorMap && !isValidColorMapDepth(colorMapDepth)) {
-    throw new DecodeErrorTga(ctx, `Unsupported color map bit depth "${colorMapDepth}"`, ctx.reader.offset - 1);
+  if (colorMapType === ColorMapType.ColorMap) {
+    if (colorMapOrigin >= colorMapLength) {
+      // This is just a warning as the origin is ignored anyway
+      handleTgaWarning(ctx, new DecodeWarning(`Color map origin "${colorMapOrigin}" is greater than color map length "${colorMapLength}"`, ctx.reader.offset - 5));
+    }
+    if (!isValidColorMapDepth(colorMapDepth)) {
+      throw new DecodeErrorTga(ctx, `Unsupported color map bit depth "${colorMapDepth}"`, ctx.reader.offset - 1);
+    }
   }
   const xOrigin = ctx.reader.readUint16();
   const yOrigin = ctx.reader.readUint16();
