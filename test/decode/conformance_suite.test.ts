@@ -30,7 +30,32 @@ const expectedColorImageLine = repeatArray([
   ...repeatArray(b, 8),
   ...repeatArray(w, 8)
 ], 2);
-const expectedColorImage = new Uint8Array(repeatArray(expectedColorImageLine, 128));
+const expectedColorImage: IImage32 = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(repeatArray(expectedColorImageLine, 128))
+};
+
+// Greyscale lines are repeated in a similar fashion
+const g1 = [0x4C, 0x4C, 0x4C, 0xFF];
+const g2 = [0x95, 0x95, 0x95, 0xFF];
+const g3 = [0xB2, 0xB2, 0xB2, 0xFF];
+const g4 = [0xFE, 0xFE, 0xFE, 0xFF];
+const expectedGreyscaleImageLine = repeatArray([
+  ...repeatArray(g1, 8),
+  ...repeatArray(g2, 8),
+  ...repeatArray(g3, 8),
+  ...repeatArray(k, 8),
+  ...repeatArray(g1, 8),
+  ...repeatArray(g2, 8),
+  ...repeatArray(g3, 8),
+  ...repeatArray(g4, 8)
+], 2);
+const expectedGreyscaleImage: IImage32 = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(repeatArray(expectedGreyscaleImageLine, 128))
+};
 
 function repeatArray(array: number[], times: number): number[] {
   const result: number[] = [];
@@ -41,12 +66,31 @@ function repeatArray(array: number[], times: number): number[] {
 }
 
 const testFiles: { [file: string]: { image: IImage32, extensionArea: IExtensionArea }} = {
+  'ubw8': {
+    image: expectedGreyscaleImage,
+    extensionArea: {
+      extensionSize: 495,
+      authorName: '',
+      authorComments: '',
+      dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
+      jobName: '',
+      jobTime: { hours: 0, minutes: 0, seconds: 0 },
+      softwareId: '',
+      softwareVersionNumber: 1.3,
+      softwareVersionLetter: '',
+      keyColor: '',
+      aspectRatioNumerator: 0,
+      aspectRatioDenominator: 0,
+      gammaValueNumerator: 0,
+      gammaValueDenominator: 0,
+      colorCorrectionOffset: 0,
+      postageStampOffset: 16428,
+      scanLineOffset: 0,
+      attributesType: 0,
+    }
+  },
   'utc16': {
-    image: {
-      width: 128,
-      height: 128,
-      data: expectedColorImage
-    },
+    image: expectedColorImage,
     extensionArea: {
       extensionSize: 495,
       authorName: '',
@@ -69,11 +113,7 @@ const testFiles: { [file: string]: { image: IImage32, extensionArea: IExtensionA
     }
   },
   'utc24': {
-    image: {
-      width: 128,
-      height: 128,
-      data: expectedColorImage
-    },
+    image: expectedColorImage,
     extensionArea: {
       extensionSize: 495,
       authorName: '',
@@ -96,11 +136,7 @@ const testFiles: { [file: string]: { image: IImage32, extensionArea: IExtensionA
     }
   },
   'utc32': {
-    image: {
-      width: 128,
-      height: 128,
-      data: expectedColorImage
-    },
+    image: expectedColorImage,
     extensionArea: {
       extensionSize: 495,
       authorName: '',
@@ -125,17 +161,12 @@ const testFiles: { [file: string]: { image: IImage32, extensionArea: IExtensionA
 };
 
 describe('conformance_suite', () => {
-  // const testFiles = fs.readdirSync(suiteRoot);
   for (const file of Object.keys(testFiles)) {
-    // if (!file.endsWith('tga')) {
-    //   continue;
-    // }
     // TODO: Don't skip any
     const skipped = [
       'cbw8',
       'ccm8',
       'ctc24',
-      'ubw8',
       'ucm8',
     ];
     (skipped.includes(file) ? it.skip : it)(file, async () => {

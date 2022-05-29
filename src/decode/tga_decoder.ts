@@ -51,7 +51,8 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   const idLength = ctx.reader.readUint8();
   const colorMapType = ctx.reader.readUint8();
   const imageType = ctx.reader.readUint8() as ImageType;
-  if (imageType !== ImageType.UncompressedTrueColor) {
+  if (imageType !== ImageType.UncompressedTrueColor &&
+      imageType !== ImageType.UncompressedGrayscale) {
     throw new Error('NYI'); // TODO: Implement
   }
   const colorMapOrigin = ctx.reader.readUint16();
@@ -62,8 +63,8 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   const width = ctx.reader.readUint16();
   const height = ctx.reader.readUint16();
   const bitDepth = ctx.reader.readUint8();
-  if (!isValidBitDepthTga(bitDepth)) {
-    throw new DecodeErrorTga(ctx, `Unsupported TGA bit depth "${bitDepth}"`, 0x10);
+  if (!isValidBitDepthTga(bitDepth, imageType)) {
+    throw new DecodeErrorTga(ctx, `Unsupported TGA bit depth "${bitDepth}" with image type ${imageType}`, 0x10);
   }
   const imageDescriptor = ctx.reader.readUint8();
   // TODO: Use mask constants
@@ -106,6 +107,7 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
   };
   let readPixel: (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
   switch (ctx.header.bitDepth) {
+    case 8: readPixel = readPixel8BitGreyscale; break;
     // case 15: readPixel = readPixel15Bit; break;
     case 16:
       if (ctx.extensionArea?.attributesType === 2) {
@@ -135,6 +137,14 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
   return image;
 }
 
+function readPixel8BitGreyscale(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
+  // Bits stored as 0bGGGGGGGG
+  imageData[imageOffset    ] = ctx.reader.view.getUint8(viewOffset);
+  imageData[imageOffset + 1] = imageData[imageOffset    ];
+  imageData[imageOffset + 2] = imageData[imageOffset    ];
+  imageData[imageOffset + 3] = 255;
+  return 1;
+}
 // The conversion from 5 bit to 8 bit color differs across editors, some naively shift the value
 // by 3 meaning the maximum channel value is 248 (`0b11111000`). The most correct approach seems
 // to be scaling the value to 0-255.

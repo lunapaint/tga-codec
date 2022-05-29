@@ -4,10 +4,13 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { BitDepth, BitDepthTga, ColorType, FilterMethod, InterlaceMethod } from '../shared/types.js';
+import { BitDepth, BitDepthTga, ColorType, FilterMethod, ImageType, InterlaceMethod } from '../shared/types.js';
 
-export function isValidBitDepthTga(bitDepth: number): bitDepth is BitDepthTga {
+export function isValidBitDepthTga(bitDepth: number, imageType: ImageType): bitDepth is BitDepthTga {
   // TODO: Support more bit depths
+  if (imageType === ImageType.UncompressedGrayscale) {
+    return bitDepth === 8;
+  }
   return (
     bitDepth === 16 ||
     bitDepth === 24 ||

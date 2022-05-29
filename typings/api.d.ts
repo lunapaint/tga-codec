@@ -241,7 +241,7 @@ export interface IPngDetails {
  */
 export type BitDepth = 1 | 2 | 4 | 8 | 16;
 
-export type BitDepthTga = 16 | 24 | 32;
+export type BitDepthTga = 8 | 16 | 24 | 32;
 
 /**
  * The color type of the image.
