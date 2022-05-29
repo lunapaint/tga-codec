@@ -93,6 +93,33 @@ const testFiles: { [file: string]: IDecodedTga } = {
     },
     developerDirectory: []
   },
+  'ccm8': {
+    image: expectedColorImage,
+    details: {
+      identificationField: 'Truevision(R) Sample Image'
+    },
+    extensionArea: {
+      extensionSize: 495,
+      authorName: 'Ricky True',
+      authorComments: 'Sample 8 bit run length compressed color mapped image',
+      dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
+      jobName: 'TGA Utilities',
+      jobTime: { hours: 0, minutes: 0, seconds: 0 },
+      softwareId: 'TGAEdit',
+      softwareVersionNumber: 2,
+      softwareVersionLetter: '',
+      keyColor: '',
+      aspectRatioNumerator: 0,
+      aspectRatioDenominator: 0,
+      gammaValueNumerator: 0,
+      gammaValueDenominator: 0,
+      colorCorrectionOffset: 0,
+      postageStampOffset: 4652,
+      scanLineOffset: 0,
+      attributesType: 0,
+    },
+    developerDirectory: []
+  },
   'ctc24': {
     image: expectedColorImage,
     details: {
@@ -259,11 +286,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
 
 describe('conformance_suite', () => {
   for (const file of Object.keys(testFiles)) {
-    // TODO: Don't skip any
-    const skipped = [
-      'ccm8',
-    ];
-    (skipped.includes(file) ? it.skip : it)(file, async () => {
+    it(file, async () => {
       const data = new Uint8Array(await fs.promises.readFile(join(suiteRoot, `${file}.tga`)));
       const result = await decodeTga(data, {});
       const testSpec = testFiles[file];

@@ -9,7 +9,7 @@ import { ColorMapType, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, Inte
 import { DecodeError, DecodeWarning, handleWarning } from './assert.js';
 import { ByteStreamReader } from './byteStreamReader.js';
 import { readText } from './text.js';
-import { isValidBitDepth, isValidColorMapDepth } from './validate.js';
+import { isValidBitDepth, isValidColorMapDepth, isValidImageType } from './validate.js';
 
 const enum ImageDescriptorMask {
   AttributeBits    = 0b00001111,
@@ -86,12 +86,8 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
     colorMapType = ColorMapType.Unrecognized;
   }
   const imageType = ctx.reader.readUint8() as ImageType;
-  if (imageType !== ImageType.UncompressedColorMapped &&
-      imageType !== ImageType.UncompressedTrueColor &&
-      imageType !== ImageType.UncompressedGrayscale &&
-      imageType !== ImageType.RunLengthEncodedGrayscale &&
-      imageType !== ImageType.RunLengthEncodedTrueColor) {
-    throw new Error('NYI'); // TODO: Implement
+  if (!isValidImageType(imageType)) {
+    throw new DecodeError(ctx, `Invalid image type "${imageType}"`, ctx.reader.offset - 1);
   }
   if (colorMapType === ColorMapType.ColorMap &&
       imageType !== ImageType.UncompressedColorMapped /*&&
@@ -170,8 +166,10 @@ function parseColorMap(ctx: ITgaDecodeContext): IReadPixelDelegate {
       break;
   }
   return (ctx, imageData, imageOffset, view, viewOffset) => {
+    // Pull the color index of view and pass in the ctx's view in case view is a separate decoded
+    // array
     const colorIndex = view.getUint8(viewOffset);
-    readPixel(ctx, imageData, imageOffset, view, colorMapOffset + colorIndex * bytesPerEntry);
+    readPixel(ctx, imageData, imageOffset, ctx.reader.view, colorMapOffset + colorIndex * bytesPerEntry);
     return 1;
   };
 }
