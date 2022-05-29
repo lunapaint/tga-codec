@@ -49,7 +49,7 @@ export function readText(ctx: IDecodeContext, chunk: IPngChunk, textDecoder: Tex
   return { text: textDecoder ? textDecoder.decode(typedArray) : String.fromCharCode(...bytes), bytesRead: i + 1 };
 }
 
-export function readTextTga(ctx: ITgaDecodeContext, textDecoder: TextDecoder | undefined, maxLength: number, isCompressed?: boolean): { bytesRead: number, text: string } {
+export function readTextTga(ctx: ITgaDecodeContext, textDecoder: TextDecoder | undefined, maxLength: number, isCompressed?: boolean): string {
   const bytes = [];
   let current = 0;
   let i = 0;
@@ -71,9 +71,9 @@ export function readTextTga(ctx: ITgaDecodeContext, textDecoder: TextDecoder | u
     ctx.reader.offset++;
     bytes.push(current);
   }
-  ctx.reader.offset = startOffset; // + maxLength;
-  return {
-    text: textDecoder ? textDecoder.decode(new Uint8Array(bytes)) : String.fromCharCode(...bytes),
-    bytesRead: i + 1
-  };
+  ctx.reader.offset = startOffset + maxLength;
+  if (textDecoder) {
+    return textDecoder.decode(new Uint8Array(bytes));
+  }
+  return String.fromCharCode(...bytes);
 }

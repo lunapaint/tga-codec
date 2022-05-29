@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { ColorMapDepth, ColorMapType, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, IReadPixelDelegate, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
+import { ColorMapDepth, ColorMapType, IByteStreamReader, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, IReadPixelDelegate, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
 import { DecodeError, DecodeErrorTga, DecodeWarning, handleTgaWarning, handleWarning } from './assert.js';
 import { readText, readTextTga } from './text.js';
 import { isValidBitDepthTga, isValidColorMapDepth } from './validate.js';
@@ -37,12 +37,7 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
     header
   };
 
-  const idFieldOffset = ctx.reader.offset;
-  const idField = readTextTga(ctx, undefined, ctx.header.idLength);
-  ctx.identificationField = idField.text;
-
-  // TODO: Use reader instead of view in calls below
-  ctx.reader.offset = idFieldOffset + ctx.header.idLength;
+  ctx.identificationField = readTextTga(ctx, undefined, ctx.header.idLength);
 
   if (ctx.header.colorMapType === ColorMapType.ColorMap) {
     // TODO: Support color map
@@ -277,65 +272,44 @@ function readPixel32BitNoAlpha(ctx: ITgaDecodeContext, imageData: Uint8Array, im
 }
 
 function parseExtensionArea(ctx: ITgaDecodeContext, offset: number): IExtensionArea {
-  const extensionSize = ctx.reader.view.getUint16(offset, true);
+  ctx.reader.offset = ctx.footer!.extensionAreaOffset;
+  const extensionSize = ctx.reader.readUint16();
   if (extensionSize !== 495) {
     // TODO: Should this be info instead?
-    handleTgaWarning(ctx, new DecodeWarning('TGA file is a version other than v2', offset));
+    handleTgaWarning(ctx, new DecodeWarning('TGA file is a version other than v2', ctx.reader.offset - 2));
   }
-  offset += 2;
-  ctx.reader.offset = offset;
   const authorName = readTextTga(ctx, undefined, 41);
-  offset += 41;
-  ctx.reader.offset = offset;
   const authorComments = readTextTga(ctx, undefined, 324);
-  offset += 324;
-  const dateTimestamp = readDateTimestamp(ctx, offset);
-  offset += dateTimestamp.bytesRead;
-  ctx.reader.offset = offset;
+  const dateTimestamp = readDateTimestamp(ctx);
   const jobName = readTextTga(ctx, undefined, 41);
-  offset += 41;
-  const jobTime = readTimestamp(ctx, offset);
-  offset += jobTime.bytesRead;
-  ctx.reader.offset = offset;
+  const jobTime = readTimestamp(ctx);
   const softwareId = readTextTga(ctx, undefined, 41);
-  offset += 41;
-  const softwareVersionNumber = ctx.reader.view.getUint8(offset++) / 100;
-  ctx.reader.offset = offset;
+  const softwareVersionNumber = ctx.reader.readUint8() / 100;
   const softwareVersionLetter = readTextTga(ctx, undefined, 2);
-  offset += 2;
-  ctx.reader.offset = offset;
   const keyColor = readTextTga(ctx, undefined, 4);
-  offset += 4;
-  const aspectRatioNumerator = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const aspectRatioDenominator = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const gammaValueNumerator = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const gammaValueDenominator = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const colorCorrectionOffset = ctx.reader.view.getUint32(offset, true);
-  offset += 4;
-  const postageStampOffset = ctx.reader.view.getUint32(offset, true);
-  offset += 4;
-  const scanLineOffset = ctx.reader.view.getUint32(offset, true);
-  offset += 4;
-  const attributesType = ctx.reader.view.getUint8(offset++);
+  const aspectRatioNumerator = ctx.reader.readUint16();
+  const aspectRatioDenominator = ctx.reader.readUint16();
+  const gammaValueNumerator = ctx.reader.readUint16();
+  const gammaValueDenominator = ctx.reader.readUint16();
+  const colorCorrectionOffset = ctx.reader.readUint32();
+  const postageStampOffset = ctx.reader.readUint32();
+  const scanLineOffset = ctx.reader.readUint32();
+  const attributesType = ctx.reader.readUint8();
   // TODO: Warn on unassigned or reserved attributes type
   // TODO: Scan line table
   // TODO: Postage stamp image
   // TODO: Color correction table
   return {
     extensionSize,
-    authorName: authorName.text,
-    authorComments: authorComments.text,
-    dateTimestamp: dateTimestamp.value,
-    jobName: jobName.text,
-    jobTime: jobTime.value,
-    softwareId: softwareId.text,
+    authorName,
+    authorComments,
+    dateTimestamp,
+    jobName,
+    jobTime,
+    softwareId,
     softwareVersionNumber,
-    softwareVersionLetter: softwareVersionLetter.text,
-    keyColor: keyColor.text,
+    softwareVersionLetter,
+    keyColor,
     aspectRatioNumerator,
     aspectRatioDenominator,
     gammaValueNumerator,
@@ -347,45 +321,29 @@ function parseExtensionArea(ctx: ITgaDecodeContext, offset: number): IExtensionA
   };
 }
 
-function readDateTimestamp(ctx: ITgaDecodeContext, offset: number): { bytesRead: number, value: Date } {
-  const month = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const day = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const year = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const hour = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const minute = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const second = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  return {
-    bytesRead: 12,
-    value: new Date(year, month, day, hour, minute, second)
-  };
+function readDateTimestamp(ctx: ITgaDecodeContext): Date {
+  const month = ctx.reader.readUint16();
+  const day = ctx.reader.readUint16();
+  const year = ctx.reader.readUint16();
+  const hour = ctx.reader.readUint16();
+  const minute = ctx.reader.readUint16();
+  const second = ctx.reader.readUint16();
+  return new Date(year, month, day, hour, minute, second);
 }
 
-function readTimestamp(ctx: ITgaDecodeContext, offset: number): { bytesRead: number, value: { hours: number, minutes: number, seconds: number } } {
-  const hours = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const minutes = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  const seconds = ctx.reader.view.getUint16(offset, true);
-  offset += 2;
-  return {
-    bytesRead: 6,
-    value: { hours, minutes, seconds }
-  };
+function readTimestamp(ctx: ITgaDecodeContext): { hours: number, minutes: number, seconds: number } {
+  const hours = ctx.reader.readUint16();
+  const minutes = ctx.reader.readUint16();
+  const seconds = ctx.reader.readUint16();
+  return { hours, minutes, seconds };
 }
 
 function parseFooter(ctx: ITgaDecodeContext): ITgaFooterDetails {
   // The footer is the last 26 bytes of the file and importantly includes the offsets of the
   // extension area and developer directory
-  let offset = ctx.reader.view.byteLength - 26;
-  const extensionAreaOffset = ctx.reader.view.getUint32(offset, true);
-  offset += 4;
-  const developerDirectoryOffset = ctx.reader.view.getUint32(offset, true);
+  ctx.reader.offset = ctx.reader.view.byteLength - 26;
+  const extensionAreaOffset = ctx.reader.readUint32();
+  const developerDirectoryOffset = ctx.reader.readUint32();
   // TODO: Pull signature
   // TODO: Verify last 2 bytes
   return {
