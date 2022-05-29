@@ -49,16 +49,16 @@ export function readText(ctx: IDecodeContext, chunk: IPngChunk, textDecoder: Tex
   return { text: textDecoder ? textDecoder.decode(typedArray) : String.fromCharCode(...bytes), bytesRead: i + 1 };
 }
 
-export function readTextTga(ctx: ITgaDecodeContext, textDecoder: TextDecoder | undefined, maxLength: number | undefined, offset: number, maxOffset: number, readTrailingNull: boolean, isCompressed?: boolean): { bytesRead: number, text: string } {
+export function readTextTga(ctx: ITgaDecodeContext, textDecoder: TextDecoder | undefined, maxLength: number, readTrailingNull: boolean, isCompressed?: boolean): { bytesRead: number, text: string } {
   const bytes = [];
   let current = 0;
   let i = 0;
-  for (; maxLength === undefined || i < maxLength; i++) {
-    if (!readTrailingNull && offset === maxOffset) {
+  for (; i < maxLength; i++) {
+    if (!readTrailingNull) {
       break;
     }
     try {
-      current = ctx.view.getUint8(offset);
+      current = ctx.reader.view.getUint8(ctx.reader.offset);
     } catch (e: unknown) {
       if (e instanceof Error && e.message === 'Offset is outside the bounds of the DataView') {
         // TODO: Warn
@@ -70,24 +70,17 @@ export function readTextTga(ctx: ITgaDecodeContext, textDecoder: TextDecoder | u
     if (!isCompressed && current === 0) {
       break;
     }
-    offset++;
+    ctx.reader.offset++;
     bytes.push(current);
   }
 
-  if (readTrailingNull && ctx.view.getUint8(offset) !== 0) {
+  if (readTrailingNull && ctx.reader.view.getUint8(ctx.reader.offset) !== 0) {
     // TODO: Warn
     // throw createChunkDecodeWarning(chunk, 'No null character after text', offset);
   }
 
-  const typedArray: Uint8Array = new Uint8Array(bytes);
-  // if (isCompressed) {
-  //   const inflator = new pako.Inflate();
-  //   inflator.push(typedArray);
-  //   if (inflator.err) {
-  //     throw createChunkDecodeWarning(chunk, `Inflate error: ${inflator.msg}`, offset);
-  //   }
-  //   typedArray = inflator.result as Uint8Array;
-  // }
-
-  return { text: textDecoder ? textDecoder.decode(typedArray) : String.fromCharCode(...bytes), bytesRead: i + 1 };
+  return {
+    text: textDecoder ? textDecoder.decode(new Uint8Array(bytes)) : String.fromCharCode(...bytes),
+    bytesRead: i + 1
+  };
 }

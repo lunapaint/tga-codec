@@ -85,7 +85,7 @@ export interface IInitialDecodeContext extends IBaseDecodeContext {
 
 export interface ITgaBaseDecodeContext {
   image?: IImage32;
-  view: DataView;
+  reader: IByteStreamReader;
   warnings: DecodeWarning[];
   options: IDecodeTgaOptions;
   header?: ITgaHeaderDetails;
@@ -100,6 +100,15 @@ export interface ITgaInitialDecodeContext extends ITgaBaseDecodeContext {
 
 export interface ITgaDecodeContext extends ITgaBaseDecodeContext {
   header: ITgaHeaderDetails;
+}
+
+export interface IByteStreamReader {
+  offset: number;
+  readonly data: Readonly<Uint8Array>;
+  readonly view: DataView;
+  readUint8(): number;
+  readUint16(): number;
+  readUint32(): number;
 }
 
 export interface IDecodeContext extends IBaseDecodeContext {
