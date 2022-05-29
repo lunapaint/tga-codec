@@ -5,8 +5,8 @@
   "main": "out-dist/public/tga.js",
   "typings": "typings/api.d.ts",
   "scripts": {
-    "build": "tsc -b ./tsconfig.all.json",
-    "watch": "tsc -b -w ./tsconfig.all.json --preserveWatchOutput",
+    "build": "tsc -b ./tsconfig.json",
+    "watch": "tsc -b -w ./tsconfig.json --preserveWatchOutput",
     "lint": "eslint -c .eslintrc.json --max-warnings 0 --ext .ts src/ test/",
     "test": "mocha ./out-test/**/*.js",
     "coverage": "nyc npm run test",

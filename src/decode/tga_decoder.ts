@@ -4,11 +4,12 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, ITgaDecodeContext, ITgaExtensionAreaDetails, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
+import { IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
 import { DecodeError, DecodeErrorTga, DecodeWarning, handleTgaWarning, handleWarning } from './assert.js';
 import { readText, readTextTga } from './text.js';
 import { isValidBitDepthTga } from './validate.js';
 import { ByteStreamReader } from './byteStreamReader.js';
+import { IExtensionArea } from '../../typings/api.js';
 
 export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions = {}): Promise<IDecodedTga> {
   const initialCtx: ITgaInitialDecodeContext = {
@@ -22,10 +23,9 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
     header
   };
   const idField = readTextTga(ctx, undefined, ctx.header.idLength, false);
-  if (ctx.header.idLength !== idField.bytesRead) {
-    // TODO: Warn
-  }
   ctx.identificationField = idField.text;
+
+  // TODO: Use reader instead of view in calls below
   ctx.reader.offset += ctx.header.idLength;
 
   if (ctx.header.colorMapType !== 0) {
@@ -42,7 +42,8 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
 
   console.log('ctx', ctx);
   return {
-    image: ctx.image
+    image: ctx.image,
+    extensionArea: ctx.extensionArea!
   };
 }
 
@@ -166,9 +167,10 @@ function readPixel32BitNoAlpha(ctx: ITgaDecodeContext, imageData: Uint8Array, im
   return 4;
 }
 
-function parseExtensionArea(ctx: ITgaDecodeContext, offset: number): ITgaExtensionAreaDetails {
+function parseExtensionArea(ctx: ITgaDecodeContext, offset: number): IExtensionArea {
   const extensionSize = ctx.reader.view.getUint16(offset, true);
   if (extensionSize !== 495) {
+    // TODO: Should this be info instead?
     handleTgaWarning(ctx, new DecodeWarning('TGA file is a version other than v2', offset));
   }
   offset += 2;

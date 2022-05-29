@@ -55,6 +55,7 @@ import {
   IDecodePngOptions,
   IDecodeTgaOptions,
   IEncodePngOptions,
+  IExtensionArea,
   IImage32,
   IImage64,
   InterlaceMethod,
@@ -91,7 +92,7 @@ export interface ITgaBaseDecodeContext {
   header?: ITgaHeaderDetails;
   identificationField?: string;
   footer?: ITgaFooterDetails;
-  extensionArea?: ITgaExtensionAreaDetails;
+  extensionArea?: IExtensionArea;
 }
 
 export interface ITgaInitialDecodeContext extends ITgaBaseDecodeContext {
@@ -164,27 +165,6 @@ export interface ITgaFooterDetails {
   extensionAreaOffset: number;
   developerDirectoryOffset: number;
   signature: string;
-}
-
-export interface ITgaExtensionAreaDetails {
-  extensionSize: number;
-  authorName: string;
-  authorComments: string;
-  dateTimestamp: Date;
-  jobName: string;
-  jobTime: { hours: number, minutes: number, seconds: number };
-  softwareId: string;
-  softwareVersionNumber: number;
-  softwareVersionLetter: string;
-  keyColor: string;
-  aspectRatioNumerator: number;
-  aspectRatioDenominator: number;
-  gammaValueNumerator: number;
-  gammaValueDenominator: number;
-  colorCorrectionOffset: number;
-  postageStampOffset: number;
-  scanLineOffset: number;
-  attributesType: number;
 }
 
 export const enum ImageType {

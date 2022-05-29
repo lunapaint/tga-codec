@@ -8,6 +8,8 @@ export function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions
 
 export interface IDecodedTga {
   image: IImage32;
+
+  extensionArea: IExtensionArea;
 }
 
 /**
@@ -33,6 +35,27 @@ export interface IDecodedTga {
    * would has failed in strict mode in {@link IDecodedPng.warnings}.
    */
   strictMode?: boolean;
+}
+
+export interface IExtensionArea {
+  extensionSize: number;
+  authorName: string;
+  authorComments: string;
+  dateTimestamp: Date;
+  jobName: string;
+  jobTime: { hours: number, minutes: number, seconds: number };
+  softwareId: string;
+  softwareVersionNumber: number;
+  softwareVersionLetter: string;
+  keyColor: string;
+  aspectRatioNumerator: number;
+  aspectRatioDenominator: number;
+  gammaValueNumerator: number;
+  gammaValueDenominator: number;
+  colorCorrectionOffset: number;
+  postageStampOffset: number;
+  scanLineOffset: number;
+  attributesType: number;
 }
 
 
