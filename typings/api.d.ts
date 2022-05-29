@@ -8,7 +8,7 @@ export function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions
 
 export interface IDecodedTga {
   image: IImage32;
-
+  details: ITgaDetails;
   extensionArea: IExtensionArea;
 }
 
@@ -56,6 +56,10 @@ export interface IExtensionArea {
   postageStampOffset: number;
   scanLineOffset: number;
   attributesType: number;
+}
+
+export interface ITgaDetails {
+  identificationField: string;
 }
 
 

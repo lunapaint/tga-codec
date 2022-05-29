@@ -9,7 +9,7 @@ import { join } from 'path';
 import * as fs from 'fs';
 import { decodeTga } from '../../out-dev/public/png.js';
 import { dataArraysEqual } from '../shared/testUtil.js';
-import { IExtensionArea, IImage32 } from '../../typings/api.js';
+import { IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
 
 const suiteRoot = 'test/conformance_suite';
 
@@ -65,17 +65,20 @@ function repeatArray(array: number[], times: number): number[] {
   return result;
 }
 
-const testFiles: { [file: string]: { image: IImage32, extensionArea: IExtensionArea }} = {
+const testFiles: { [file: string]: { image: IImage32, details: ITgaDetails, extensionArea: IExtensionArea }} = {
   'ubw8': {
     image: expectedGreyscaleImage,
+    details: {
+      identificationField: 'Truevision(R) Sample Image'
+    },
     extensionArea: {
       extensionSize: 495,
-      authorName: '',
-      authorComments: '',
+      authorName: 'Ricky True',
+      authorComments: 'Sample 8 bit uncompressed black and white image',
       dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
-      jobName: '',
+      jobName: 'TGA Utilities',
       jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: '',
+      softwareId: 'TGAEdit',
       softwareVersionNumber: 1.3,
       softwareVersionLetter: '',
       keyColor: '',
@@ -91,14 +94,17 @@ const testFiles: { [file: string]: { image: IImage32, extensionArea: IExtensionA
   },
   'ucm8': {
     image: expectedColorImage,
+    details: {
+      identificationField: 'Truevision(R) Sample Image'
+    },
     extensionArea: {
       extensionSize: 495,
-      authorName: '',
-      authorComments: '',
+      authorName: 'Ricky True',
+      authorComments: 'Sample 8 bit uncompressed color mapped image',
       dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-      jobName: '',
+      jobName: 'TGA Utilities',
       jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: '',
+      softwareId: 'TGAEdit',
       softwareVersionNumber: 1.4,
       softwareVersionLetter: '',
       keyColor: '',
@@ -114,14 +120,17 @@ const testFiles: { [file: string]: { image: IImage32, extensionArea: IExtensionA
   },
   'utc16': {
     image: expectedColorImage,
+    details: {
+      identificationField: 'Truevision(R) Sample Image'
+    },
     extensionArea: {
       extensionSize: 495,
-      authorName: '',
-      authorComments: '',
+      authorName: 'Ricky True',
+      authorComments: 'Sample 16 bit uncompressed true color image',
       dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
-      jobName: '',
+      jobName: 'TGA Utilities',
       jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: '',
+      softwareId: 'TGAEdit',
       softwareVersionNumber: 1.3,
       softwareVersionLetter: '',
       keyColor: '',
@@ -137,14 +146,17 @@ const testFiles: { [file: string]: { image: IImage32, extensionArea: IExtensionA
   },
   'utc24': {
     image: expectedColorImage,
+    details: {
+      identificationField: 'Truevision(R) Sample Image'
+    },
     extensionArea: {
       extensionSize: 495,
-      authorName: '',
-      authorComments: '',
+      authorName: 'Ricky True',
+      authorComments: 'Sample 24 bit uncompressed true color image',
       dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-      jobName: '',
+      jobName: 'TGA Utilities',
       jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: '',
+      softwareId: 'TGAEdit',
       softwareVersionNumber: 1.4,
       softwareVersionLetter: '',
       keyColor: '',
@@ -160,14 +172,17 @@ const testFiles: { [file: string]: { image: IImage32, extensionArea: IExtensionA
   },
   'utc32': {
     image: expectedColorImage,
+    details: {
+      identificationField: 'Truevision(R) Sample Image'
+    },
     extensionArea: {
       extensionSize: 495,
-      authorName: '',
-      authorComments: '',
+      authorName: 'Ricky True',
+      authorComments: 'Sample 32 bit uncompressed true color image',
       dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-      jobName: '',
+      jobName: 'TGA Utilities',
       jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: '',
+      softwareId: 'TGAEdit',
       softwareVersionNumber: 1.4,
       softwareVersionLetter: '',
       keyColor: '',
@@ -199,6 +214,7 @@ describe('conformance_suite', () => {
       strictEqual(result.image.height, testSpec.image.height);
       dataArraysEqual(result.image.data, testSpec.image.data);
       deepStrictEqual(result.extensionArea, testSpec.extensionArea);
+      deepStrictEqual(result.details.identificationField, testSpec.details.identificationField);
     });
   }
 });

@@ -49,14 +49,12 @@ export function readText(ctx: IDecodeContext, chunk: IPngChunk, textDecoder: Tex
   return { text: textDecoder ? textDecoder.decode(typedArray) : String.fromCharCode(...bytes), bytesRead: i + 1 };
 }
 
-export function readTextTga(ctx: ITgaDecodeContext, textDecoder: TextDecoder | undefined, maxLength: number, readTrailingNull: boolean, isCompressed?: boolean): { bytesRead: number, text: string } {
+export function readTextTga(ctx: ITgaDecodeContext, textDecoder: TextDecoder | undefined, maxLength: number, isCompressed?: boolean): { bytesRead: number, text: string } {
   const bytes = [];
   let current = 0;
   let i = 0;
+  const startOffset = ctx.reader.offset;
   for (; i < maxLength; i++) {
-    if (!readTrailingNull) {
-      break;
-    }
     try {
       current = ctx.reader.view.getUint8(ctx.reader.offset);
     } catch (e: unknown) {
@@ -73,12 +71,7 @@ export function readTextTga(ctx: ITgaDecodeContext, textDecoder: TextDecoder | u
     ctx.reader.offset++;
     bytes.push(current);
   }
-
-  if (readTrailingNull && ctx.reader.view.getUint8(ctx.reader.offset) !== 0) {
-    // TODO: Warn
-    // throw createChunkDecodeWarning(chunk, 'No null character after text', offset);
-  }
-
+  ctx.reader.offset = startOffset; // + maxLength;
   return {
     text: textDecoder ? textDecoder.decode(new Uint8Array(bytes)) : String.fromCharCode(...bytes),
     bytesRead: i + 1

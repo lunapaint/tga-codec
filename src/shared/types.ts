@@ -92,9 +92,11 @@ export interface ITgaBaseDecodeContext {
   header?: ITgaHeaderDetails;
   identificationField?: string;
   footer?: ITgaFooterDetails;
-  colorMap?: (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
+  colorMap?: IReadPixelDelegate;
   extensionArea?: IExtensionArea;
 }
+
+export type IReadPixelDelegate = (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
 
 export interface ITgaInitialDecodeContext extends ITgaBaseDecodeContext {
   header?: ITgaHeaderDetails;

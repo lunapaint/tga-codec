@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { ColorMapDepth, ColorMapType, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
+import { ColorMapDepth, ColorMapType, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, IReadPixelDelegate, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
 import { DecodeError, DecodeErrorTga, DecodeWarning, handleTgaWarning, handleWarning } from './assert.js';
 import { readText, readTextTga } from './text.js';
 import { isValidBitDepthTga, isValidColorMapDepth } from './validate.js';
@@ -36,11 +36,13 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
     ...initialCtx,
     header
   };
-  const idField = readTextTga(ctx, undefined, ctx.header.idLength, false);
+
+  const idFieldOffset = ctx.reader.offset;
+  const idField = readTextTga(ctx, undefined, ctx.header.idLength);
   ctx.identificationField = idField.text;
 
   // TODO: Use reader instead of view in calls below
-  ctx.reader.offset += ctx.header.idLength;
+  ctx.reader.offset = idFieldOffset + ctx.header.idLength;
 
   if (ctx.header.colorMapType === ColorMapType.ColorMap) {
     // TODO: Support color map
@@ -48,20 +50,24 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
 
     // throw new DecodeErrorTga(ctx, 'TGA images with color maps are not supported yet', ctx.reader.offset);
   }
-  console.log('offset after color map', ctx.reader.offset.toString(16));
+
+  const dataOffset = ctx.reader.offset;
 
   // Parse the footer before the image data as the extension area has important details on decoding
   // the data.
   ctx.footer = parseFooter(ctx);
   ctx.extensionArea = parseExtensionArea(ctx, ctx.footer.extensionAreaOffset);
 
-  console.log('offset before image data', ctx.reader.offset.toString(16));
+  ctx.reader.offset = dataOffset;
   ctx.image = parseImageData(ctx, ctx.reader.offset);
 
-  console.log('ctx', ctx);
+  // console.log('ctx', ctx);
   return {
     image: ctx.image,
-    extensionArea: ctx.extensionArea!
+    extensionArea: ctx.extensionArea!,
+    details: {
+      identificationField: ctx.identificationField
+    }
   };
 }
 
@@ -134,12 +140,12 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   };
 }
 
-function parseColorMap(ctx: ITgaDecodeContext): (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number {
+function parseColorMap(ctx: ITgaDecodeContext): IReadPixelDelegate {
   const colorMapOffset = ctx.reader.offset;
   const bytesPerEntry = Math.ceil(ctx.header.colorMapDepth / 8);
   // Skip the length of the color map
   ctx.reader.offset += ctx.header.colorMapLength * bytesPerEntry;
-  let readPixel: (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
+  let readPixel: IReadPixelDelegate;
   switch (ctx.header.colorMapDepth) {
     case 15: readPixel = readPixel15Bit; break;
     case 16:
@@ -171,7 +177,7 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
     height: ctx.header.height,
     data: new Uint8Array(ctx.header.width * ctx.header.height * 4)
   };
-  let readPixel: (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
+  let readPixel: IReadPixelDelegate;
   if (ctx.colorMap) {
     readPixel = ctx.colorMap;
   } else {
@@ -277,22 +283,28 @@ function parseExtensionArea(ctx: ITgaDecodeContext, offset: number): IExtensionA
     handleTgaWarning(ctx, new DecodeWarning('TGA file is a version other than v2', offset));
   }
   offset += 2;
-  const authorName = readTextTga(ctx, undefined, 41, false);
+  ctx.reader.offset = offset;
+  const authorName = readTextTga(ctx, undefined, 41);
   offset += 41;
-  const authorComments = readTextTga(ctx, undefined, 324, false);
+  ctx.reader.offset = offset;
+  const authorComments = readTextTga(ctx, undefined, 324);
   offset += 324;
   const dateTimestamp = readDateTimestamp(ctx, offset);
   offset += dateTimestamp.bytesRead;
-  const jobName = readTextTga(ctx, undefined, 41, false);
+  ctx.reader.offset = offset;
+  const jobName = readTextTga(ctx, undefined, 41);
   offset += 41;
   const jobTime = readTimestamp(ctx, offset);
   offset += jobTime.bytesRead;
-  const softwareId = readTextTga(ctx, undefined, 41, false);
+  ctx.reader.offset = offset;
+  const softwareId = readTextTga(ctx, undefined, 41);
   offset += 41;
   const softwareVersionNumber = ctx.reader.view.getUint8(offset++) / 100;
-  const softwareVersionLetter = readTextTga(ctx, undefined, 2, false);
+  ctx.reader.offset = offset;
+  const softwareVersionLetter = readTextTga(ctx, undefined, 2);
   offset += 2;
-  const keyColor = readTextTga(ctx, undefined, 4, false);
+  ctx.reader.offset = offset;
+  const keyColor = readTextTga(ctx, undefined, 4);
   offset += 4;
   const aspectRatioNumerator = ctx.reader.view.getUint16(offset, true);
   offset += 2;
