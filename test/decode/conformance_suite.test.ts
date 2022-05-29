@@ -5,11 +5,11 @@
  */
 
 import { deepStrictEqual, strictEqual } from 'assert';
-import { join } from 'path';
 import * as fs from 'fs';
+import { join } from 'path';
 import { decodeTga } from '../../out-dev/public/tga.js';
-import { dataArraysEqual } from '../shared/testUtil.js';
 import { IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
+import { dataArraysEqual } from '../shared/testUtil.js';
 
 const suiteRoot = 'test/conformance_suite';
 
