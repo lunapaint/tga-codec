@@ -25,6 +25,15 @@ const enum ImageDescriptorShift {
   InterleavingFlag = 6
 }
 
+const enum ImageTypeMask {
+  RunLengthEncoded = 0b00001000
+}
+
+const enum RunLengthEncodingMask {
+  PixelCount = 0b01111111,
+  IsRle      = 0b10000000
+}
+
 export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions = {}): Promise<IDecodedTga> {
   const initialCtx: ITgaInitialDecodeContext = {
     reader: new ByteStreamReader(data, true),
@@ -79,7 +88,8 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   const imageType = ctx.reader.readUint8() as ImageType;
   if (imageType !== ImageType.UncompressedColorMapped &&
       imageType !== ImageType.UncompressedTrueColor &&
-      imageType !== ImageType.UncompressedGrayscale) {
+      imageType !== ImageType.UncompressedGrayscale &&
+      imageType !== ImageType.RunLengthEncodedGrayscale) {
     throw new Error('NYI'); // TODO: Implement
   }
   if (colorMapType === ColorMapType.ColorMap &&
@@ -158,9 +168,9 @@ function parseColorMap(ctx: ITgaDecodeContext): IReadPixelDelegate {
       }
       break;
   }
-  return (ctx, imageData, imageOffset, viewOffset) => {
-    const colorIndex = ctx.reader.view.getUint8(viewOffset);
-    readPixel(ctx, imageData, imageOffset, colorMapOffset + colorIndex * bytesPerEntry);
+  return (ctx, imageData, imageOffset, view, viewOffset) => {
+    const colorIndex = view.getUint8(viewOffset);
+    readPixel(ctx, imageData, imageOffset, view, colorMapOffset + colorIndex * bytesPerEntry);
     return 1;
   };
 }
@@ -198,18 +208,56 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
     }
   }
   let imageOffset = 0;
+  let view = ctx.reader.view;
+  if (ctx.header.imageType & ImageTypeMask.RunLengthEncoded) {
+    const decoded = decodeRunLengthEncoding(ctx);
+    view = new DataView(decoded.buffer, decoded.byteOffset, decoded.length);
+    offset = 0;
+  }
   for (let y = 0; y < image.height; y++) {
     for (let x = 0; x < image.width; x++) {
-      offset += readPixel(ctx, image.data, imageOffset, offset);
+      offset += readPixel(ctx, image.data, imageOffset, view, offset);
       imageOffset += 4;
     }
   }
   return image;
 }
 
-function readPixel8BitGreyscale(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
+function decodeRunLengthEncoding(ctx: ITgaDecodeContext): Uint8Array {
+  // Decode the array into another array. This is a slow but simple approach, it would be better to
+  // do this in-place.
+  const bytesPerPixel = Math.ceil(ctx.header.bitDepth / 8);
+  const result = new Uint8Array(ctx.header.width * ctx.header.height * bytesPerPixel);
+  let byte = 0;
+  let count = 0;
+  let i = 0, j = 0, k = 0;
+  while (i < result.length - 1) {
+    byte = ctx.reader.readUint8();
+    count = (byte & RunLengthEncodingMask.PixelCount) + 1;
+    if (byte & RunLengthEncodingMask.IsRle) {
+      // RLE
+      for (j = 0; j < bytesPerPixel; j++) {
+        byte = ctx.reader.readUint8();
+        for (k = 0; k < count; k++) {
+          result[i + k * bytesPerPixel + j] = byte;
+        }
+      }
+      i += count * bytesPerPixel;
+    } else {
+      // Raw
+      byte = ctx.reader.readUint8();
+      count *= bytesPerPixel;
+      for (let k = 0; k < count; k++) {
+        result[i++] = byte;
+      }
+    }
+  }
+  return result;
+}
+
+function readPixel8BitGreyscale(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   // Bits stored as 0bGGGGGGGG
-  imageData[imageOffset    ] = ctx.reader.view.getUint8(viewOffset);
+  imageData[imageOffset    ] = view.getUint8(viewOffset);
   imageData[imageOffset + 1] = imageData[imageOffset    ];
   imageData[imageOffset + 2] = imageData[imageOffset    ];
   imageData[imageOffset + 3] = 255;
@@ -219,8 +267,8 @@ function readPixel8BitGreyscale(ctx: ITgaDecodeContext, imageData: Uint8Array, i
 // by 3 meaning the maximum channel value is 248 (`0b11111000`). The most correct approach seems
 // to be scaling the value to 0-255.
 let currentValue = 0;
-function readPixel15Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
-  currentValue = ctx.reader.view.getUint16(viewOffset, true);
+function readPixel15Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
+  currentValue = view.getUint16(viewOffset, true);
   // Bits stored as 0b_RRRRRGG 0bGGGBBBBB
   imageData[imageOffset    ] = scaleToRange(currentValue >> 10 & 0x1f, 0x1f, 0xff);
   imageData[imageOffset + 1] = scaleToRange(currentValue >>  5 & 0x1f, 0x1f, 0xff);
@@ -228,8 +276,8 @@ function readPixel15Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffs
   imageData[imageOffset + 3] = 255;
   return 2;
 }
-function readPixel16Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
-  currentValue = ctx.reader.view.getUint16(viewOffset, true);
+function readPixel16Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
+  currentValue = view.getUint16(viewOffset, true);
   // Bits stored as 0bARRRRRGG 0bGGGBBBBB
   imageData[imageOffset    ] = scaleToRange(currentValue >> 10 & 0x1f, 0x1f, 0xff);
   imageData[imageOffset + 1] = scaleToRange(currentValue >>  5 & 0x1f, 0x1f, 0xff);
@@ -242,29 +290,29 @@ function scaleToRange(value: number, maxValue: number, scaledMax: number): numbe
   return Math.round((value / maxValue) * scaledMax);
 }
 
-function readPixel24Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
+function readPixel24Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   // Bytes stored as BGR
-  imageData[imageOffset    ] = ctx.reader.view.getUint8(viewOffset + 2);
-  imageData[imageOffset + 1] = ctx.reader.view.getUint8(viewOffset + 1);
-  imageData[imageOffset + 2] = ctx.reader.view.getUint8(viewOffset    );
+  imageData[imageOffset    ] = view.getUint8(viewOffset + 2);
+  imageData[imageOffset + 1] = view.getUint8(viewOffset + 1);
+  imageData[imageOffset + 2] = view.getUint8(viewOffset    );
   imageData[imageOffset + 3] = 255;
   return 3;
 }
 
-function readPixel32Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
+function readPixel32Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   // Bytes stored as BGRA
-  imageData[imageOffset    ] = ctx.reader.view.getUint8(viewOffset + 2);
-  imageData[imageOffset + 1] = ctx.reader.view.getUint8(viewOffset + 1);
-  imageData[imageOffset + 2] = ctx.reader.view.getUint8(viewOffset    );
-  imageData[imageOffset + 3] = ctx.reader.view.getUint8(viewOffset + 3);
+  imageData[imageOffset    ] = view.getUint8(viewOffset + 2);
+  imageData[imageOffset + 1] = view.getUint8(viewOffset + 1);
+  imageData[imageOffset + 2] = view.getUint8(viewOffset    );
+  imageData[imageOffset + 3] = view.getUint8(viewOffset + 3);
   return 4;
 }
 
-function readPixel32BitNoAlpha(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
+function readPixel32BitNoAlpha(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   // Bytes stored as BGRA, A gets ignored when attribute bits is 0
-  imageData[imageOffset    ] = ctx.reader.view.getUint8(viewOffset + 2);
-  imageData[imageOffset + 1] = ctx.reader.view.getUint8(viewOffset + 1);
-  imageData[imageOffset + 2] = ctx.reader.view.getUint8(viewOffset    );
+  imageData[imageOffset    ] = view.getUint8(viewOffset + 2);
+  imageData[imageOffset + 1] = view.getUint8(viewOffset + 1);
+  imageData[imageOffset + 2] = view.getUint8(viewOffset    );
   imageData[imageOffset + 3] = 255;
   return 4;
 }

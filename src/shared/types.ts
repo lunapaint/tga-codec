@@ -34,7 +34,7 @@ export interface ITgaBaseDecodeContext {
   developerDirectory?: IDeveloperDirectoryEntry[];
 }
 
-export type IReadPixelDelegate = (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
+export type IReadPixelDelegate = (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number) => number;
 
 export interface ITgaInitialDecodeContext extends ITgaBaseDecodeContext {
   header?: ITgaHeaderDetails;

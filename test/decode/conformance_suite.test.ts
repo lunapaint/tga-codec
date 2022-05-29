@@ -66,6 +66,33 @@ function repeatArray(array: number[], times: number): number[] {
 }
 
 const testFiles: { [file: string]: IDecodedTga } = {
+  'cbw8': {
+    image: expectedGreyscaleImage,
+    details: {
+      identificationField: 'Truevision(R) Sample Image'
+    },
+    extensionArea: {
+      extensionSize: 495,
+      authorName: 'Ricky True',
+      authorComments: 'Sample 8 bit run length compressed black and white image',
+      dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
+      jobName: 'TGA Utilities',
+      jobTime: { hours: 0, minutes: 0, seconds: 0 },
+      softwareId: 'TGAEdit',
+      softwareVersionNumber: 2,
+      softwareVersionLetter: '',
+      keyColor: '',
+      aspectRatioNumerator: 0,
+      aspectRatioDenominator: 0,
+      gammaValueNumerator: 0,
+      gammaValueDenominator: 0,
+      colorCorrectionOffset: 0,
+      postageStampOffset: 4140,
+      scanLineOffset: 0,
+      attributesType: 0,
+    },
+    developerDirectory: []
+  },
   'ubw8': {
     image: expectedGreyscaleImage,
     details: {
@@ -207,9 +234,8 @@ describe('conformance_suite', () => {
   for (const file of Object.keys(testFiles)) {
     // TODO: Don't skip any
     const skipped = [
-      'cbw8',
       'ccm8',
-      'ctc24'
+      'ctc24',
     ];
     (skipped.includes(file) ? it.skip : it)(file, async () => {
       const data = new Uint8Array(await fs.promises.readFile(join(suiteRoot, `${file}.tga`)));
