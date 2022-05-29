@@ -89,7 +89,8 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   if (imageType !== ImageType.UncompressedColorMapped &&
       imageType !== ImageType.UncompressedTrueColor &&
       imageType !== ImageType.UncompressedGrayscale &&
-      imageType !== ImageType.RunLengthEncodedGrayscale) {
+      imageType !== ImageType.RunLengthEncodedGrayscale &&
+      imageType !== ImageType.RunLengthEncodedTrueColor) {
     throw new Error('NYI'); // TODO: Implement
   }
   if (colorMapType === ColorMapType.ColorMap &&
