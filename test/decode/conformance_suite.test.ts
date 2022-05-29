@@ -89,6 +89,29 @@ const testFiles: { [file: string]: { image: IImage32, extensionArea: IExtensionA
       attributesType: 0,
     }
   },
+  'ucm8': {
+    image: expectedColorImage,
+    extensionArea: {
+      extensionSize: 495,
+      authorName: '',
+      authorComments: '',
+      dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
+      jobName: '',
+      jobTime: { hours: 0, minutes: 0, seconds: 0 },
+      softwareId: '',
+      softwareVersionNumber: 1.4,
+      softwareVersionLetter: '',
+      keyColor: '',
+      aspectRatioNumerator: 0,
+      aspectRatioDenominator: 0,
+      gammaValueNumerator: 0,
+      gammaValueDenominator: 0,
+      colorCorrectionOffset: 0,
+      postageStampOffset: 16940,
+      scanLineOffset: 0,
+      attributesType: 0,
+    }
+  },
   'utc16': {
     image: expectedColorImage,
     extensionArea: {
@@ -166,8 +189,7 @@ describe('conformance_suite', () => {
     const skipped = [
       'cbw8',
       'ccm8',
-      'ctc24',
-      'ucm8',
+      'ctc24'
     ];
     (skipped.includes(file) ? it.skip : it)(file, async () => {
       const data = new Uint8Array(await fs.promises.readFile(join(suiteRoot, `${file}.tga`)));

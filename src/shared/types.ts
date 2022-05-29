@@ -92,6 +92,7 @@ export interface ITgaBaseDecodeContext {
   header?: ITgaHeaderDetails;
   identificationField?: string;
   footer?: ITgaFooterDetails;
+  colorMap?: (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
   extensionArea?: IExtensionArea;
 }
 
@@ -144,11 +145,27 @@ export interface IPngHeaderDetails {
 
 export interface ITgaHeaderDetails {
   idLength: number; // char
-  colorMapType: number; // char
-  imageType: ImageType; // char
-  colorMapOrigin: number; // short int
-  colorMapLength: number; // short int
-  colorMapDepth: number; // char
+  /**
+   * Whether the image has a color map.
+   */
+  colorMapType: ColorMapType;
+  /**
+   * The image type which defines how the image data is encoded.
+   */
+  imageType: ImageType;
+  /**
+   * The index (0-65536) of the starting entry when loading the color map. This allows ignoring the beginning
+   * of the color map.
+   */
+  colorMapOrigin: number;
+  /**
+   * The total number (0-65536) of entries in the color map.
+   */
+  colorMapLength: number;
+  /**
+   * The bits per entry (0-255) of the color map. This is typically 15, 16, 24 or 32.
+   */
+  colorMapDepth: number;
   xOrigin: number; // short int
   yOrigin: number; // short int
   width: number; // short
@@ -165,6 +182,12 @@ export interface ITgaFooterDetails {
   extensionAreaOffset: number;
   developerDirectoryOffset: number;
   signature: string;
+}
+
+export const enum ColorMapType {
+  NoColorMap = 0,
+  ColorMap = 1,
+  Unrecognized = 2,
 }
 
 export const enum ImageType {

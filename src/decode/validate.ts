@@ -8,7 +8,7 @@ import { BitDepth, BitDepthTga, ColorType, FilterMethod, ImageType, InterlaceMet
 
 export function isValidBitDepthTga(bitDepth: number, imageType: ImageType): bitDepth is BitDepthTga {
   // TODO: Support more bit depths
-  if (imageType === ImageType.UncompressedGrayscale) {
+  if (imageType === ImageType.UncompressedGrayscale || imageType === ImageType.UncompressedColorMapped) {
     return bitDepth === 8;
   }
   return (

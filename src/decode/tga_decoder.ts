@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
+import { ColorMapType, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
 import { DecodeError, DecodeErrorTga, DecodeWarning, handleTgaWarning, handleWarning } from './assert.js';
 import { readText, readTextTga } from './text.js';
 import { isValidBitDepthTga } from './validate.js';
@@ -28,16 +28,20 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
   // TODO: Use reader instead of view in calls below
   ctx.reader.offset += ctx.header.idLength;
 
-  if (ctx.header.colorMapType !== 0) {
-    throw new DecodeErrorTga(ctx, 'TGA images with color maps are not supported yet', ctx.reader.offset);
+  if (ctx.header.colorMapType === ColorMapType.ColorMap) {
+    // TODO: Support color map
+    ctx.colorMap = parseColorMap(ctx);
+
+    // throw new DecodeErrorTga(ctx, 'TGA images with color maps are not supported yet', ctx.reader.offset);
   }
-  // TODO: Support color map
+  console.log('offset after color map', ctx.reader.offset.toString(16));
 
   // Parse the footer before the image data as the extension area has important details on decoding
   // the data.
   ctx.footer = parseFooter(ctx);
   ctx.extensionArea = parseExtensionArea(ctx, ctx.footer.extensionAreaOffset);
 
+  console.log('offset before image data', ctx.reader.offset.toString(16));
   ctx.image = parseImageData(ctx, ctx.reader.offset);
 
   console.log('ctx', ctx);
@@ -49,11 +53,25 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
 
 function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   const idLength = ctx.reader.readUint8();
-  const colorMapType = ctx.reader.readUint8();
+  const colorMapTypeRaw = ctx.reader.readUint8();
+  let colorMapType: ColorMapType;
+  if (colorMapTypeRaw === ColorMapType.NoColorMap ||
+      colorMapTypeRaw === ColorMapType.ColorMap) {
+    colorMapType = colorMapTypeRaw;
+  } else {
+    // TODO: Info color map type, treat as no color map
+    colorMapType = ColorMapType.Unrecognized;
+  }
   const imageType = ctx.reader.readUint8() as ImageType;
-  if (imageType !== ImageType.UncompressedTrueColor &&
+  if (imageType !== ImageType.UncompressedColorMapped &&
+      imageType !== ImageType.UncompressedTrueColor &&
       imageType !== ImageType.UncompressedGrayscale) {
     throw new Error('NYI'); // TODO: Implement
+  }
+  if (colorMapType === ColorMapType.ColorMap &&
+      imageType !== ImageType.UncompressedColorMapped /*&&
+      imageType !== ImageType.RunLengthEncodedColorMapped*/) {
+    handleTgaWarning(ctx, new DecodeWarning(`Image type "${imageType}" cannot have a color map`, ctx.reader.offset - 2));
   }
   const colorMapOrigin = ctx.reader.readUint16();
   const colorMapLength = ctx.reader.readUint16();
@@ -95,8 +113,19 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   };
 }
 
-// TODO: Support color map
-function parseColorMap(ctx: ITgaDecodeContext) {
+function parseColorMap(ctx: ITgaDecodeContext): (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number {
+  const colorMapOffset = ctx.reader.offset;
+  // Skip the length of the color map
+  ctx.reader.offset += ctx.header.colorMapLength * Math.ceil(ctx.header.colorMapDepth / 8);
+  return (ctx, imageData, imageOffset, viewOffset) => {
+    const colorIndex = ctx.reader.view.getUint8(viewOffset);
+    if (ctx.extensionArea?.attributesType === 2 || ctx.header.attributeBitsPerPixel === 0) {
+      readPixel15Bit(ctx, imageData, imageOffset, colorMapOffset + colorIndex * Math.ceil(ctx.header.colorMapDepth / 8));
+    } else {
+      readPixel16Bit(ctx, imageData, imageOffset, colorMapOffset + colorIndex * Math.ceil(ctx.header.colorMapDepth / 8));
+    }
+    return Math.ceil(ctx.header.bitDepth / 8);
+  };
 }
 
 function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
@@ -106,26 +135,30 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
     data: new Uint8Array(ctx.header.width * ctx.header.height * 4)
   };
   let readPixel: (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
-  switch (ctx.header.bitDepth) {
-    case 8: readPixel = readPixel8BitGreyscale; break;
-    // case 15: readPixel = readPixel15Bit; break;
-    case 16:
-      if (ctx.extensionArea?.attributesType === 2) {
-        readPixel = readPixel15Bit;
-      } else {
-        readPixel = readPixel16Bit;
-      }
-      break;
-    case 24: readPixel = readPixel24Bit; break;
-    case 32:
-      if (ctx.extensionArea?.attributesType === 2) {
-        readPixel = readPixel32BitNoAlpha;
-      } else {
-        readPixel = readPixel32Bit;
-      }
-      break;
-    default:
-      throw new Error('NYI'); // TODO: Implement
+  if (ctx.colorMap) {
+    readPixel = ctx.colorMap;
+  } else {
+    switch (ctx.header.bitDepth) {
+      case 8: readPixel = readPixel8BitGreyscale; break;
+      // case 15: readPixel = readPixel15Bit; break;
+      case 16:
+        if (ctx.extensionArea?.attributesType === 2 || ctx.header.attributeBitsPerPixel === 0) {
+          readPixel = readPixel15Bit;
+        } else {
+          readPixel = readPixel16Bit;
+        }
+        break;
+      case 24: readPixel = readPixel24Bit; break;
+      case 32:
+        if (ctx.extensionArea?.attributesType === 2 || ctx.header.attributeBitsPerPixel === 0) {
+          readPixel = readPixel32BitNoAlpha;
+        } else {
+          readPixel = readPixel32Bit;
+        }
+        break;
+      default:
+        throw new Error('NYI'); // TODO: Implement
+    }
   }
   let imageOffset = 0;
   for (let y = 0; y < image.height; y++) {
@@ -165,6 +198,7 @@ function readPixel16Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffs
   imageData[imageOffset + 1] = scaleToRange(currentValue >>  5 & 0x1f, 0x1f, 0xff);
   imageData[imageOffset + 2] = scaleToRange(currentValue       & 0x1f, 0x1f, 0xff);
   imageData[imageOffset + 3] = (1 - currentValue >> 15 & 0x01) * 255;
+  console.log('readpixel16bit', imageData.slice(imageOffset, imageOffset + 4));
   return 2;
 }
 
