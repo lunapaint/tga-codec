@@ -106,7 +106,14 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
   };
   let readPixel: (ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number) => number;
   switch (ctx.header.bitDepth) {
-    case 16: readPixel = readPixel16Bit; break;
+    // case 15: readPixel = readPixel15Bit; break;
+    case 16:
+      if (ctx.extensionArea?.attributesType === 2) {
+        readPixel = readPixel15Bit;
+      } else {
+        readPixel = readPixel16Bit;
+      }
+      break;
     case 24: readPixel = readPixel24Bit; break;
     case 32:
       if (ctx.extensionArea?.attributesType === 2) {
@@ -128,16 +135,31 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
   return image;
 }
 
+// The conversion from 5 bit to 8 bit color differs across editors, some naively shift the value
+// by 3 meaning the maximum channel value is 248 (`0b11111000`). The most correct approach seems
+// to be scaling the value to 0-255.
 let currentValue = 0;
+function readPixel15Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
+  currentValue = ctx.reader.view.getUint16(viewOffset, true);
+  // Bits stored as 0b_RRRRRGG 0bGGGBBBBB
+  imageData[imageOffset    ] = scaleToRange(currentValue >> 10 & 0x1f, 0x1f, 0xff);
+  imageData[imageOffset + 1] = scaleToRange(currentValue >>  5 & 0x1f, 0x1f, 0xff);
+  imageData[imageOffset + 2] = scaleToRange(currentValue       & 0x1f, 0x1f, 0xff);
+  imageData[imageOffset + 3] = 255;
+  return 2;
+}
 function readPixel16Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
   currentValue = ctx.reader.view.getUint16(viewOffset, true);
   // Bits stored as 0bARRRRRGG 0bGGGBBBBB
-  // TODO: How these colors are read differs across editors - does 0b11111 = 248 or 255?
-  imageData[imageOffset    ] = (currentValue >> 10 & 0x1f) << 3;
-  imageData[imageOffset + 1] = (currentValue >>  5 & 0x1f) << 3;
-  imageData[imageOffset + 2] = (currentValue       & 0x1f) << 3;
+  imageData[imageOffset    ] = scaleToRange(currentValue >> 10 & 0x1f, 0x1f, 0xff);
+  imageData[imageOffset + 1] = scaleToRange(currentValue >>  5 & 0x1f, 0x1f, 0xff);
+  imageData[imageOffset + 2] = scaleToRange(currentValue       & 0x1f, 0x1f, 0xff);
   imageData[imageOffset + 3] = (1 - currentValue >> 15 & 0x01) * 255;
   return 2;
+}
+
+function scaleToRange(value: number, maxValue: number, scaledMax: number): number {
+  return Math.round((value / maxValue) * scaledMax);
 }
 
 function readPixel24Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, viewOffset: number): number {
