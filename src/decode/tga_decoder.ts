@@ -11,6 +11,20 @@ import { isValidBitDepthTga, isValidColorMapDepth } from './validate.js';
 import { ByteStreamReader } from './byteStreamReader.js';
 import { IExtensionArea } from '../../typings/api.js';
 
+const enum ImageDescriptorMask {
+  AttributeBits    = 0b00001111,
+  Reserved         = 0b00010000,
+  ScreenOrigin     = 0b00100000,
+  InterleavingFlag = 0b11000000
+}
+
+const enum ImageDescriptorShift {
+  AttributeBits    = 0,
+  Reserved         = 4,
+  ScreenOrigin     = 5,
+  InterleavingFlag = 6
+}
+
 export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions = {}): Promise<IDecodedTga> {
   const initialCtx: ITgaInitialDecodeContext = {
     reader: new ByteStreamReader(data, true),
@@ -94,15 +108,13 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
     throw new DecodeErrorTga(ctx, `Unsupported TGA bit depth "${bitDepth}" with image type ${imageType}`, 0x10);
   }
   const imageDescriptor = ctx.reader.readUint8();
-  // TODO: Use mask constants
-  const attributeBitsPerPixel = imageDescriptor & 0b1111;
-  console.log('attributeBitsPerPixel', attributeBitsPerPixel);
-  const reserved = imageDescriptor >> 4 & 0b1;
+  const attributeBitsPerPixel = imageDescriptor & ImageDescriptorMask.AttributeBits >> ImageDescriptorShift.AttributeBits;
+  const reserved = imageDescriptor & ImageDescriptorMask.Reserved >> ImageDescriptorShift.Reserved;
   if (reserved !== 0) {
     handleTgaWarning(ctx, new DecodeWarning(`Reserved bit "${reserved}" is not zero`, 0x11));
   }
-  const screenOrigin = (imageDescriptor >> 5 & 0b1) as ScreenOrigin;
-  const interleaving = (imageDescriptor >> 7 & 0b11) as InterleavingFlag;
+  const screenOrigin = (imageDescriptor & ImageDescriptorMask.ScreenOrigin >> ImageDescriptorShift.ScreenOrigin) as ScreenOrigin;
+  const interleaving = (imageDescriptor & ImageDescriptorMask.InterleavingFlag >> ImageDescriptorShift.InterleavingFlag) as InterleavingFlag;
   return {
     idLength,
     colorMapType,
