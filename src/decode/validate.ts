@@ -4,7 +4,16 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { BitDepth, BitDepthTga, ColorType, FilterMethod, ImageType, InterlaceMethod } from '../shared/types.js';
+import { BitDepth, BitDepthTga, ColorMapDepth, ColorType, FilterMethod, ImageType, InterlaceMethod } from '../shared/types.js';
+
+export function isValidColorMapDepth(colorMapDepth: number): colorMapDepth is ColorMapDepth {
+  return (
+    colorMapDepth === 15 ||
+    colorMapDepth === 16 ||
+    colorMapDepth === 24 ||
+    colorMapDepth === 32
+  );
+}
 
 export function isValidBitDepthTga(bitDepth: number, imageType: ImageType): bitDepth is BitDepthTga {
   // TODO: Support more bit depths

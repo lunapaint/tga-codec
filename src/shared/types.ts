@@ -190,6 +190,8 @@ export const enum ColorMapType {
   Unrecognized = 2,
 }
 
+export type ColorMapDepth = 15 | 16 | 24 | 32;
+
 export const enum ImageType {
   NoImageData = 0,
   UncompressedColorMapped = 1,
