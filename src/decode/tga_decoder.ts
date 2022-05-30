@@ -467,7 +467,7 @@ function parseFooter(ctx: ITgaDecodeContext): ITgaFooterDetails {
     };
   }
 
-  // Valid signautre, reset the offset and read
+  // Valid signature, reset the offset and read
   ctx.reader.offset = ctx.reader.view.byteLength - 26;
   let extensionAreaOffset = ctx.reader.readUint32();
   if (extensionAreaOffset >= ctx.reader.view.byteLength) {
@@ -479,8 +479,6 @@ function parseFooter(ctx: ITgaDecodeContext): ITgaFooterDetails {
     handleWarning(ctx, new DecodeWarning(`Developer directory offset "${developerDirectoryOffset}" is invalid`, ctx.reader.offset - 4));
     developerDirectoryOffset = 0;
   }
-  // TODO: Pull signature
-  // TODO: Verify last 2 bytes
   return {
     extensionAreaOffset,
     developerDirectoryOffset
