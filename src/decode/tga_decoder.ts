@@ -210,13 +210,11 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
         break;
       case 24: readPixel = readPixel24Bit; break;
       case 32:
-
         if (ctx.hasAlpha) {
           readPixel = readPixel32Bit;
         } else {
           readPixel = readPixel32BitNoAlpha;
         }
-
         break;
       default:
         throw new Error('NYI'); // TODO: Implement
@@ -337,7 +335,7 @@ function readPixel16Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffs
   imageData[imageOffset + 1] = (imageData[imageOffset + 1] << 3) | (imageData[imageOffset + 1] >> 2);
   imageData[imageOffset + 2] = (imageData[imageOffset + 2] << 3) | (imageData[imageOffset + 2] >> 2);
   // Alpha
-  imageData[imageOffset + 3] = (1 - currentValue >> 15 & 0x01) * 255;
+  imageData[imageOffset + 3] = (currentValue & 0x8000) ? 0 : 255;
   return 2;
 }
 

@@ -13,10 +13,6 @@ describe('tombexcavator_suite', () => {
   createTestsFromFolder(suiteRoot, 23, [
     'rgb15',
     'rgb15rle',
-    'rgb16',
     'rgb16rle',
-    // 'rgb32',
-    'TGA_16_rle',
-    'TGA_16_uncompressed',
   ]);
 });
