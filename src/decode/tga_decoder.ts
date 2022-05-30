@@ -181,10 +181,14 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
       case 8: readPixel = readPixel8BitGreyscale; break;
       // case 15: readPixel = readPixel15Bit; break;
       case 16:
-        if (ctx.extensionArea?.attributesType === 2 || ctx.header.attributeBitsPerPixel === 0) {
-          readPixel = readPixel15Bit;
+        if (ctx.header.imageType === ImageType.RunLengthEncodedGrayscale || ctx.header.imageType === ImageType.UncompressedGrayscale) {
+          readPixel = readPixel16BitGreyscale;
         } else {
-          readPixel = readPixel16Bit;
+          if (ctx.extensionArea?.attributesType === 2 || ctx.header.attributeBitsPerPixel === 0) {
+            readPixel = readPixel15Bit;
+          } else {
+            readPixel = readPixel16Bit;
+          }
         }
         break;
       case 24: readPixel = readPixel24Bit; break;
@@ -266,6 +270,15 @@ function readPixel8BitGreyscale(ctx: ITgaDecodeContext, imageData: Uint8Array, i
   imageData[imageOffset + 2] = imageData[imageOffset    ];
   imageData[imageOffset + 3] = 255;
   return 1;
+}
+
+function readPixel16BitGreyscale(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
+  // Bits stored as 0bAAAAAAAA 0bGGGGGGGG
+  imageData[imageOffset    ] = view.getUint8(viewOffset    );
+  imageData[imageOffset + 1] = imageData[imageOffset    ];
+  imageData[imageOffset + 2] = imageData[imageOffset    ];
+  imageData[imageOffset + 3] = view.getUint8(viewOffset + 1);
+  return 2;
 }
 
 let currentValue = 0;

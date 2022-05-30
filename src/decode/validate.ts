@@ -29,10 +29,12 @@ export function isValidColorMapDepth(colorMapDepth: number): colorMapDepth is Co
 export function isValidBitDepth(bitDepth: number, imageType: ImageType): bitDepth is BitDepth {
   // TODO: Support more bit depths
   if (imageType === ImageType.UncompressedColorMapped ||
-      imageType === ImageType.UncompressedGrayscale ||
-      imageType === ImageType.RunLengthEncodedColorMapped ||
-      imageType === ImageType.RunLengthEncodedGrayscale) {
+      imageType === ImageType.RunLengthEncodedColorMapped) {
     return bitDepth === 8;
+  }
+  if (imageType === ImageType.UncompressedGrayscale ||
+      imageType === ImageType.RunLengthEncodedGrayscale) {
+    return bitDepth === 8 || bitDepth === 16;
   }
   // TODO 15?
   return (
