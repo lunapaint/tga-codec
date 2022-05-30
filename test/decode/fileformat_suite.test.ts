@@ -11,6 +11,7 @@ import { join } from 'path';
 import { decodeTga } from '../../out-dev/public/tga.js';
 import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
 import { dataArraysEqual } from '../shared/testUtil.js';
+import { decodePng } from '@lunapaint/png-codec';
 
 const suiteRoot = 'test/fileformat_suite';
 
@@ -91,7 +92,14 @@ function repeatArray(array: number[], times: number): number[] {
   return result;
 }
 
-const testFiles: { [file: string]: IDecodedTga } = {
+async function getPngImage(path: string): Promise<IImage32> {
+  const result = await decodePng(await fs.promises.readFile(path), { force32: true });
+  return result.image;
+}
+
+type ITestDecodedTga = Omit<IDecodedTga, 'image'> & { image: string | IImage32 };
+
+const testFiles: { [file: string]: ITestDecodedTga } = {
   'cbw8': {
     image: expectedGreyscaleImage,
     details: commonDetails,
@@ -158,11 +166,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
     developerDirectory: []
   },
   'flag_b16': {
-    image: {
-      width: 124,
-      height: 124,
-      data: new Uint8Array(require(`../../test/fileformat_suite/flag_b16.json`))
-    },
+    image: `test/fileformat_suite/flag_b16.png`,
     details: {
       identificationField: ''
     },
@@ -170,11 +174,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
     developerDirectory: []
   },
   'flag_b24': {
-    image: {
-      width: 124,
-      height: 124,
-      data: new Uint8Array(require(`../../test/fileformat_suite/flag_b24.json`))
-    },
+    image: `test/fileformat_suite/flag_b24.png`,
     details: {
       identificationField: ''
     },
@@ -182,11 +182,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
     developerDirectory: []
   },
   'flag_b32': {
-    image: {
-      width: 124,
-      height: 124,
-      data: new Uint8Array(require(`../../test/fileformat_suite/flag_b32.json`))
-    },
+    image: `test/fileformat_suite/flag_b32.png`,
     details: {
       identificationField: ''
     },
@@ -194,11 +190,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
     developerDirectory: []
   },
   'flag_t16': {
-    image: {
-      width: 124,
-      height: 124,
-      data: new Uint8Array(require(`../../test/fileformat_suite/flag_t16.json`))
-    },
+    image: `test/fileformat_suite/flag_t16.png`,
     details: {
       identificationField: ''
     },
@@ -206,11 +198,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
     developerDirectory: []
   },
   'flag_t32': {
-    image: {
-      width: 124,
-      height: 124,
-      data: new Uint8Array(require(`../../test/fileformat_suite/flag_t32.json`))
-    },
+    image: `test/fileformat_suite/flag_t32.png`,
     details: {
       identificationField: ''
     },
@@ -219,11 +207,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
   },
   // Uncompressed true color, 24 bit depth, origin 0
   'marbles': {
-    image: {
-      width: 1419,
-      height: 1001,
-      data: new Uint8Array(require(`../../test/fileformat_suite/marbles.json`))
-    },
+    image: `test/fileformat_suite/marbles.png`,
     details: {
       identificationField: ''
     },
@@ -297,11 +281,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
   },
   // Uncompressed true color, 16 bit depth, origin 0
   'xing_b16': {
-    image: {
-      width: 240,
-      height: 164,
-      data: new Uint8Array(require(`../../test/fileformat_suite/xing_b16.json`))
-    },
+    image: `test/fileformat_suite/xing_b16.png`,
     details: {
       identificationField: ''
     },
@@ -310,11 +290,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
   },
   // Uncompressed true color, 24 bit depth, origin 0
   'xing_b24': {
-    image: {
-      width: 240,
-      height: 164,
-      data: new Uint8Array(require(`../../test/fileformat_suite/xing_b24.json`))
-    },
+    image: `test/fileformat_suite/xing_b24.png`,
     details: {
       identificationField: ''
     },
@@ -323,11 +299,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
   },
   // Uncompressed true color, 32 bit depth, origin 0
   'xing_b32': {
-    image: {
-      width: 240,
-      height: 164,
-      data: new Uint8Array(require(`../../test/fileformat_suite/xing_b32.json`))
-    },
+    image: `test/fileformat_suite/xing_b32.png`,
     details: {
       identificationField: ''
     },
@@ -336,11 +308,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
   },
   // Uncompressed true color, 16 bit depth, origin 2
   'xing_t16': {
-    image: {
-      width: 240,
-      height: 164,
-      data: new Uint8Array(require(`../../test/fileformat_suite/xing_t16.json`))
-    },
+    image: `test/fileformat_suite/xing_t16.png`,
     details: {
       identificationField: ''
     },
@@ -349,11 +317,7 @@ const testFiles: { [file: string]: IDecodedTga } = {
   },
   // Uncompressed true color, 24 bit depth, origin 2
   'xing_t24': {
-    image: {
-      width: 240,
-      height: 164,
-      data: new Uint8Array(require(`../../test/fileformat_suite/xing_t24.json`))
-    },
+    image: `test/fileformat_suite/xing_t24.png`,
     details: {
       identificationField: ''
     },
@@ -362,206 +326,13 @@ const testFiles: { [file: string]: IDecodedTga } = {
   },
   // Uncompressed true color, 32 bit depth, origin 2
   'xing_t32': {
-    image: {
-      width: 240,
-      height: 164,
-      data: new Uint8Array(require(`../../test/fileformat_suite/xing_t32.json`))
-    },
+    image: `test/fileformat_suite/xing_t32.png`,
     details: {
       identificationField: ''
     },
     extensionArea: undefined,
     developerDirectory: []
   },
-  // 'ccm8': {
-  //   image: expectedColorImage,
-  //   details: {
-  //     identificationField: 'Truevision(R) Sample Image'
-  //   },
-  //   extensionArea: {
-  //     extensionSize: 495,
-  //     authorName: 'Ricky True',
-  //     authorComments: 'Sample 8 bit run length compressed color mapped image',
-  //     dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
-  //     jobName: 'TGA Utilities',
-  //     jobTime: { hours: 0, minutes: 0, seconds: 0 },
-  //     softwareId: 'TGAEdit',
-  //     softwareVersionNumber: 2,
-  //     softwareVersionLetter: '',
-  //     keyColor: '',
-  //     aspectRatioNumerator: 0,
-  //     aspectRatioDenominator: 0,
-  //     gammaValueNumerator: 0,
-  //     gammaValueDenominator: 0,
-  //     colorCorrectionOffset: 0,
-  //     postageStampOffset: 4652,
-  //     scanLineOffset: 0,
-  //     attributesType: 0,
-  //   },
-  //   developerDirectory: []
-  // },
-  // 'ctc24': {
-  //   image: expectedColorImage,
-  //   details: {
-  //     identificationField: 'Truevision(R) Sample Image'
-  //   },
-  //   extensionArea: {
-  //     extensionSize: 495,
-  //     authorName: 'Ricky True',
-  //     authorComments: 'Sample 24 bit run length compressed true color image',
-  //     dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
-  //     jobName: 'TGA Utilities',
-  //     jobTime: { hours: 0, minutes: 0, seconds: 0 },
-  //     softwareId: 'TGAEdit',
-  //     softwareVersionNumber: 2,
-  //     softwareVersionLetter: '',
-  //     keyColor: '',
-  //     aspectRatioNumerator: 0,
-  //     aspectRatioDenominator: 0,
-  //     gammaValueNumerator: 0,
-  //     gammaValueDenominator: 0,
-  //     colorCorrectionOffset: 0,
-  //     postageStampOffset: 8236,
-  //     scanLineOffset: 0,
-  //     attributesType: 0,
-  //   },
-  //   developerDirectory: []
-  // },
-  // 'ubw8': {
-  //   image: expectedGreyscaleImage,
-  //   details: {
-  //     identificationField: 'Truevision(R) Sample Image'
-  //   },
-  //   extensionArea: {
-  //     extensionSize: 495,
-  //     authorName: 'Ricky True',
-  //     authorComments: 'Sample 8 bit uncompressed black and white image',
-  //     dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
-  //     jobName: 'TGA Utilities',
-  //     jobTime: { hours: 0, minutes: 0, seconds: 0 },
-  //     softwareId: 'TGAEdit',
-  //     softwareVersionNumber: 1.3,
-  //     softwareVersionLetter: '',
-  //     keyColor: '',
-  //     aspectRatioNumerator: 0,
-  //     aspectRatioDenominator: 0,
-  //     gammaValueNumerator: 0,
-  //     gammaValueDenominator: 0,
-  //     colorCorrectionOffset: 0,
-  //     postageStampOffset: 16428,
-  //     scanLineOffset: 0,
-  //     attributesType: 0,
-  //   },
-  //   developerDirectory: []
-  // },
-  // 'ucm8': {
-  //   image: expectedColorImage,
-  //   details: {
-  //     identificationField: 'Truevision(R) Sample Image'
-  //   },
-  //   extensionArea: {
-  //     extensionSize: 495,
-  //     authorName: 'Ricky True',
-  //     authorComments: 'Sample 8 bit uncompressed color mapped image',
-  //     dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-  //     jobName: 'TGA Utilities',
-  //     jobTime: { hours: 0, minutes: 0, seconds: 0 },
-  //     softwareId: 'TGAEdit',
-  //     softwareVersionNumber: 1.4,
-  //     softwareVersionLetter: '',
-  //     keyColor: '',
-  //     aspectRatioNumerator: 0,
-  //     aspectRatioDenominator: 0,
-  //     gammaValueNumerator: 0,
-  //     gammaValueDenominator: 0,
-  //     colorCorrectionOffset: 0,
-  //     postageStampOffset: 16940,
-  //     scanLineOffset: 0,
-  //     attributesType: 0,
-  //   },
-  //   developerDirectory: []
-  // },
-  // 'utc16': {
-  //   image: expectedColorImage,
-  //   details: {
-  //     identificationField: 'Truevision(R) Sample Image'
-  //   },
-  //   extensionArea: {
-  //     extensionSize: 495,
-  //     authorName: 'Ricky True',
-  //     authorComments: 'Sample 16 bit uncompressed true color image',
-  //     dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
-  //     jobName: 'TGA Utilities',
-  //     jobTime: { hours: 0, minutes: 0, seconds: 0 },
-  //     softwareId: 'TGAEdit',
-  //     softwareVersionNumber: 1.3,
-  //     softwareVersionLetter: '',
-  //     keyColor: '',
-  //     aspectRatioNumerator: 0,
-  //     aspectRatioDenominator: 0,
-  //     gammaValueNumerator: 0,
-  //     gammaValueDenominator: 0,
-  //     colorCorrectionOffset: 0,
-  //     postageStampOffset: 32812,
-  //     scanLineOffset: 0,
-  //     attributesType: 2,
-  //   },
-  //   developerDirectory: []
-  // },
-  // 'utc24': {
-  //   image: expectedColorImage,
-  //   details: {
-  //     identificationField: 'Truevision(R) Sample Image'
-  //   },
-  //   extensionArea: {
-  //     extensionSize: 495,
-  //     authorName: 'Ricky True',
-  //     authorComments: 'Sample 24 bit uncompressed true color image',
-  //     dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-  //     jobName: 'TGA Utilities',
-  //     jobTime: { hours: 0, minutes: 0, seconds: 0 },
-  //     softwareId: 'TGAEdit',
-  //     softwareVersionNumber: 1.4,
-  //     softwareVersionLetter: '',
-  //     keyColor: '',
-  //     aspectRatioNumerator: 0,
-  //     aspectRatioDenominator: 0,
-  //     gammaValueNumerator: 0,
-  //     gammaValueDenominator: 0,
-  //     colorCorrectionOffset: 0,
-  //     postageStampOffset: 49196,
-  //     scanLineOffset: 0,
-  //     attributesType: 0,
-  //   },
-  //   developerDirectory: []
-  // },
-  // 'utc32': {
-  //   image: expectedColorImage,
-  //   details: {
-  //     identificationField: 'Truevision(R) Sample Image'
-  //   },
-  //   extensionArea: {
-  //     extensionSize: 495,
-  //     authorName: 'Ricky True',
-  //     authorComments: 'Sample 32 bit uncompressed true color image',
-  //     dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-  //     jobName: 'TGA Utilities',
-  //     jobTime: { hours: 0, minutes: 0, seconds: 0 },
-  //     softwareId: 'TGAEdit',
-  //     softwareVersionNumber: 1.4,
-  //     softwareVersionLetter: '',
-  //     keyColor: '',
-  //     aspectRatioNumerator: 0,
-  //     aspectRatioDenominator: 0,
-  //     gammaValueNumerator: 0,
-  //     gammaValueDenominator: 0,
-  //     colorCorrectionOffset: 0,
-  //     postageStampOffset: 65580,
-  //     scanLineOffset: 0,
-  //     attributesType: 2,
-  //   },
-  //   developerDirectory: []
-  // }
 };
 
 describe('fileformat_suite', () => {
@@ -570,9 +341,10 @@ describe('fileformat_suite', () => {
       const data = new Uint8Array(await fs.promises.readFile(join(suiteRoot, `${file}.tga`)));
       const result = await decodeTga(data, {});
       const testSpec = testFiles[file];
-      strictEqual(result.image.width, testSpec.image.width);
-      strictEqual(result.image.height, testSpec.image.height);
-      dataArraysEqual(result.image.data, testSpec.image.data);
+      const expectedImage = typeof testSpec.image === 'string' ? await getPngImage(testSpec.image) : testSpec.image;
+      strictEqual(result.image.width, expectedImage.width);
+      strictEqual(result.image.height, expectedImage.height);
+      dataArraysEqual(result.image.data, expectedImage.data);
       deepStrictEqual(result.details, testSpec.details);
       deepStrictEqual(result.extensionArea, testSpec.extensionArea);
       deepStrictEqual(result.developerDirectory, testSpec.developerDirectory);
