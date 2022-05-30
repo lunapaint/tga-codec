@@ -46,20 +46,23 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
 
   ctx.identificationField = readText(ctx, undefined, ctx.header.idLength);
 
-  if (ctx.header.colorMapType === ColorMapType.ColorMap) {
-    ctx.colorMap = parseColorMap(ctx);
-  }
+  const colorMapOffset = ctx.reader.offset;
 
-  const dataOffset = ctx.reader.offset;
-
-  // Parse the footer before the image data as the extension area has important details on decoding
-  // the data.
+  // Parse the footer before the color map and image data as the extension area has important
+  // details on decoding the data.
   ctx.footer = parseFooter(ctx);
   ctx.extensionArea = parseExtensionArea(ctx);
   ctx.developerDirectory = parseDeveloperDirectory(ctx);
 
-  ctx.reader.offset = dataOffset;
+  ctx.reader.offset = colorMapOffset;
+
+  if (ctx.header.colorMapType === ColorMapType.ColorMap) {
+    ctx.colorMap = parseColorMap(ctx);
+  }
+
   ctx.image = parseImageData(ctx, ctx.reader.offset);
+
+  // console.log('ctx', ctx);
 
   return {
     image: ctx.image,
@@ -151,11 +154,8 @@ function parseColorMap(ctx: ITgaDecodeContext): IReadPixelDelegate {
       break;
     case 24: readPixel = readPixel24Bit; break;
     case 32:
-      if (ctx.extensionArea?.attributesType === 2 || ctx.header.attributeBitsPerPixel === 0) {
-        readPixel = readPixel32BitNoAlpha;
-      } else {
-        readPixel = readPixel32Bit;
-      }
+      // 32-bit color maps always support alpha
+      readPixel = readPixel32Bit;
       break;
   }
   return (ctx, imageData, imageOffset, view, viewOffset) => {

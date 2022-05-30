@@ -7,7 +7,7 @@
 import { deepStrictEqual, fail, strictEqual } from 'assert';
 import * as fs from 'fs';
 import { decodeTga } from '../../out-dev/public/tga.js';
-import { decodePng } from '@lunapaint/png-codec';
+import { decodePng, encodePng } from '@lunapaint/png-codec';
 import { IDecodedTga, IImage32 } from '../../typings/api.js';
 import { join } from 'path';
 
@@ -25,7 +25,8 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       const result = await decodeTga(data, {});
 
       // Uncomment to write decoded tgas as pngs in the repo root
-      // fs.writeFileSync(`encoded_${file}.png`, (await (await encodePng(result.image)).data));
+      fs.mkdirSync('encoded', { recursive: true });
+      fs.writeFileSync(`encoded/${suiteRoot.replace(/\//g, '_')}_${file}.png`, (await (await encodePng(result.image)).data));
 
       const testSpec = testFiles[file];
       const expectedImage = typeof testSpec.image === 'string' ? await getPngImage(testSpec.image) : testSpec.image;

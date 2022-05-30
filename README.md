@@ -2,7 +2,7 @@
 
 ## Decoder support details
 
-While writing this codec I became aware that other TGA decoders are inconsistent, don't handle seemingly common cases and the spec is ambiguous. Some examples of this are Paint.NET (v4.3.10) decodes 16-bit true color by shifting each 5 bit value left by 3, this means that the maximum value for any channel is 255. Krita (v5.0.2) however handles that case but does not support various features like 16-bit greyscale encoding.
+While writing this codec I became aware that other TGA decoders are inconsistent, don't handle seemingly common cases and the spec is ambiguous. Some examples of this are Paint.NET (v4.3.10) decodes 16-bit true color by shifting each 5 bit value left by 3, this means that the maximum value for any channel is 255. Krita (v5.0.2) however handles that case but does not support various features and decodes 16-bit greyscale encoding without understanding the alpha channel.
 
 Here are the details on what this codec supports:
 

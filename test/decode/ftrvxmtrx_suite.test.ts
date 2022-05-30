@@ -52,6 +52,58 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     extensionArea: undefined,
     developerDirectory: []
   },
+  'rgb24_bottom_left_rle': {
+    image: `${suiteRoot}/rgb24.0.png`,
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  'rgb24_top_left': {
+    image: `${suiteRoot}/rgb24.0.png`,
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  'rgb24_top_left_colormap': {
+    image: `${suiteRoot}/rgb24.1.png`,
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  // Transparent pixels stored as 0x00000000
+  'rgb32_top_left_rle': {
+    image: `${suiteRoot}/rgb32.0.png`,
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  // Transparent pixels stored as 0x00000000
+  'rgb32_bottom_left': {
+    image: `${suiteRoot}/rgb32.0.png`,
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  // Transparent pixels stored as 0xFFFFFF00
+  // Image says no alpha support but 32-bit color maps always use alpha
+  'rgb32_top_left_rle_colormap': {
+    image: `${suiteRoot}/rgb32.1.png`,
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
 };
 
 describe('ftrvxmtrx_suite', () => {
