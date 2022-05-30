@@ -78,7 +78,7 @@ export interface IImage32 {
   height: number;
 }
 
-export type BitDepth = 8 | 16 | 24 | 32;
+export type BitDepth = 8 | 15 | 16 | 24 | 32;
 
 /**
  * A critical error occurred during decoding.

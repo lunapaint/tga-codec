@@ -10,9 +10,41 @@ import { createTestsFromFolder } from '../shared/testUtil.js';
 const suiteRoot = 'test/tombexcavator_suite';
 
 describe('tombexcavator_suite', () => {
-  createTestsFromFolder(suiteRoot, 23, [
-    'rgb15',
-    'rgb15rle',
-    'rgb16rle',
-  ]);
+  createTestsFromFolder(suiteRoot, 23, {
+    allowOneOffError: [
+      // Decoders struggle with this file, ImageMagick ended up being used to convert it TGA which
+      // uses slightly different decoding of 15-bit values
+      'rgb16rle',
+    ],
+    extensionArea: {
+      'rgb16rle': {
+        aspectRatioDenominator: 0,
+        aspectRatioNumerator: 0,
+        attributesType: 0,
+        authorComments: '',
+        authorName: '',
+        colorCorrectionOffset: 0,
+        dateTimestamp: new Date('1899-12-31T08:00:00.000Z'),
+        extensionSize: 495,
+        gammaValueDenominator: 0,
+        gammaValueNumerator: 0,
+        jobName: '',
+        jobTime: {
+          hours: 0,
+          minutes: 0,
+          seconds: 0
+        },
+        keyColor: '',
+        postageStampOffset: 0,
+        scanLineOffset: 19119,
+        softwareId: 'Handmade Software, Inc. Image Alchemy   ',
+        softwareVersionLetter: '',
+        softwareVersionNumber: 0.32
+      }
+    },
+    skip: [
+      'rgb15',
+      'rgb15rle',
+    ]
+  });
 });

@@ -196,7 +196,7 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
   } else {
     switch (ctx.header.bitDepth) {
       case 8: readPixel = readPixel8BitGreyscale; break;
-      // case 15: readPixel = readPixel15Bit; break;
+      case 15: readPixel = readPixel15Bit; break;
       case 16:
         if (ctx.header.imageType === ImageType.RunLengthEncodedGrayscale || ctx.header.imageType === ImageType.UncompressedGrayscale) {
           readPixel = readPixel16BitGreyscale;

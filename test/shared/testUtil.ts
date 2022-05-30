@@ -8,7 +8,7 @@ import { deepStrictEqual, fail, strictEqual } from 'assert';
 import * as fs from 'fs';
 import { decodeTga } from '../../out-dev/public/tga.js';
 import { decodePng, encodePng } from '@lunapaint/png-codec';
-import { IDecodedTga, IImage32 } from '../../typings/api.js';
+import { IDecodedTga, IExtensionArea, IImage32 } from '../../typings/api.js';
 import { join } from 'path';
 
 async function getPngImage(path: string): Promise<IImage32> {
@@ -16,13 +16,17 @@ async function getPngImage(path: string): Promise<IImage32> {
   return result.image;
 }
 
-export type ITestDecodedTga = Omit<IDecodedTga, 'image'> & { image: string | IImage32, clearAlphaChannel?: boolean };
+export type ITestDecodedTga = Omit<IDecodedTga, 'image'> & {
+  image: string | IImage32;
+  allowOneOffError?: boolean;
+  clearAlphaChannel?: boolean;
+};
 
-export function createTestsFromFolder(suiteRoot: string, expectedCount: number, skip: string[] = []) {
+export function createTestsFromFolder(suiteRoot: string, expectedCount: number, options?: { skip?: string[], allowOneOffError?: string[], extensionArea?: { [file: string]: IExtensionArea } }) {
   const tgaFiles = fs.readdirSync(suiteRoot)
     .filter(e => e.endsWith('.tga'));
   const tgaFilesWithoutSkipped = tgaFiles
-    .filter(e => !skip.includes(e.replace(/\.tga$/, '')));
+    .filter(e => !(options?.skip ?? []).includes(e.replace(/\.tga$/, '')));
   const testFiles: { [file: string]: ITestDecodedTga } = {};
   for (const fileName of tgaFilesWithoutSkipped) {
     const withoutExtension = fileName.replace(/\.tga$/, '');
@@ -31,9 +35,12 @@ export function createTestsFromFolder(suiteRoot: string, expectedCount: number, 
       details: {
         identificationField: ''
       },
-      extensionArea: undefined,
+      extensionArea: options?.extensionArea ? options.extensionArea[withoutExtension] : undefined,
       developerDirectory: []
     };
+    if (options?.allowOneOffError?.includes(withoutExtension)) {
+      testFiles[withoutExtension].allowOneOffError = true;
+    }
   }
   strictEqual(Object.keys(tgaFiles).length, expectedCount, 'Expected number of test files not present');
 
@@ -59,7 +66,24 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       if (testSpec.clearAlphaChannel) {
         clearAlphaChannel(expectedImage.data);
       }
-      dataArraysEqual(result.image.data, expectedImage.data);
+      if (testSpec.allowOneOffError) {
+        for (let i = 0; i < result.image.data.length; i += 4) {
+          if (
+            Math.abs(result.image.data[i    ] - expectedImage.data[i    ]) > 1 ||
+            Math.abs(result.image.data[i + 1] - expectedImage.data[i + 1]) > 1 ||
+            Math.abs(result.image.data[i + 2] - expectedImage.data[i + 2]) > 1 ||
+            Math.abs(result.image.data[i + 3] - expectedImage.data[i + 3]) > 1
+          ) {
+            throw new Error(
+              `Channel value for pixel ${i / 4} (index=${i}) is off by more than 1.\n\n` +
+              `  actual=${Array.prototype.slice.call(result.image.data, i, i + 4)}\n` +
+              `  expected=${Array.prototype.slice.call(expectedImage.data, i, i + 4)}`
+            );
+          }
+        }
+      } else {
+        dataArraysEqual(result.image.data, expectedImage.data);
+      }
       deepStrictEqual(result.details, testSpec.details);
       deepStrictEqual(result.extensionArea, testSpec.extensionArea);
       deepStrictEqual(result.developerDirectory, testSpec.developerDirectory);
