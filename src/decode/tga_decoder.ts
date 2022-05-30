@@ -456,6 +456,18 @@ function readTimestamp(ctx: ITgaDecodeContext): { hours: number, minutes: number
 function parseFooter(ctx: ITgaDecodeContext): ITgaFooterDetails {
   // The footer is the last 26 bytes of the file and importantly includes the offsets of the
   // extension area and developer directory
+
+  // Verify the signature to see if the footer is present
+  ctx.reader.offset = ctx.reader.view.byteLength - 26 + 8;
+  const signature = readText(ctx, undefined, 17);
+  if (signature !== 'TRUEVISION-XFILE.' || ctx.reader.readUint8() !== 0) {
+    return {
+      extensionAreaOffset: 0,
+      developerDirectoryOffset: 0
+    };
+  }
+
+  // Valid signautre, reset the offset and read
   ctx.reader.offset = ctx.reader.view.byteLength - 26;
   let extensionAreaOffset = ctx.reader.readUint32();
   if (extensionAreaOffset >= ctx.reader.view.byteLength) {
@@ -471,7 +483,6 @@ function parseFooter(ctx: ITgaDecodeContext): ITgaFooterDetails {
   // TODO: Verify last 2 bytes
   return {
     extensionAreaOffset,
-    developerDirectoryOffset,
-    signature: ''
+    developerDirectoryOffset
   };
 }

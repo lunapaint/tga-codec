@@ -92,7 +92,6 @@ export interface ITgaHeaderDetails {
 export interface ITgaFooterDetails {
   extensionAreaOffset: number;
   developerDirectoryOffset: number;
-  signature: string;
 }
 
 export const enum ColorMapType {
