@@ -53,7 +53,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     developerDirectory: []
   },
   'rgb24_bottom_left_rle': {
-    image: `${suiteRoot}/rgb24.0.png`,
+    image: `${suiteRoot}/rgb24_bottom_left_rle.png`,
     details: {
       identificationField: ''
     },
@@ -61,7 +61,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     developerDirectory: []
   },
   'rgb24_top_left': {
-    image: `${suiteRoot}/rgb24.0.png`,
+    image: `${suiteRoot}/rgb24_top_left.png`,
     details: {
       identificationField: ''
     },
@@ -69,7 +69,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     developerDirectory: []
   },
   'rgb24_top_left_colormap': {
-    image: `${suiteRoot}/rgb24.1.png`,
+    image: `${suiteRoot}/rgb24_top_left_colormap.png`,
     details: {
       identificationField: ''
     },
@@ -78,7 +78,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   // Transparent pixels stored as 0x00000000
   'rgb32_top_left_rle': {
-    image: `${suiteRoot}/rgb32.0.png`,
+    image: `${suiteRoot}/rgb32_top_left_rle.png`,
     details: {
       identificationField: ''
     },
@@ -87,7 +87,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   // Transparent pixels stored as 0x00000000
   'rgb32_bottom_left': {
-    image: `${suiteRoot}/rgb32.0.png`,
+    image: `${suiteRoot}/rgb32_bottom_left.png`,
     details: {
       identificationField: ''
     },
@@ -97,7 +97,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Transparent pixels stored as 0xFFFFFF00
   // Image says no alpha support but 32-bit color maps always use alpha
   'rgb32_top_left_rle_colormap': {
-    image: `${suiteRoot}/rgb32.1.png`,
+    image: `${suiteRoot}/rgb32_top_left_rle_colormap.png`,
     details: {
       identificationField: ''
     },
