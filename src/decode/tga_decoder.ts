@@ -113,10 +113,6 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   }
   const imageDescriptor = ctx.reader.readUint8();
   const attributeBitsPerPixel = imageDescriptor & ImageDescriptorMask.AttributeBits >> ImageDescriptorShift.AttributeBits;
-  // const reserved = imageDescriptor & ImageDescriptorMask.Reserved >> ImageDescriptorShift.Reserved;
-  // if (reserved !== 0) {
-  //   handleWarning(ctx, new DecodeWarning(`Reserved bit "${reserved}" is not zero`, 0x11));
-  // }
   const screenOrigin = (imageDescriptor & ImageDescriptorMask.ScreenOrigin >> ImageDescriptorShift.ScreenOrigin) as ScreenOrigin;
   const interleaving = (imageDescriptor & ImageDescriptorMask.InterleavingFlag >> ImageDescriptorShift.InterleavingFlag) as InterleavingFlag;
   return {

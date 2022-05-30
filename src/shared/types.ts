@@ -113,8 +113,10 @@ export const enum ImageType {
 }
 
 export const enum ScreenOrigin {
-  UpperLeft = 1,
-  LowerLeft = 0
+  BottomLeft = 0,
+  BottomRight = 1,
+  UpperLeft = 2,
+  LowerLeft = 3
 }
 export const enum InterleavingFlag {
   NonInterleaved = 0,

@@ -169,6 +169,30 @@ const testFiles: { [file: string]: IDecodedTga } = {
     extensionArea: undefined,
     developerDirectory: []
   },
+  'flag_b24': {
+    image: {
+      width: 124,
+      height: 124,
+      data: new Uint8Array(require(`../../test/fileformat_suite/flag_b24.json`))
+    },
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  'flag_b32': {
+    image: {
+      width: 124,
+      height: 124,
+      data: new Uint8Array(require(`../../test/fileformat_suite/flag_b32.json`))
+    },
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
   // 'ccm8': {
   //   image: expectedColorImage,
   //   details: {
