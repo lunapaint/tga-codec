@@ -15,7 +15,7 @@ describe('tombexcavator_suite', () => {
     'rgb15rle',
     'rgb16',
     'rgb16rle',
-    'rgb32',
+    // 'rgb32',
     'TGA_16_rle',
     'TGA_16_uncompressed',
   ]);

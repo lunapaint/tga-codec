@@ -35,6 +35,7 @@ const enum RunLengthEncodingMask {
 export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions = {}): Promise<IDecodedTga> {
   const initialCtx: ITgaInitialDecodeContext = {
     reader: new ByteStreamReader(data, true),
+    hasAlpha: false,
     options,
     warnings: []
   };
@@ -59,6 +60,22 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
   if (ctx.header.colorMapType === ColorMapType.ColorMap) {
     ctx.colorMap = parseColorMap(ctx);
   }
+
+  ctx.hasAlpha = (
+    (
+      ctx.colorMap && ctx.header.colorMapDepth === 32
+    ) || (
+      (
+        ctx.header.attributeBitsPerPixel > 0 ||
+        ctx.header.bitDepth === 32
+      ) && (
+        ctx.extensionArea === undefined ||
+        ctx.extensionArea.attributesType > 2
+      )
+    )
+  );
+
+  // TODO: In an ambiguous alpha case, try guess if it should be used, if so use it with a warning
 
   ctx.image = parseImageData(ctx, ctx.reader.offset);
 
@@ -146,10 +163,10 @@ function parseColorMap(ctx: ITgaDecodeContext): IReadPixelDelegate {
   switch (ctx.header.colorMapDepth) {
     case 15: readPixel = readPixel15Bit; break;
     case 16:
-      if (ctx.extensionArea?.attributesType === 2 || ctx.header.attributeBitsPerPixel === 0) {
-        readPixel = readPixel15Bit;
-      } else {
+      if (ctx.hasAlpha) {
         readPixel = readPixel16Bit;
+      } else {
+        readPixel = readPixel15Bit;
       }
       break;
     case 24: readPixel = readPixel24Bit; break;
@@ -184,20 +201,22 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
         if (ctx.header.imageType === ImageType.RunLengthEncodedGrayscale || ctx.header.imageType === ImageType.UncompressedGrayscale) {
           readPixel = readPixel16BitGreyscale;
         } else {
-          if (ctx.extensionArea?.attributesType === 2 || ctx.header.attributeBitsPerPixel === 0) {
-            readPixel = readPixel15Bit;
-          } else {
+          if (ctx.hasAlpha) {
             readPixel = readPixel16Bit;
+          } else {
+            readPixel = readPixel15Bit;
           }
         }
         break;
       case 24: readPixel = readPixel24Bit; break;
       case 32:
-        if (ctx.extensionArea?.attributesType === 2 || ctx.header.attributeBitsPerPixel === 0) {
-          readPixel = readPixel32BitNoAlpha;
-        } else {
+
+        if (ctx.hasAlpha) {
           readPixel = readPixel32Bit;
+        } else {
+          readPixel = readPixel32BitNoAlpha;
         }
+
         break;
       default:
         throw new Error('NYI'); // TODO: Implement
@@ -375,6 +394,7 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
   const colorCorrectionOffset = ctx.reader.readUint32();
   const postageStampOffset = ctx.reader.readUint32();
   const scanLineOffset = ctx.reader.readUint32();
+  // TODO: Improve support for alpha in attributesType
   const attributesType = ctx.reader.readUint8();
   // TODO: Warn on unassigned or reserved attributes type
   // TODO: Scan line table

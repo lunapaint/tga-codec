@@ -163,6 +163,9 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'flag_b32': {
     image: `test/fileformat_suite/flag_b32.png`,
+    // Different editors decode differently, we want to retain the RGB channel information but
+    // respect the attribute bits/type as declared in the file
+    clearAlphaChannel: true,
     details: {
       identificationField: ''
     },
@@ -179,6 +182,9 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'flag_t32': {
     image: `test/fileformat_suite/flag_t32.png`,
+    // Different editors decode differently, we want to retain the RGB channel information but
+    // respect the attribute bits/type as declared in the file
+    clearAlphaChannel: true,
     details: {
       identificationField: ''
     },
@@ -280,6 +286,9 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 32 bit depth, origin 0
   'xing_b32': {
     image: `test/fileformat_suite/xing_b32.png`,
+    // Different editors decode differently, we want to retain the RGB channel information but
+    // respect the attribute bits/type as declared in the file
+    clearAlphaChannel: true,
     details: {
       identificationField: ''
     },
@@ -307,6 +316,9 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 32 bit depth, origin 2
   'xing_t32': {
     image: `test/fileformat_suite/xing_t32.png`,
+    // Different editors decode differently, we want to retain the RGB channel information but
+    // respect the attribute bits/type as declared in the file
+    clearAlphaChannel: true,
     details: {
       identificationField: ''
     },

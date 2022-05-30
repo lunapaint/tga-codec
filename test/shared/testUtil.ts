@@ -16,7 +16,7 @@ async function getPngImage(path: string): Promise<IImage32> {
   return result.image;
 }
 
-export type ITestDecodedTga = Omit<IDecodedTga, 'image'> & { image: string | IImage32 };
+export type ITestDecodedTga = Omit<IDecodedTga, 'image'> & { image: string | IImage32, clearAlphaChannel?: boolean };
 
 export function createTestsFromFolder(suiteRoot: string, expectedCount: number, skip: string[] = []) {
   const tgaFiles = fs.readdirSync(suiteRoot)
@@ -54,6 +54,11 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       const expectedImage = typeof testSpec.image === 'string' ? await getPngImage(testSpec.image) : testSpec.image;
       strictEqual(result.image.width, expectedImage.width);
       strictEqual(result.image.height, expectedImage.height);
+      // Due to difficulties retaining saved pngs hue in image editors in a fully transparent image,
+      // allow a test to clear the alpha channel of the expected image to 0 before checking.
+      if (testSpec.clearAlphaChannel) {
+        clearAlphaChannel(expectedImage.data);
+      }
       dataArraysEqual(result.image.data, expectedImage.data);
       deepStrictEqual(result.details, testSpec.details);
       deepStrictEqual(result.extensionArea, testSpec.extensionArea);
@@ -95,4 +100,10 @@ export function repeatArray(array: number[], times: number): number[] {
     result.push(...array);
   }
   return result;
+}
+
+function clearAlphaChannel(data: Uint8Array) {
+  for (let i = 3; i < data.length; i += 4) {
+    data[i] = 0;
+  }
 }
