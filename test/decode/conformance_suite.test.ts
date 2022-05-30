@@ -57,6 +57,31 @@ const expectedGreyscaleImage: IImage32 = {
   data: new Uint8Array(repeatArray(expectedGreyscaleImageLine, 128))
 };
 
+const commonDetails: ITgaDetails = {
+  identificationField: 'Truevision(R) Sample Image'
+};
+
+const commonExtensionArea: IExtensionArea = {
+  extensionSize: 495,
+  authorName: 'Ricky True',
+  authorComments: '...',
+  dateTimestamp: new Date(),
+  jobName: 'TGA Utilities',
+  jobTime: { hours: 0, minutes: 0, seconds: 0 },
+  softwareId: 'TGAEdit',
+  softwareVersionNumber: -1,
+  softwareVersionLetter: '',
+  keyColor: '',
+  aspectRatioNumerator: 0,
+  aspectRatioDenominator: 0,
+  gammaValueNumerator: 0,
+  gammaValueDenominator: 0,
+  colorCorrectionOffset: 0,
+  postageStampOffset: -1,
+  scanLineOffset: 0,
+  attributesType: -1,
+};
+
 function repeatArray(array: number[], times: number): number[] {
   const result: number[] = [];
   for (let i = 0; i < times; i++) {
@@ -68,216 +93,104 @@ function repeatArray(array: number[], times: number): number[] {
 const testFiles: { [file: string]: IDecodedTga } = {
   'cbw8': {
     image: expectedGreyscaleImage,
-    details: {
-      identificationField: 'Truevision(R) Sample Image'
-    },
+    details: commonDetails,
     extensionArea: {
-      extensionSize: 495,
-      authorName: 'Ricky True',
+      ...commonExtensionArea,
       authorComments: 'Sample 8 bit run length compressed black and white image',
       dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
-      jobName: 'TGA Utilities',
-      jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: 'TGAEdit',
       softwareVersionNumber: 2,
-      softwareVersionLetter: '',
-      keyColor: '',
-      aspectRatioNumerator: 0,
-      aspectRatioDenominator: 0,
-      gammaValueNumerator: 0,
-      gammaValueDenominator: 0,
-      colorCorrectionOffset: 0,
       postageStampOffset: 4140,
-      scanLineOffset: 0,
       attributesType: 0,
     },
     developerDirectory: []
   },
   'ccm8': {
     image: expectedColorImage,
-    details: {
-      identificationField: 'Truevision(R) Sample Image'
-    },
+    details: commonDetails,
     extensionArea: {
-      extensionSize: 495,
-      authorName: 'Ricky True',
+      ...commonExtensionArea,
       authorComments: 'Sample 8 bit run length compressed color mapped image',
       dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
-      jobName: 'TGA Utilities',
-      jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: 'TGAEdit',
       softwareVersionNumber: 2,
-      softwareVersionLetter: '',
-      keyColor: '',
-      aspectRatioNumerator: 0,
-      aspectRatioDenominator: 0,
-      gammaValueNumerator: 0,
-      gammaValueDenominator: 0,
-      colorCorrectionOffset: 0,
       postageStampOffset: 4652,
-      scanLineOffset: 0,
       attributesType: 0,
     },
     developerDirectory: []
   },
   'ctc24': {
     image: expectedColorImage,
-    details: {
-      identificationField: 'Truevision(R) Sample Image'
-    },
+    details: commonDetails,
     extensionArea: {
-      extensionSize: 495,
-      authorName: 'Ricky True',
+      ...commonExtensionArea,
       authorComments: 'Sample 24 bit run length compressed true color image',
       dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
-      jobName: 'TGA Utilities',
-      jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: 'TGAEdit',
       softwareVersionNumber: 2,
-      softwareVersionLetter: '',
-      keyColor: '',
-      aspectRatioNumerator: 0,
-      aspectRatioDenominator: 0,
-      gammaValueNumerator: 0,
-      gammaValueDenominator: 0,
-      colorCorrectionOffset: 0,
       postageStampOffset: 8236,
-      scanLineOffset: 0,
       attributesType: 0,
     },
     developerDirectory: []
   },
   'ubw8': {
     image: expectedGreyscaleImage,
-    details: {
-      identificationField: 'Truevision(R) Sample Image'
-    },
+    details: commonDetails,
     extensionArea: {
-      extensionSize: 495,
-      authorName: 'Ricky True',
+      ...commonExtensionArea,
       authorComments: 'Sample 8 bit uncompressed black and white image',
       dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
-      jobName: 'TGA Utilities',
-      jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: 'TGAEdit',
       softwareVersionNumber: 1.3,
-      softwareVersionLetter: '',
-      keyColor: '',
-      aspectRatioNumerator: 0,
-      aspectRatioDenominator: 0,
-      gammaValueNumerator: 0,
-      gammaValueDenominator: 0,
-      colorCorrectionOffset: 0,
       postageStampOffset: 16428,
-      scanLineOffset: 0,
       attributesType: 0,
     },
     developerDirectory: []
   },
   'ucm8': {
     image: expectedColorImage,
-    details: {
-      identificationField: 'Truevision(R) Sample Image'
-    },
+    details: commonDetails,
     extensionArea: {
-      extensionSize: 495,
-      authorName: 'Ricky True',
+      ...commonExtensionArea,
       authorComments: 'Sample 8 bit uncompressed color mapped image',
       dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-      jobName: 'TGA Utilities',
-      jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: 'TGAEdit',
       softwareVersionNumber: 1.4,
-      softwareVersionLetter: '',
-      keyColor: '',
-      aspectRatioNumerator: 0,
-      aspectRatioDenominator: 0,
-      gammaValueNumerator: 0,
-      gammaValueDenominator: 0,
-      colorCorrectionOffset: 0,
       postageStampOffset: 16940,
-      scanLineOffset: 0,
       attributesType: 0,
     },
     developerDirectory: []
   },
   'utc16': {
     image: expectedColorImage,
-    details: {
-      identificationField: 'Truevision(R) Sample Image'
-    },
+    details: commonDetails,
     extensionArea: {
-      extensionSize: 495,
-      authorName: 'Ricky True',
+      ...commonExtensionArea,
       authorComments: 'Sample 16 bit uncompressed true color image',
       dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
-      jobName: 'TGA Utilities',
-      jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: 'TGAEdit',
       softwareVersionNumber: 1.3,
-      softwareVersionLetter: '',
-      keyColor: '',
-      aspectRatioNumerator: 0,
-      aspectRatioDenominator: 0,
-      gammaValueNumerator: 0,
-      gammaValueDenominator: 0,
-      colorCorrectionOffset: 0,
       postageStampOffset: 32812,
-      scanLineOffset: 0,
       attributesType: 2,
     },
     developerDirectory: []
   },
   'utc24': {
     image: expectedColorImage,
-    details: {
-      identificationField: 'Truevision(R) Sample Image'
-    },
+    details: commonDetails,
     extensionArea: {
-      extensionSize: 495,
-      authorName: 'Ricky True',
+      ...commonExtensionArea,
       authorComments: 'Sample 24 bit uncompressed true color image',
       dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-      jobName: 'TGA Utilities',
-      jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: 'TGAEdit',
       softwareVersionNumber: 1.4,
-      softwareVersionLetter: '',
-      keyColor: '',
-      aspectRatioNumerator: 0,
-      aspectRatioDenominator: 0,
-      gammaValueNumerator: 0,
-      gammaValueDenominator: 0,
-      colorCorrectionOffset: 0,
       postageStampOffset: 49196,
-      scanLineOffset: 0,
       attributesType: 0,
     },
     developerDirectory: []
   },
   'utc32': {
     image: expectedColorImage,
-    details: {
-      identificationField: 'Truevision(R) Sample Image'
-    },
+    details: commonDetails,
     extensionArea: {
-      extensionSize: 495,
-      authorName: 'Ricky True',
+      ...commonExtensionArea,
       authorComments: 'Sample 32 bit uncompressed true color image',
       dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-      jobName: 'TGA Utilities',
-      jobTime: { hours: 0, minutes: 0, seconds: 0 },
-      softwareId: 'TGAEdit',
       softwareVersionNumber: 1.4,
-      softwareVersionLetter: '',
-      keyColor: '',
-      aspectRatioNumerator: 0,
-      aspectRatioDenominator: 0,
-      gammaValueNumerator: 0,
-      gammaValueDenominator: 0,
-      colorCorrectionOffset: 0,
       postageStampOffset: 65580,
-      scanLineOffset: 0,
       attributesType: 2,
     },
     developerDirectory: []

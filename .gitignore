@@ -4,4 +4,4 @@ out-test/
 node_modules/
 .nyc_output/
 test/conformance_suite
-test/fileformat
+test/fileformat_suite

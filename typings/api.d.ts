@@ -9,7 +9,7 @@ export function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions
 export interface IDecodedTga {
   image: IImage32;
   details: ITgaDetails;
-  extensionArea: IExtensionArea;
+  extensionArea: IExtensionArea | undefined;
   developerDirectory: IDeveloperDirectoryEntry[];
 }
 

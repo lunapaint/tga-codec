@@ -13,15 +13,13 @@ import { isValidBitDepth, isValidColorMapDepth, isValidImageType } from './valid
 
 const enum ImageDescriptorMask {
   AttributeBits    = 0b00001111,
-  Reserved         = 0b00010000,
-  ScreenOrigin     = 0b00100000,
+  ScreenOrigin     = 0b00110000,
   InterleavingFlag = 0b11000000
 }
 
 const enum ImageDescriptorShift {
   AttributeBits    = 0,
-  Reserved         = 4,
-  ScreenOrigin     = 5,
+  ScreenOrigin     = 4,
   InterleavingFlag = 6
 }
 
@@ -63,13 +61,12 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
   ctx.reader.offset = dataOffset;
   ctx.image = parseImageData(ctx, ctx.reader.offset);
 
-  // console.log('ctx', ctx);
   return {
     image: ctx.image,
     details: {
       identificationField: ctx.identificationField
     },
-    extensionArea: ctx.extensionArea!,
+    extensionArea: ctx.extensionArea,
     developerDirectory: ctx.developerDirectory
   };
 }
@@ -90,8 +87,8 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
     throw new DecodeError(ctx, `Invalid image type "${imageType}"`, ctx.reader.offset - 1);
   }
   if (colorMapType === ColorMapType.ColorMap &&
-      imageType !== ImageType.UncompressedColorMapped /*&&
-      imageType !== ImageType.RunLengthEncodedColorMapped*/) {
+      imageType !== ImageType.UncompressedColorMapped &&
+      imageType !== ImageType.RunLengthEncodedColorMapped) {
     handleWarning(ctx, new DecodeWarning(`Image type "${imageType}" cannot have a color map`, ctx.reader.offset - 2));
   }
   const colorMapOrigin = ctx.reader.readUint16();
@@ -116,10 +113,10 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   }
   const imageDescriptor = ctx.reader.readUint8();
   const attributeBitsPerPixel = imageDescriptor & ImageDescriptorMask.AttributeBits >> ImageDescriptorShift.AttributeBits;
-  const reserved = imageDescriptor & ImageDescriptorMask.Reserved >> ImageDescriptorShift.Reserved;
-  if (reserved !== 0) {
-    handleWarning(ctx, new DecodeWarning(`Reserved bit "${reserved}" is not zero`, 0x11));
-  }
+  // const reserved = imageDescriptor & ImageDescriptorMask.Reserved >> ImageDescriptorShift.Reserved;
+  // if (reserved !== 0) {
+  //   handleWarning(ctx, new DecodeWarning(`Reserved bit "${reserved}" is not zero`, 0x11));
+  // }
   const screenOrigin = (imageDescriptor & ImageDescriptorMask.ScreenOrigin >> ImageDescriptorShift.ScreenOrigin) as ScreenOrigin;
   const interleaving = (imageDescriptor & ImageDescriptorMask.InterleavingFlag >> ImageDescriptorShift.InterleavingFlag) as InterleavingFlag;
   return {
@@ -206,19 +203,31 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
         throw new Error('NYI'); // TODO: Implement
     }
   }
-  let imageOffset = 0;
+  // let imageOffset = 0;
   let view = ctx.reader.view;
   if (ctx.header.imageType & ImageTypeMask.RunLengthEncoded) {
     const decoded = decodeRunLengthEncoding(ctx);
     view = new DataView(decoded.buffer, decoded.byteOffset, decoded.length);
     offset = 0;
   }
-  for (let y = 0; y < image.height; y++) {
-    for (let x = 0; x < image.width; x++) {
-      offset += readPixel(ctx, image.data, imageOffset, view, offset);
-      imageOffset += 4;
+  // if (ctx.header.screenOrigin === ScreenOrigin.UpperLeft) {
+  //   let imageOffset = 0;
+  //   for (let y = 0; y < image.height; y++) {
+  //     for (let x = 0; x < image.width; x++) {
+  //       offset += readPixel(ctx, image.data, imageOffset, view, offset);
+  //       imageOffset += 4;
+  //     }
+  //   }
+  // } else {
+    let imageOffset = 0;
+    for (let y = image.height - 1; y >= 0; y--) {
+      imageOffset = ctx.header.height * y * 4;
+      for (let x = 0; x < image.width; x++) {
+        offset += readPixel(ctx, image.data, imageOffset, view, offset);
+        imageOffset += 4;
+      }
     }
-  }
+  // }
   return image;
 }
 
@@ -316,7 +325,10 @@ function readPixel32BitNoAlpha(ctx: ITgaDecodeContext, imageData: Uint8Array, im
   return 4;
 }
 
-function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea {
+function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined {
+  if (ctx.footer!.extensionAreaOffset === 0) {
+    return undefined;
+  }
   ctx.reader.offset = ctx.footer!.extensionAreaOffset;
   const extensionSize = ctx.reader.readUint16();
   if (extensionSize !== 495) {
@@ -403,8 +415,16 @@ function parseFooter(ctx: ITgaDecodeContext): ITgaFooterDetails {
   // The footer is the last 26 bytes of the file and importantly includes the offsets of the
   // extension area and developer directory
   ctx.reader.offset = ctx.reader.view.byteLength - 26;
-  const extensionAreaOffset = ctx.reader.readUint32();
-  const developerDirectoryOffset = ctx.reader.readUint32();
+  let extensionAreaOffset = ctx.reader.readUint32();
+  if (extensionAreaOffset >= ctx.reader.view.byteLength) {
+    handleWarning(ctx, new DecodeWarning(`Extension area offset "${extensionAreaOffset}" is invalid`, ctx.reader.offset - 4));
+    extensionAreaOffset = 0;
+  }
+  let developerDirectoryOffset = ctx.reader.readUint32();
+  if (developerDirectoryOffset >= ctx.reader.view.byteLength) {
+    handleWarning(ctx, new DecodeWarning(`Developer directory offset "${developerDirectoryOffset}" is invalid`, ctx.reader.offset - 4));
+    developerDirectoryOffset = 0;
+  }
   // TODO: Pull signature
   // TODO: Verify last 2 bytes
   return {
