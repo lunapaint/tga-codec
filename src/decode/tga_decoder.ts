@@ -112,9 +112,9 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
     throw new DecodeError(ctx, `Unsupported TGA bit depth "${bitDepth}" with image type ${imageType}`, 0x10);
   }
   const imageDescriptor = ctx.reader.readUint8();
-  const attributeBitsPerPixel = imageDescriptor & ImageDescriptorMask.AttributeBits >> ImageDescriptorShift.AttributeBits;
-  const screenOrigin = (imageDescriptor & ImageDescriptorMask.ScreenOrigin >> ImageDescriptorShift.ScreenOrigin) as ScreenOrigin;
-  const interleaving = (imageDescriptor & ImageDescriptorMask.InterleavingFlag >> ImageDescriptorShift.InterleavingFlag) as InterleavingFlag;
+  const attributeBitsPerPixel = (imageDescriptor & ImageDescriptorMask.AttributeBits) >> ImageDescriptorShift.AttributeBits;
+  const screenOrigin = ((imageDescriptor & ImageDescriptorMask.ScreenOrigin) >> ImageDescriptorShift.ScreenOrigin) as ScreenOrigin;
+  const interleaving = ((imageDescriptor & ImageDescriptorMask.InterleavingFlag) >> ImageDescriptorShift.InterleavingFlag) as InterleavingFlag;
   return {
     idLength,
     colorMapType,
@@ -206,15 +206,16 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
     view = new DataView(decoded.buffer, decoded.byteOffset, decoded.length);
     offset = 0;
   }
-  // if (ctx.header.screenOrigin === ScreenOrigin.UpperLeft) {
-  //   let imageOffset = 0;
-  //   for (let y = 0; y < image.height; y++) {
-  //     for (let x = 0; x < image.width; x++) {
-  //       offset += readPixel(ctx, image.data, imageOffset, view, offset);
-  //       imageOffset += 4;
-  //     }
-  //   }
-  // } else {
+  // TODO: Support upper/lower right
+  if (ctx.header.screenOrigin === ScreenOrigin.UpperLeft) {
+    let imageOffset = 0;
+    for (let y = 0; y < image.height; y++) {
+      for (let x = 0; x < image.width; x++) {
+        offset += readPixel(ctx, image.data, imageOffset, view, offset);
+        imageOffset += 4;
+      }
+    }
+  } else {
     let imageOffset = 0;
     for (let y = image.height - 1; y >= 0; y--) {
       imageOffset = ctx.header.height * y * 4;
@@ -223,7 +224,7 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
         imageOffset += 4;
       }
     }
-  // }
+  }
   return image;
 }
 
