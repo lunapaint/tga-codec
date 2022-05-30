@@ -4,12 +4,8 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { deepStrictEqual, strictEqual } from 'assert';
-import * as fs from 'fs';
-import { join } from 'path';
-import { decodeTga } from '../../out-dev/public/tga.js';
-import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
-import { dataArraysEqual } from '../shared/testUtil.js';
+import { IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
+import { createTests, ITestDecodedTga, repeatArray } from '../shared/testUtil.js';
 
 const suiteRoot = 'test/conformance_suite';
 
@@ -82,15 +78,7 @@ const commonExtensionArea: IExtensionArea = {
   attributesType: -1,
 };
 
-function repeatArray(array: number[], times: number): number[] {
-  const result: number[] = [];
-  for (let i = 0; i < times; i++) {
-    result.push(...array);
-  }
-  return result;
-}
-
-const testFiles: { [file: string]: IDecodedTga } = {
+const testFiles: { [file: string]: ITestDecodedTga } = {
   'cbw8': {
     image: expectedGreyscaleImage,
     details: commonDetails,
@@ -198,17 +186,5 @@ const testFiles: { [file: string]: IDecodedTga } = {
 };
 
 describe('conformance_suite', () => {
-  for (const file of Object.keys(testFiles)) {
-    it(file, async () => {
-      const data = new Uint8Array(await fs.promises.readFile(join(suiteRoot, `${file}.tga`)));
-      const result = await decodeTga(data, {});
-      const testSpec = testFiles[file];
-      strictEqual(result.image.width, testSpec.image.width);
-      strictEqual(result.image.height, testSpec.image.height);
-      dataArraysEqual(result.image.data, testSpec.image.data);
-      deepStrictEqual(result.details, testSpec.details);
-      deepStrictEqual(result.extensionArea, testSpec.extensionArea);
-      deepStrictEqual(result.developerDirectory, testSpec.developerDirectory);
-    });
-  }
+  createTests(suiteRoot, testFiles);
 });

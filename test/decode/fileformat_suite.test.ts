@@ -5,13 +5,8 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { deepStrictEqual, strictEqual } from 'assert';
-import * as fs from 'fs';
-import { join } from 'path';
-import { decodeTga } from '../../out-dev/public/tga.js';
-import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
-import { dataArraysEqual } from '../shared/testUtil.js';
-import { decodePng } from '@lunapaint/png-codec';
+import { IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
+import { createTests, ITestDecodedTga, repeatArray } from '../shared/testUtil.js';
 
 const suiteRoot = 'test/fileformat_suite';
 
@@ -83,21 +78,6 @@ const commonExtensionArea: IExtensionArea = {
   scanLineOffset: 0,
   attributesType: -1,
 };
-
-function repeatArray(array: number[], times: number): number[] {
-  const result: number[] = [];
-  for (let i = 0; i < times; i++) {
-    result.push(...array);
-  }
-  return result;
-}
-
-async function getPngImage(path: string): Promise<IImage32> {
-  const result = await decodePng(await fs.promises.readFile(path), { force32: true });
-  return result.image;
-}
-
-type ITestDecodedTga = Omit<IDecodedTga, 'image'> & { image: string | IImage32 };
 
 const testFiles: { [file: string]: ITestDecodedTga } = {
   'cbw8': {
@@ -336,18 +316,5 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
 };
 
 describe('fileformat_suite', () => {
-  for (const file of Object.keys(testFiles)) {
-    it(file, async () => {
-      const data = new Uint8Array(await fs.promises.readFile(join(suiteRoot, `${file}.tga`)));
-      const result = await decodeTga(data, {});
-      const testSpec = testFiles[file];
-      const expectedImage = typeof testSpec.image === 'string' ? await getPngImage(testSpec.image) : testSpec.image;
-      strictEqual(result.image.width, expectedImage.width);
-      strictEqual(result.image.height, expectedImage.height);
-      dataArraysEqual(result.image.data, expectedImage.data);
-      deepStrictEqual(result.details, testSpec.details);
-      deepStrictEqual(result.extensionArea, testSpec.extensionArea);
-      deepStrictEqual(result.developerDirectory, testSpec.developerDirectory);
-    });
-  }
+  createTests(suiteRoot, testFiles);
 });
