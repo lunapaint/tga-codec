@@ -18,6 +18,28 @@ async function getPngImage(path: string): Promise<IImage32> {
 
 export type ITestDecodedTga = Omit<IDecodedTga, 'image'> & { image: string | IImage32 };
 
+export function createTestsFromFolder(suiteRoot: string, expectedCount: number, skip: string[] = []) {
+  const tgaFiles = fs.readdirSync(suiteRoot)
+    .filter(e => e.endsWith('.tga'));
+  const tgaFilesWithoutSkipped = tgaFiles
+    .filter(e => !skip.includes(e.replace(/\.tga$/, '')));
+  const testFiles: { [file: string]: ITestDecodedTga } = {};
+  for (const fileName of tgaFilesWithoutSkipped) {
+    const withoutExtension = fileName.replace(/\.tga$/, '');
+    testFiles[withoutExtension] = {
+      image: `${suiteRoot}/${withoutExtension}.png`,
+      details: {
+        identificationField: ''
+      },
+      extensionArea: undefined,
+      developerDirectory: []
+    };
+  }
+  strictEqual(Object.keys(tgaFiles).length, expectedCount, 'Expected number of test files not present');
+
+  createTests(suiteRoot, testFiles);
+}
+
 export function createTests(suiteRoot: string, testFiles: { [file: string]: ITestDecodedTga }) {
   for (const file of Object.keys(testFiles)) {
     it(file, async () => {

@@ -7,4 +7,5 @@ test/conformance_suite
 test/fileformat_suite
 test/ftrvxmtrx_suite
 test/uwaterloo_suite
+test/tombexcavator_suite
 encoded/

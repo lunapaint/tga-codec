@@ -7,8 +7,16 @@
 
 import { createTestsFromFolder } from '../shared/testUtil.js';
 
-const suiteRoot = 'test/uwaterloo_suite';
+const suiteRoot = 'test/tombexcavator_suite';
 
-describe('uwaterloo_suite', () => {
-  createTestsFromFolder(suiteRoot, 32);
+describe('tombexcavator_suite', () => {
+  createTestsFromFolder(suiteRoot, 23, [
+    'rgb15',
+    'rgb15rle',
+    'rgb16',
+    'rgb16rle',
+    'rgb32',
+    'TGA_16_rle',
+    'TGA_16_uncompressed',
+  ]);
 });
