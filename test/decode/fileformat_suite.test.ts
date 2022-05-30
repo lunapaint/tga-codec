@@ -217,12 +217,155 @@ const testFiles: { [file: string]: IDecodedTga } = {
     extensionArea: undefined,
     developerDirectory: []
   },
-  // Uncompressed true color, 24 bit depth
+  // Uncompressed true color, 24 bit depth, origin 0
   'marbles': {
     image: {
       width: 1419,
       height: 1001,
       data: new Uint8Array(require(`../../test/fileformat_suite/marbles.json`))
+    },
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  'ubw8': {
+    image: expectedGreyscaleImage,
+    details: commonDetails,
+    extensionArea: {
+      ...commonExtensionArea,
+      authorComments: 'Sample 8 bit uncompressed black and white image',
+      dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
+      softwareVersionNumber: 1.3,
+      postageStampOffset: 16428,
+      attributesType: 0,
+    },
+    developerDirectory: []
+  },
+  'ucm8': {
+    image: expectedColorImage,
+    details: commonDetails,
+    extensionArea: {
+      ...commonExtensionArea,
+      authorComments: 'Sample 8 bit uncompressed color mapped image',
+      dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
+      softwareVersionNumber: 1.4,
+      postageStampOffset: 16940,
+      attributesType: 0,
+    },
+    developerDirectory: []
+  },
+  'utc16': {
+    image: expectedColorImage,
+    details: commonDetails,
+    extensionArea: {
+      ...commonExtensionArea,
+      authorComments: 'Sample 16 bit uncompressed true color image',
+      dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
+      softwareVersionNumber: 1.3,
+      postageStampOffset: 32812,
+      attributesType: 2,
+    },
+    developerDirectory: []
+  },
+  'utc24': {
+    image: expectedColorImage,
+    details: commonDetails,
+    extensionArea: {
+      ...commonExtensionArea,
+      authorComments: 'Sample 24 bit uncompressed true color image',
+      dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
+      softwareVersionNumber: 1.4,
+      postageStampOffset: 49196,
+      attributesType: 0,
+    },
+    developerDirectory: []
+  },
+  'utc32': {
+    image: expectedColorImage,
+    details: commonDetails,
+    extensionArea: {
+      ...commonExtensionArea,
+      authorComments: 'Sample 32 bit uncompressed true color image',
+      dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
+      softwareVersionNumber: 1.4,
+      postageStampOffset: 65580,
+      attributesType: 2,
+    },
+    developerDirectory: []
+  },
+  // Uncompressed true color, 16 bit depth, origin 0
+  'xing_b16': {
+    image: {
+      width: 240,
+      height: 164,
+      data: new Uint8Array(require(`../../test/fileformat_suite/xing_b16.json`))
+    },
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  // Uncompressed true color, 24 bit depth, origin 0
+  'xing_b24': {
+    image: {
+      width: 240,
+      height: 164,
+      data: new Uint8Array(require(`../../test/fileformat_suite/xing_b24.json`))
+    },
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  // Uncompressed true color, 32 bit depth, origin 0
+  'xing_b32': {
+    image: {
+      width: 240,
+      height: 164,
+      data: new Uint8Array(require(`../../test/fileformat_suite/xing_b32.json`))
+    },
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  // Uncompressed true color, 16 bit depth, origin 2
+  'xing_t16': {
+    image: {
+      width: 240,
+      height: 164,
+      data: new Uint8Array(require(`../../test/fileformat_suite/xing_t16.json`))
+    },
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  // Uncompressed true color, 24 bit depth, origin 2
+  'xing_t24': {
+    image: {
+      width: 240,
+      height: 164,
+      data: new Uint8Array(require(`../../test/fileformat_suite/xing_t24.json`))
+    },
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
+  // Uncompressed true color, 32 bit depth, origin 2
+  'xing_t32': {
+    image: {
+      width: 240,
+      height: 164,
+      data: new Uint8Array(require(`../../test/fileformat_suite/xing_t32.json`))
     },
     details: {
       identificationField: ''

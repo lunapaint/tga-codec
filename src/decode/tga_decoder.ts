@@ -268,31 +268,46 @@ function readPixel8BitGreyscale(ctx: ITgaDecodeContext, imageData: Uint8Array, i
   imageData[imageOffset + 3] = 255;
   return 1;
 }
-// The conversion from 5 bit to 8 bit color differs across editors, some naively shift the value
-// by 3 meaning the maximum channel value is 248 (`0b11111000`). The most correct approach seems
-// to be scaling the value to 0-255.
+
 let currentValue = 0;
+// The naive approach to decoding 15/16-bit values is to simply shift left by 3 but that would mean
+// the maximum value for any channel would be 248. Unfortunately the spec isn't clear on what to do
+// here so editors are inconsistent, however an approximation to scaling the value using using bit
+// math seems to be the ideal approach:
+//
+// Convert 5-bit values to 8 bit values by shifting left by 3 and adding it to the same value
+// shifted right by 2
+// 00000 -> 00000 << 3 | 00000 >> 2 = 00000000
+// 11000 -> 11000 << 3 | 11000 >> 2 = 11000110
+// 11111 -> 11111 << 3 | 11111 >> 2 = 11111111
 function readPixel15Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   currentValue = view.getUint16(viewOffset, true);
   // Bits stored as 0b_RRRRRGG 0bGGGBBBBB
-  imageData[imageOffset    ] = scaleToRange(currentValue >> 10 & 0x1f, 0x1f, 0xff);
-  imageData[imageOffset + 1] = scaleToRange(currentValue >>  5 & 0x1f, 0x1f, 0xff);
-  imageData[imageOffset + 2] = scaleToRange(currentValue       & 0x1f, 0x1f, 0xff);
+  // See explanation of this in readPixel15Bit
+  imageData[imageOffset    ] = currentValue >> 10 & 0x1f;
+  imageData[imageOffset + 1] = currentValue >>  5 & 0x1f;
+  imageData[imageOffset + 2] = currentValue       & 0x1f;
+  imageData[imageOffset    ] = (imageData[imageOffset    ] << 3) | (imageData[imageOffset    ] >> 2);
+  imageData[imageOffset + 1] = (imageData[imageOffset + 1] << 3) | (imageData[imageOffset + 1] >> 2);
+  imageData[imageOffset + 2] = (imageData[imageOffset + 2] << 3) | (imageData[imageOffset + 2] >> 2);
+  // Alpha
   imageData[imageOffset + 3] = 255;
   return 2;
 }
 function readPixel16Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   currentValue = view.getUint16(viewOffset, true);
   // Bits stored as 0bARRRRRGG 0bGGGBBBBB
-  imageData[imageOffset    ] = scaleToRange(currentValue >> 10 & 0x1f, 0x1f, 0xff);
-  imageData[imageOffset + 1] = scaleToRange(currentValue >>  5 & 0x1f, 0x1f, 0xff);
-  imageData[imageOffset + 2] = scaleToRange(currentValue       & 0x1f, 0x1f, 0xff);
+  // Get the 5-bit values first
+  imageData[imageOffset    ] = currentValue >> 10 & 0x1f;
+  imageData[imageOffset + 1] = currentValue >>  5 & 0x1f;
+  imageData[imageOffset + 2] = currentValue       & 0x1f;
+  // Convert to 8-bit values
+  imageData[imageOffset    ] = (imageData[imageOffset    ] << 3) | (imageData[imageOffset    ] >> 2);
+  imageData[imageOffset + 1] = (imageData[imageOffset + 1] << 3) | (imageData[imageOffset + 1] >> 2);
+  imageData[imageOffset + 2] = (imageData[imageOffset + 2] << 3) | (imageData[imageOffset + 2] >> 2);
+  // Alpha
   imageData[imageOffset + 3] = (1 - currentValue >> 15 & 0x01) * 255;
   return 2;
-}
-
-function scaleToRange(value: number, maxValue: number, scaledMax: number): number {
-  return Math.round((value / maxValue) * scaledMax);
 }
 
 function readPixel24Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
