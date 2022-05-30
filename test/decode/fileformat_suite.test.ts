@@ -217,6 +217,19 @@ const testFiles: { [file: string]: IDecodedTga } = {
     extensionArea: undefined,
     developerDirectory: []
   },
+  // Uncompressed true color, 24 bit depth
+  'marbles': {
+    image: {
+      width: 1419,
+      height: 1001,
+      data: new Uint8Array(require(`../../test/fileformat_suite/marbles.json`))
+    },
+    details: {
+      identificationField: ''
+    },
+    extensionArea: undefined,
+    developerDirectory: []
+  },
   // 'ccm8': {
   //   image: expectedColorImage,
   //   details: {
