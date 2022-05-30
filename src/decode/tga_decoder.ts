@@ -250,10 +250,9 @@ function decodeRunLengthEncoding(ctx: ITgaDecodeContext): Uint8Array {
       i += count * bytesPerPixel;
     } else {
       // Raw
-      byte = ctx.reader.readUint8();
       count *= bytesPerPixel;
       for (let k = 0; k < count; k++) {
-        result[i++] = byte;
+        result[i++] = ctx.reader.readUint8();
       }
     }
   }
