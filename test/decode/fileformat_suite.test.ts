@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
+import { DecodeWarning, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
 import { createTests, ITestDecodedTga, repeatArray } from '../shared/testUtil.js';
 
 const suiteRoot = 'test/tga-test-suite/fileformat';
@@ -163,14 +163,17 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'flag_b32': {
     image: `${suiteRoot}/flag_b32.png`,
-    // Different editors decode differently, we want to retain the RGB channel information but
-    // respect the attribute bits/type as declared in the file
-    detectAmbiguousAlphaChannel: true,
     details: {
       identificationField: ''
     },
     extensionArea: undefined,
-    developerDirectory: []
+    developerDirectory: [],
+    // Different editors decode differently, we want to retain the RGB channel information but
+    // respect the attribute bits/type as declared in the file
+    detectAmbiguousAlphaChannel: true,
+    warnings: [
+      { message: 'Image has ambiguous alpha and is fully transparent, alpha has been disabled', offset: -1 }
+    ]
   },
   'flag_t16': {
     image: `${suiteRoot}/flag_t16.png`,
@@ -182,14 +185,17 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'flag_t32': {
     image: `${suiteRoot}/flag_t32.png`,
-    // Different editors decode differently, we want to retain the RGB channel information but
-    // respect the attribute bits/type as declared in the file
-    detectAmbiguousAlphaChannel: true,
     details: {
       identificationField: ''
     },
     extensionArea: undefined,
-    developerDirectory: []
+    developerDirectory: [],
+    // Different editors decode differently, we want to retain the RGB channel information but
+    // respect the attribute bits/type as declared in the file
+    detectAmbiguousAlphaChannel: true,
+    warnings: [
+      { message: 'Image has ambiguous alpha and is fully transparent, alpha has been disabled', offset: -1 }
+    ]
   },
   // Uncompressed true color, 24 bit depth, origin 0
   'marbles': {
@@ -286,14 +292,17 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 32 bit depth, origin 0
   'xing_b32': {
     image: `${suiteRoot}/xing_b32.png`,
-    // Different editors decode differently, we want to retain the RGB channel information but
-    // respect the attribute bits/type as declared in the file
-    detectAmbiguousAlphaChannel: true,
     details: {
       identificationField: ''
     },
     extensionArea: undefined,
-    developerDirectory: []
+    developerDirectory: [],
+    // Different editors decode differently, we want to retain the RGB channel information but
+    // respect the attribute bits/type as declared in the file
+    detectAmbiguousAlphaChannel: true,
+    warnings: [
+      { message: 'Image has ambiguous alpha and is fully transparent, alpha has been disabled', offset: -1 }
+    ]
   },
   // Uncompressed true color, 16 bit depth, origin 2
   'xing_t16': {
@@ -316,14 +325,17 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 32 bit depth, origin 2
   'xing_t32': {
     image: `${suiteRoot}/xing_t32.png`,
-    // Different editors decode differently, we want to retain the RGB channel information but
-    // respect the attribute bits/type as declared in the file
-    detectAmbiguousAlphaChannel: true,
     details: {
       identificationField: ''
     },
     extensionArea: undefined,
-    developerDirectory: []
+    developerDirectory: [],
+    // Different editors decode differently, we want to retain the RGB channel information but
+    // respect the attribute bits/type as declared in the file
+    detectAmbiguousAlphaChannel: true,
+    warnings: [
+      { message: 'Image has ambiguous alpha and is fully transparent, alpha has been disabled', offset: -1 }
+    ]
   },
 };
 
