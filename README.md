@@ -18,5 +18,11 @@ Here are the details on what this codec supports:
   - The `attribute bits per pixel` in the `image descriptor` field is > 0, OR
   - The `bit depth` field in the header is 32, OR
   - A `color map` is defined and its `bit depth` is 32
-  - WHen there is no `color map` defined, if the `attributes type` field in the `extension area` is 0, 1 or 2
+  - When there is no `color map` defined, if the `attributes type` field in the `extension area` is 0, 1 or 2
 - TODO: Check with warning
+
+## References
+
+- https://www.dca.fee.unicamp.br/~martino/disciplinas/ea978/tgaffs.pdf
+- https://en.wikipedia.org/wiki/Truevision_TGA
+- http://www.paulbourke.net/dataformats/tga/

@@ -87,7 +87,8 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
       identificationField: ctx.identificationField
     },
     extensionArea: ctx.extensionArea,
-    developerDirectory: ctx.developerDirectory
+    developerDirectory: ctx.developerDirectory,
+    warnings: ctx.warnings
   };
 }
 

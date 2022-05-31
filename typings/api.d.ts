@@ -11,6 +11,7 @@ export interface IDecodedTga {
   details: ITgaDetails;
   extensionArea: IExtensionArea | undefined;
   developerDirectory: IDeveloperDirectoryEntry[];
+  warnings: DecodeWarning[];
 }
 
 /**
