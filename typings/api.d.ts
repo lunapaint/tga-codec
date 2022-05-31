@@ -17,11 +17,23 @@ export interface IDecodedTga {
 /**
  * A set of options to configure how decoding happens.
  */
- export interface IDecodeTgaOptions {
+export interface IDecodeTgaOptions {
   /**
    * Automatically convert 64-bit images (ie. 16 bit depth) to 32-bit images.
    */
   // force32?: boolean;
+
+
+  /**
+   * Since different TGA decoders behave slightly differently, sometimes images come out as 100%
+   * transparent. When this feature is enabled, any image with ambiguous alpha (when alpha is
+   * processed but attribute bits per pixel is 0) will be checked to see if the decoded image is
+   * 100% transparent and there is data in the rgb channels and if so will make the image fully
+   * opaque and will add a warning to {@link IDecodedTga.warnings}.
+   *
+   * This setting is ignored when in {@link IDecodeTgaOptions.strictMode}.
+   */
+  detectAmbiguousAlphaChannel?: boolean;
 
   /**
    * A list of optional chunk types to parse or `'*'` to parse all known chunk types. By default

@@ -165,7 +165,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     image: `${suiteRoot}/flag_b32.png`,
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
-    clearAlphaChannel: true,
+    detectAmbiguousAlphaChannel: true,
     details: {
       identificationField: ''
     },
@@ -184,7 +184,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     image: `${suiteRoot}/flag_t32.png`,
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
-    clearAlphaChannel: true,
+    detectAmbiguousAlphaChannel: true,
     details: {
       identificationField: ''
     },
@@ -288,7 +288,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     image: `${suiteRoot}/xing_b32.png`,
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
-    clearAlphaChannel: true,
+    detectAmbiguousAlphaChannel: true,
     details: {
       identificationField: ''
     },
@@ -318,7 +318,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     image: `${suiteRoot}/xing_t32.png`,
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
-    clearAlphaChannel: true,
+    detectAmbiguousAlphaChannel: true,
     details: {
       identificationField: ''
     },

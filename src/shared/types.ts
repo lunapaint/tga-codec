@@ -24,6 +24,7 @@ import {
 export interface ITgaBaseDecodeContext {
   image?: IImage32;
   hasAlpha: boolean;
+  ambiguousAlpha: boolean;
   reader: IByteStreamReader;
   warnings: DecodeWarning[];
   options: IDecodeTgaOptions;

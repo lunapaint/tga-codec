@@ -36,6 +36,7 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
   const initialCtx: ITgaInitialDecodeContext = {
     reader: new ByteStreamReader(data, true),
     hasAlpha: false,
+    ambiguousAlpha: false,
     options,
     warnings: []
   };
@@ -75,7 +76,11 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
     )
   );
 
-  // TODO: In an ambiguous alpha case, try guess if it should be used, if so use it with a warning
+  // The alpha channel is considered ambiguous when the image is determined to have alpha but its
+  // attribute bits per pixel is zero. Different decoders behave differently here, it's unclear what
+  // the right thing to do here but since this library is most interested in high compatibility,
+  // there is an option to sample the image for pixels that and
+  ctx.ambiguousAlpha = ctx.hasAlpha && ctx.header.attributeBitsPerPixel === 0;
 
   ctx.image = parseImageData(ctx, ctx.reader.offset);
 
@@ -244,6 +249,20 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
       for (let x = 0; x < image.width; x++) {
         offset += readPixel(ctx, image.data, imageOffset, view, offset);
         imageOffset += 4;
+      }
+    }
+  }
+  if (ctx.ambiguousAlpha && !ctx.options.strictMode && ctx.options.detectAmbiguousAlphaChannel) {
+    let hasOpacity = false;
+    for (let i = 3; i < image.width * image.height * 4; i += 4) {
+      if (image.data[i] > 0) {
+        hasOpacity = true;
+      }
+    }
+    if (!hasOpacity) {
+      handleWarning(ctx, new DecodeWarning('Image has ambiguous alpha and is fully transparent, alpha has been disabled', -1));
+      for (let i = 3; i < image.width * image.height * 4; i += 4) {
+        image.data[i] = 255;
       }
     }
   }
