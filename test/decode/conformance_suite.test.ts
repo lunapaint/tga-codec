@@ -7,7 +7,7 @@
 import { IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
 import { createTests, ITestDecodedTga, repeatArray } from '../shared/testUtil.js';
 
-const suiteRoot = 'test/conformance_suite';
+const suiteRoot = 'test/tga-test-suite/conformance';
 
 // All lines are this pattern repeated twice:
 // 8x red, 8x green, 8x blue, 8x black, 8x red, 8x green, 8x blue, 8x white
@@ -185,6 +185,6 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   }
 };
 
-describe('conformance_suite', () => {
+describe('tga-test-suite/conformance', () => {
   createTests(suiteRoot, testFiles);
 });

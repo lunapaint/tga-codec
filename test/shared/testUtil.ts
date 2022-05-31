@@ -54,8 +54,8 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       const result = await decodeTga(data, {});
 
       // Uncomment to write decoded tgas as pngs in the repo root
-      fs.mkdirSync('encoded', { recursive: true });
-      fs.writeFileSync(`encoded/${suiteRoot.replace(/\//g, '_')}_${file}.png`, (await (await encodePng(result.image)).data));
+      // fs.mkdirSync('encoded', { recursive: true });
+      // fs.writeFileSync(`encoded/${suiteRoot.replace(/\//g, '_')}_${file}.png`, (await (await encodePng(result.image)).data));
 
       const testSpec = testFiles[file];
       const expectedImage = typeof testSpec.image === 'string' ? await getPngImage(testSpec.image) : testSpec.image;

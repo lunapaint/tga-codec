@@ -5,15 +5,9 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { deepStrictEqual, strictEqual } from 'assert';
-import * as fs from 'fs';
-import { join } from 'path';
-import { decodeTga } from '../../out-dev/public/tga.js';
-import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
-import { createTests, dataArraysEqual, ITestDecodedTga } from '../shared/testUtil.js';
-import { decodePng, encodePng } from '@lunapaint/png-codec';
+import { createTests, ITestDecodedTga } from '../shared/testUtil.js';
 
-const suiteRoot = 'test/ftrvxmtrx_suite';
+const suiteRoot = 'test/tga-test-suite/ftrvxmtrx';
 
 const testFiles: { [file: string]: ITestDecodedTga } = {
   'monochrome8_bottom_left': {
@@ -106,6 +100,6 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
 };
 
-describe('ftrvxmtrx_suite', () => {
+describe('tga-test-suite/ftrvxmtrx', () => {
   createTests(suiteRoot, testFiles);
 });

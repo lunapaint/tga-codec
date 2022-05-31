@@ -8,7 +8,7 @@
 import { IExtensionArea } from '../../typings/api.js';
 import { createTestsFromFolder } from '../shared/testUtil.js';
 
-const suiteRoot = 'test/tombexcavator_suite';
+const suiteRoot = 'test/tga-test-suite/tombexcavator';
 
 const commonExtensionArea: IExtensionArea = {
   aspectRatioDenominator: 0,
@@ -35,7 +35,7 @@ const commonExtensionArea: IExtensionArea = {
   softwareVersionNumber: 0.32
 };
 
-describe('tombexcavator_suite', () => {
+describe('tga-test-suite/tombexcavator', () => {
   createTestsFromFolder(suiteRoot, 23, {
     allowOneOffError: [
       // Decoders struggle with these files, ImageMagick ended up being used to convert it TGA which

@@ -8,7 +8,7 @@
 import { IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
 import { createTests, ITestDecodedTga, repeatArray } from '../shared/testUtil.js';
 
-const suiteRoot = 'test/fileformat_suite';
+const suiteRoot = 'test/tga-test-suite/fileformat';
 
 // All lines are this pattern repeated twice:
 // 8x red, 8x green, 8x blue, 8x black, 8x red, 8x green, 8x blue, 8x white
@@ -146,7 +146,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     developerDirectory: []
   },
   'flag_b16': {
-    image: `test/fileformat_suite/flag_b16.png`,
+    image: `${suiteRoot}/flag_b16.png`,
     details: {
       identificationField: ''
     },
@@ -154,7 +154,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     developerDirectory: []
   },
   'flag_b24': {
-    image: `test/fileformat_suite/flag_b24.png`,
+    image: `${suiteRoot}/flag_b24.png`,
     details: {
       identificationField: ''
     },
@@ -162,7 +162,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     developerDirectory: []
   },
   'flag_b32': {
-    image: `test/fileformat_suite/flag_b32.png`,
+    image: `${suiteRoot}/flag_b32.png`,
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
     clearAlphaChannel: true,
@@ -173,7 +173,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     developerDirectory: []
   },
   'flag_t16': {
-    image: `test/fileformat_suite/flag_t16.png`,
+    image: `${suiteRoot}/flag_t16.png`,
     details: {
       identificationField: ''
     },
@@ -181,7 +181,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
     developerDirectory: []
   },
   'flag_t32': {
-    image: `test/fileformat_suite/flag_t32.png`,
+    image: `${suiteRoot}/flag_t32.png`,
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
     clearAlphaChannel: true,
@@ -193,7 +193,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   // Uncompressed true color, 24 bit depth, origin 0
   'marbles': {
-    image: `test/fileformat_suite/marbles.png`,
+    image: `${suiteRoot}/marbles.png`,
     details: {
       identificationField: ''
     },
@@ -267,7 +267,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   // Uncompressed true color, 16 bit depth, origin 0
   'xing_b16': {
-    image: `test/fileformat_suite/xing_b16.png`,
+    image: `${suiteRoot}/xing_b16.png`,
     details: {
       identificationField: ''
     },
@@ -276,7 +276,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   // Uncompressed true color, 24 bit depth, origin 0
   'xing_b24': {
-    image: `test/fileformat_suite/xing_b24.png`,
+    image: `${suiteRoot}/xing_b24.png`,
     details: {
       identificationField: ''
     },
@@ -285,7 +285,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   // Uncompressed true color, 32 bit depth, origin 0
   'xing_b32': {
-    image: `test/fileformat_suite/xing_b32.png`,
+    image: `${suiteRoot}/xing_b32.png`,
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
     clearAlphaChannel: true,
@@ -297,7 +297,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   // Uncompressed true color, 16 bit depth, origin 2
   'xing_t16': {
-    image: `test/fileformat_suite/xing_t16.png`,
+    image: `${suiteRoot}/xing_t16.png`,
     details: {
       identificationField: ''
     },
@@ -306,7 +306,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   // Uncompressed true color, 24 bit depth, origin 2
   'xing_t24': {
-    image: `test/fileformat_suite/xing_t24.png`,
+    image: `${suiteRoot}/xing_t24.png`,
     details: {
       identificationField: ''
     },
@@ -315,7 +315,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   // Uncompressed true color, 32 bit depth, origin 2
   'xing_t32': {
-    image: `test/fileformat_suite/xing_t32.png`,
+    image: `${suiteRoot}/xing_t32.png`,
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
     clearAlphaChannel: true,
@@ -327,6 +327,6 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
 };
 
-describe('fileformat_suite', () => {
+describe('tga-test-suite/fileformat', () => {
   createTests(suiteRoot, testFiles);
 });
