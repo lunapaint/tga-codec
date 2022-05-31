@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-export function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions): Promise<IDecodedTga>;
+export function decodeTga(data: Readonly<Uint8Array>, options?: IDecodeTgaOptions): Promise<IDecodedTga>;
 
 export interface IDecodedTga {
   image: IImage32;
