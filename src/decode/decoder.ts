@@ -105,7 +105,7 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
       colorMapTypeRaw === ColorMapType.ColorMap) {
     colorMapType = colorMapTypeRaw;
   } else {
-    // TODO: Info color map type, treat as no color map
+    handleWarning(ctx, new DecodeWarning('Color map type unrecognized', ctx.reader.offset - 1));
     colorMapType = ColorMapType.Unrecognized;
   }
   const imageType = ctx.reader.readUint8() as ImageType;
@@ -222,11 +222,8 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
           readPixel = readPixel32BitNoAlpha;
         }
         break;
-      default:
-        throw new Error('NYI'); // TODO: Implement
     }
   }
-  // let imageOffset = 0;
   let view = ctx.reader.view;
   if (ctx.header.imageType & ImageTypeMask.RunLengthEncoded) {
     const decoded = decodeRunLengthEncoding(ctx);
@@ -393,7 +390,6 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
   ctx.reader.offset = ctx.footer!.extensionAreaOffset;
   const extensionSize = ctx.reader.readUint16();
   if (extensionSize !== 495) {
-    // TODO: Should this be info instead?
     handleWarning(ctx, new DecodeWarning('TGA file is a version other than v2', ctx.reader.offset - 2));
   }
   const authorName = readText(ctx, undefined, 41);
@@ -412,9 +408,7 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
   const colorCorrectionOffset = ctx.reader.readUint32();
   const postageStampOffset = ctx.reader.readUint32();
   const scanLineOffset = ctx.reader.readUint32();
-  // TODO: Improve support for alpha in attributesType
   const attributesType = ctx.reader.readUint8();
-  // TODO: Warn on unassigned or reserved attributes type
   // TODO: Scan line table
   // TODO: Postage stamp image
   // TODO: Color correction table
