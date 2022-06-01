@@ -11,5 +11,5 @@ import { IDecodedTga, IDecodeTgaOptions } from '../shared/types.js';
 // imports so the bare minimum code is loaded when code splitting is enabled.
 
 export async function decodeTga(data: Readonly<Uint8Array>, options?: IDecodeTgaOptions): Promise<IDecodedTga> {
-  return (await import('../decode/tga_decoder.js')).decodeTga(data, options);
+  return (await import('../decode/decoder.js')).decodeTga(data, options);
 }
