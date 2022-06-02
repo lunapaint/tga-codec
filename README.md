@@ -1,5 +1,18 @@
 # @lunapaint/tga-codec
 
+This is a TGA decoder library for JavaScript that runs in both the browser and in Node.js. It is used in [Luna Paint](https://marketplace.visualstudio.com/items?itemName=Tyriar.luna-paint) (an image editor for VS Code) to work with TGA files.
+
+You can try it out on [`vscode.dev`](https://vscode.dev/) by installing the Luna Paint extension and opening a tga file.
+
+## Features
+
+- **Performance**: Just like Luna Paint, performance is a priority.
+- **Correctness**: The library has a suite of TGA files it tests against, if you have a TGA file that cannot be opened please create an issue.
+- **Simple API**: The API is a well documented [TypeScript declaration file](https://github.dev/lunapaint/tga-codec/blob/main/typings/api.d.ts).
+- **Compatibility**: Some TGA files have ambiguous alpha channels which is why they open correctly in some editors and are transparent in others. These issues can be detected with the `detectAmbiguousAlphaChannel` option.
+- **Readable Codebase**: A big part of this was a learning exercise for me so I put some effort in to make the code as readable as possible to help others on the same journey.
+- **Error tolerant**: Images will still load with warnings unless a critical error is hit.
+
 ## Decoder support details
 
 While writing this codec I became aware that other TGA decoders are inconsistent, don't handle seemingly common cases and the spec is ambiguous. Some examples of these issues:
