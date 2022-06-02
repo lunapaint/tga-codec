@@ -230,8 +230,10 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
     view = new DataView(decoded.buffer, decoded.byteOffset, decoded.length);
     offset = 0;
   }
-  // TODO: Support upper/lower right
-  if (ctx.header.screenOrigin === ScreenOrigin.UpperLeft) {
+  // While the spec does define TopRight and BottomRight, these are basically never used and
+  // seemingly never supported to save by image editors. It's also very difficult to find sample
+  // files to test against.
+  if (ctx.header.screenOrigin === ScreenOrigin.TopLeft) {
     let imageOffset = 0;
     for (let y = 0; y < image.height; y++) {
       for (let x = 0; x < image.width; x++) {
