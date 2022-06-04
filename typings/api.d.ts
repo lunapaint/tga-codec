@@ -131,27 +131,17 @@ export interface IExtensionArea {
    */
   keyColor: Uint8Array | undefined;
   /**
-   * The numerator of the pixel aspect ratio for when it is important to preserve the proper aspect
-   * ratio of the saved image. If this is the same as {@link aspectRatioDenominator} it means the
-   * image is composed of square pixels.
+   * The pixel aspect ratio when it is important to preserve the proper aspect ratio of the saved
+   * image. If this is undefined it means the aspect ratio was not specified and is composed of
+   * square pixels.
    */
-  aspectRatioNumerator: number;
+  aspectRatio: number | undefined;
   /**
-   * The denominator of the pixel aspect ratio for when it is important to preserve the proper
-   * aspect ratio of the saved image. If this is zero or the same as {@link aspectRatioNumerator} it
-   * means the image is composed of square pixels.
+   * The gamma value which can be used to correct the image. If this is 1.0 gamma was _specified_
+   * but there is no gamma value. If this is undefined no gamma value was specified and should be
+   * treated the same as no gamma value.
    */
-  aspectRatioDenominator: number;
-  /**
-   * The numberator of a fractional gamma value which can be used to correct the image. If this is
-   * the same as {@link gammaValueDenominator} it means the image has no gamma value (ie. 1.0).
-   */
-  gammaValueNumerator: number;
-  /**
-   * If this is zero or the same as {@link gammaValueNumerator} it means the image has no gamma
-   * value (ie. 1.0).
-   */
-  gammaValueDenominator: number;
+  gamma: number | undefined;
   /**
    * The byte offset of the color correction table, this is currently not decoded.
    */

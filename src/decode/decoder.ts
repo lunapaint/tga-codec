@@ -423,8 +423,20 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
   }
   const aspectRatioNumerator = ctx.reader.readUint16();
   const aspectRatioDenominator = ctx.reader.readUint16();
-  const gammaValueNumerator = ctx.reader.readUint16();
-  const gammaValueDenominator = ctx.reader.readUint16();
+  let aspectRatio: number | undefined;
+  if (aspectRatioDenominator === 0) {
+    aspectRatio = undefined;
+  } else {
+    aspectRatio = aspectRatioNumerator / aspectRatioDenominator;
+  }
+  const gammaNumerator = ctx.reader.readUint16();
+  const gammaDenominator = ctx.reader.readUint16();
+  let gamma: number | undefined;
+  if (gammaDenominator === 0) {
+    gamma = undefined;
+  } else {
+    gamma = gammaNumerator / gammaDenominator;
+  }
   const colorCorrectionOffset = ctx.reader.readUint32();
   const postageStampOffset = ctx.reader.readUint32();
   const scanLineOffset = ctx.reader.readUint32();
@@ -439,10 +451,8 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
     softwareId,
     softwareVersion,
     keyColor,
-    aspectRatioNumerator,
-    aspectRatioDenominator,
-    gammaValueNumerator,
-    gammaValueDenominator,
+    aspectRatio,
+    gamma,
     colorCorrectionOffset,
     postageStampOffset,
     scanLineOffset,

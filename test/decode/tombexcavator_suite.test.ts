@@ -11,16 +11,14 @@ import { createTestsFromFolder } from '../shared/testUtil.js';
 const suiteRoot = 'test/tga-test-suite/tombexcavator';
 
 const commonExtensionArea: IExtensionArea = {
-  aspectRatioDenominator: 0,
-  aspectRatioNumerator: 0,
+  aspectRatio: undefined,
   attributesType: 0,
   authorComments: undefined,
   authorName: undefined,
   colorCorrectionOffset: 0,
   dateTimestamp: undefined,
   extensionSize: 495,
-  gammaValueDenominator: 0,
-  gammaValueNumerator: 0,
+  gamma: undefined,
   jobName: undefined,
   jobTime: undefined,
   keyColor: undefined,
