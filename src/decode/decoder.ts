@@ -89,7 +89,11 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
   return {
     image: ctx.image,
     details: {
-      identificationField: ctx.identificationField
+      identificationField: ctx.identificationField,
+      width: ctx.image.width,
+      height: ctx.image.height,
+      developerDirectoryOffset: ctx.footer.developerDirectoryOffset,
+      extensionAreaOffset: ctx.footer.extensionAreaOffset,
     },
     extensionArea: ctx.extensionArea,
     developerDirectory: ctx.developerDirectory,
@@ -402,6 +406,7 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
   const softwareId = readText(ctx, undefined, 41);
   const softwareVersionNumber = ctx.reader.readUint8() / 100;
   const softwareVersionLetter = readText(ctx, undefined, 2);
+  // TODO: This should be a number[]
   const keyColor = readText(ctx, undefined, 4);
   const aspectRatioNumerator = ctx.reader.readUint16();
   const aspectRatioDenominator = ctx.reader.readUint16();
@@ -414,6 +419,7 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
   // TODO: Scan line table
   // TODO: Postage stamp image
   // TODO: Color correction table
+  // TODO: Handle optional extension area properties better
   return {
     extensionSize,
     authorName,
