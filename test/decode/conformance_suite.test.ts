@@ -54,7 +54,7 @@ const expectedGreyscaleImage: IImage32 = {
 };
 
 const commonDetails: Partial<ITgaDetails> = {
-  identificationField: 'Truevision(R) Sample Image'
+  imageId: 'Truevision(R) Sample Image'
 };
 
 const commonExtensionArea: IExtensionArea = {

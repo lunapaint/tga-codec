@@ -55,7 +55,7 @@ const expectedGreyscaleImage: IImage32 = {
 };
 
 const commonDetails: Partial<ITgaDetails> = {
-  identificationField: 'Truevision(R) Sample Image'
+  imageId: 'Truevision(R) Sample Image'
 };
 
 const commonExtensionArea: IExtensionArea = {
@@ -145,7 +145,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'flag_b16': {
     image: `${suiteRoot}/flag_b16.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -153,7 +153,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'flag_b24': {
     image: `${suiteRoot}/flag_b24.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -161,7 +161,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'flag_b32': {
     image: `${suiteRoot}/flag_b32.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: [],
@@ -175,7 +175,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'flag_t16': {
     image: `${suiteRoot}/flag_t16.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -183,7 +183,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'flag_t32': {
     image: `${suiteRoot}/flag_t32.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: [],
@@ -198,7 +198,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'marbles': {
     image: `${suiteRoot}/marbles.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -272,7 +272,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'xing_b16': {
     image: `${suiteRoot}/xing_b16.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -281,7 +281,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'xing_b24': {
     image: `${suiteRoot}/xing_b24.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -290,7 +290,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'xing_b32': {
     image: `${suiteRoot}/xing_b32.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: [],
@@ -305,7 +305,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'xing_t16': {
     image: `${suiteRoot}/xing_t16.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -314,7 +314,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'xing_t24': {
     image: `${suiteRoot}/xing_t24.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -323,7 +323,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'xing_t32': {
     image: `${suiteRoot}/xing_t32.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: [],

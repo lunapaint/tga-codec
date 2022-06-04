@@ -13,7 +13,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'monochrome8_bottom_left': {
     image: `${suiteRoot}/monochrome8_bottom_left.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -22,7 +22,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'monochrome8_bottom_left_rle': {
     image: `${suiteRoot}/monochrome8_bottom_left_rle.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -31,7 +31,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'monochrome16_top_left': {
     image: `${suiteRoot}/monochrome16_top_left.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -41,7 +41,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'monochrome16_top_left_rle': {
     image: `${suiteRoot}/monochrome16_top_left_rle.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -49,7 +49,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb24_bottom_left_rle': {
     image: `${suiteRoot}/rgb24_bottom_left_rle.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -57,7 +57,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb24_top_left': {
     image: `${suiteRoot}/rgb24_top_left.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -65,7 +65,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb24_top_left_colormap': {
     image: `${suiteRoot}/rgb24_top_left_colormap.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -74,7 +74,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb32_top_left_rle': {
     image: `${suiteRoot}/rgb32_top_left_rle.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -83,7 +83,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb32_bottom_left': {
     image: `${suiteRoot}/rgb32_bottom_left.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []
@@ -93,7 +93,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb32_top_left_rle_colormap': {
     image: `${suiteRoot}/rgb32_top_left_rle_colormap.png`,
     details: {
-      identificationField: ''
+      imageId: ''
     },
     extensionArea: undefined,
     developerDirectory: []

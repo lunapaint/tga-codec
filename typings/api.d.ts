@@ -25,6 +25,7 @@ export interface IDecodedTga {
    */
   image: IImage32;
 
+  // TODO: Split into ITgaHeader and ITgaFooter sections, move ImageId into header and make a note it's not technically part of the header
   /**
    * Details about the image, this is mostly useful internally as they are used to decode the image.
    * However, these could be presented in an image viewer.
@@ -207,7 +208,7 @@ export interface ITgaDetails {
   /**
    * Optional identifying information about the image.
    */
-  identificationField: string;
+  imageId: string;
   /**
    * The byte offset of the {@link IDecodedTga.extensionArea}.
    */

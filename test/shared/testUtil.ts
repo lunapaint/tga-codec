@@ -35,7 +35,7 @@ export function createTestsFromFolder(suiteRoot: string, expectedCount: number, 
     testFiles[withoutExtension] = {
       image: `${suiteRoot}/${withoutExtension}.png`,
       details: {
-        identificationField: '',
+        imageId: '',
         width: undefined,
         height: undefined
       },
@@ -83,8 +83,8 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       } else {
         dataArraysEqual(result.image.data, expectedImage.data);
       }
-      if (testSpec.details.identificationField) {
-        strictEqual(result.details.identificationField, testSpec.details.identificationField);
+      if (testSpec.details.imageId) {
+        strictEqual(result.details.imageId, testSpec.details.imageId);
       }
       if (testSpec.details.width) {
         strictEqual(result.details.width, testSpec.details.width);

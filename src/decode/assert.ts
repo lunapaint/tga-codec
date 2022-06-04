@@ -17,7 +17,7 @@ export class DecodeError extends Error {
     super(message);
     this.partiallyDecodedImage = {
       details: {
-        identificationField: ctx.identificationField,
+        imageId: ctx.identificationField,
         width: ctx.header?.width,
         height: ctx.header?.height,
       },
