@@ -4,13 +4,56 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
+/**
+ * Decodes a TGA file.
+ *
+ * @param data The complete TGA file data to decode.
+ * @param options Options to configure how decoding happens.
+ *
+ * @throws A {@link DecodeError} when an error is encountered or a {@link DecodeWarning} when a
+ * warning is encountered in strict mode. In Typescript, `instanceof` can be used to narrow the type
+ * safely.
+ */
 export function decodeTga(data: Readonly<Uint8Array>, options?: IDecodeTgaOptions): Promise<IDecodedTga>;
 
+/**
+ * A TGA that has been successfully decoded.
+ */
 export interface IDecodedTga {
+  /**
+   * The image dimensions and data.
+   */
   image: IImage32;
+
+  /**
+   * Details about the image, this is mostly useful internally as they are used to decode the image.
+   * However, these could be presented in an image viewer.
+   */
   details: ITgaDetails;
+
+  /**
+   * The {@link IExtensionArea} of the TGA file if it exists.
+   */
   extensionArea: IExtensionArea | undefined;
+
+  /**
+   * Developer directory entries in the TGA file.
+   */
   developerDirectory: IDeveloperDirectoryEntry[];
+
+  /**
+   * Any warnings that were encountered during decoding. Warnings are generally safe to ignore, here
+   * are some examples:
+   *
+   * - The image was determined to have ambigous alpha when
+   * {@link IDecodeTgaOptions.detectAmbiguousAlphaChannel} was set.
+   * - Unexpected field values encountered that have fallbacks like an unrecognized color map type
+   * which gets treated as a regular color map.
+   * - Invalid offset values
+   *
+   * Strict mode can be enabled via {@link IDecodeTgaOptions.strictMode} which will throw an error when
+   * any warning is encountered.
+   */
   warnings: DecodeWarning[];
 }
 
@@ -164,10 +207,25 @@ export interface IDeveloperDirectoryEntry {
  * Details about the TGA.
  */
 export interface ITgaDetails {
+  /**
+   * The width of the image.
+   */
   width: number;
+  /**
+   * The height of the image.
+   */
   height: number;
+  /**
+   * Optional identifying information about the image.
+   */
   identificationField: string;
+  /**
+   * The byte offset of the {@link IDecodedTga.extensionArea}.
+   */
   extensionAreaOffset?: number;
+  /**
+   * The byte offset of the {@link IDecodedTga.developerDirectory}.
+   */
   developerDirectoryOffset?: number;
 }
 
