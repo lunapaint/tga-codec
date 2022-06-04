@@ -8,7 +8,7 @@ import { deepStrictEqual, fail, strictEqual } from 'assert';
 import * as fs from 'fs';
 import { decodeTga } from '../../out-dev/public/tga.js';
 import { decodePng, encodePng } from '@lunapaint/png-codec';
-import { IDecodedTga, IExtensionArea, IImage32 } from '../../typings/api.js';
+import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
 import { join } from 'path';
 
 async function getPngImage(path: string): Promise<IImage32> {
@@ -16,7 +16,8 @@ async function getPngImage(path: string): Promise<IImage32> {
   return result.image;
 }
 
-export type ITestDecodedTga = Omit<IDecodedTga, 'image' | 'warnings'> & {
+export type ITestDecodedTga = Omit<IDecodedTga, 'image' | 'warnings' | 'details'> & {
+  details: Partial<ITgaDetails>;
   image: string | IImage32;
   warnings?: { message: string, offset: number }[];
   detectAmbiguousAlphaChannel?: boolean;
@@ -34,7 +35,9 @@ export function createTestsFromFolder(suiteRoot: string, expectedCount: number, 
     testFiles[withoutExtension] = {
       image: `${suiteRoot}/${withoutExtension}.png`,
       details: {
-        identificationField: ''
+        identificationField: '',
+        width: undefined,
+        height: undefined
       },
       extensionArea: options?.extensionArea ? options.extensionArea[withoutExtension] : undefined,
       developerDirectory: []
@@ -80,7 +83,15 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       } else {
         dataArraysEqual(result.image.data, expectedImage.data);
       }
-      deepStrictEqual(result.details, testSpec.details);
+      if (testSpec.details.identificationField) {
+        strictEqual(result.details.identificationField, testSpec.details.identificationField);
+      }
+      if (testSpec.details.width) {
+        strictEqual(result.details.width, testSpec.details.width);
+      }
+      if (testSpec.details.height) {
+        strictEqual(result.details.height, testSpec.details.height);
+      }
       deepStrictEqual(result.extensionArea, testSpec.extensionArea);
       deepStrictEqual(result.developerDirectory, testSpec.developerDirectory);
       if (testSpec.warnings) {

@@ -124,13 +124,16 @@ export interface IExtensionArea {
    * appended to the {@link softwareVersionNumber} (eg. 1.17b).
    */
   softwareVersionLetter: string;
-  // TODO: This should be a number[]
   /**
-   * The key color can be thought of as the 'background color' or 'transparent color'. This could be
-   * used in image viewers for example to select an idea background color. This library will decode
-   * this field but it's left up to the embedding application to use it if applicable.
+   * The key color as an array in [r, g, b, a] format. The key color can be thought of as the
+   * 'background color' or 'transparent color'. This could be used in image viewers for example to
+   * select an idea background color. This library will decode this field but it's left up to the
+   * embedding application to use it if applicable.
+   *
+   * When this is undefined it means all values were 0 which should be treated the same as black
+   * according to the specification.
    */
-  keyColor: string;
+  keyColor: Uint8Array | undefined;
   /**
    * The numerator of the pixel aspect ratio for when it is important to preserve the proper aspect
    * ratio of the saved image. If this is the same as {@link aspectRatioDenominator} it means the

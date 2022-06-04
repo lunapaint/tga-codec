@@ -27,7 +27,7 @@ const commonExtensionArea: IExtensionArea = {
     minutes: 0,
     seconds: 0
   },
-  keyColor: '',
+  keyColor: undefined,
   postageStampOffset: 0,
   scanLineOffset: 19119,
   softwareId: 'Handmade Software, Inc. Image Alchemy   ',

@@ -406,8 +406,17 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
   const softwareId = readText(ctx, undefined, 41);
   const softwareVersionNumber = ctx.reader.readUint8() / 100;
   const softwareVersionLetter = readText(ctx, undefined, 2);
-  // TODO: This should be a number[]
-  const keyColor = readText(ctx, undefined, 4);
+  const keyColorA = ctx.reader.readUint8();
+  const keyColorR = ctx.reader.readUint8();
+  const keyColorG = ctx.reader.readUint8();
+  const keyColorB = ctx.reader.readUint8();
+  let keyColor: Uint8Array | undefined;
+  if (keyColorA === 0 && keyColorR === 0 && keyColorG === 0 && keyColorB === 0) {
+    keyColor = undefined;
+  } else {
+    // The API exposes all colors as rgba
+    keyColor = new Uint8Array([keyColorR, keyColorG, keyColorB, keyColorA]);
+  }
   const aspectRatioNumerator = ctx.reader.readUint16();
   const aspectRatioDenominator = ctx.reader.readUint16();
   const gammaValueNumerator = ctx.reader.readUint16();

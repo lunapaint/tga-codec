@@ -53,7 +53,7 @@ const expectedGreyscaleImage: IImage32 = {
   data: new Uint8Array(repeatArray(expectedGreyscaleImageLine, 128))
 };
 
-const commonDetails: ITgaDetails = {
+const commonDetails: Partial<ITgaDetails> = {
   identificationField: 'Truevision(R) Sample Image'
 };
 
@@ -67,7 +67,7 @@ const commonExtensionArea: IExtensionArea = {
   softwareId: 'TGAEdit',
   softwareVersionNumber: -1,
   softwareVersionLetter: '',
-  keyColor: '',
+  keyColor: undefined,
   aspectRatioNumerator: 0,
   aspectRatioDenominator: 0,
   gammaValueNumerator: 0,
