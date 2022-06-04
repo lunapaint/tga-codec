@@ -144,7 +144,6 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
   const imageDescriptor = ctx.reader.readUint8();
   const attributeBitsPerPixel = (imageDescriptor & ImageDescriptorMask.AttributeBits) >> ImageDescriptorShift.AttributeBits;
   const screenOrigin = ((imageDescriptor & ImageDescriptorMask.ScreenOrigin) >> ImageDescriptorShift.ScreenOrigin) as ScreenOrigin;
-  const interleaving = ((imageDescriptor & ImageDescriptorMask.InterleavingFlag) >> ImageDescriptorShift.InterleavingFlag) as InterleavingFlag;
   return {
     idLength,
     colorMapType,
@@ -159,8 +158,7 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
     bitDepth,
     imageDescriptor,
     attributeBitsPerPixel,
-    screenOrigin,
-    interleaving
+    screenOrigin
   };
 }
 

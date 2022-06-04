@@ -5,6 +5,7 @@
  */
 
 import { ITgaDecodeContext } from '../shared/types';
+import { DecodeWarning, handleWarning } from './assert.js';
 
 export function readText(ctx: ITgaDecodeContext, textDecoder: TextDecoder | undefined, maxLength: number, isCompressed?: boolean): string {
   const bytes = [];
@@ -16,8 +17,7 @@ export function readText(ctx: ITgaDecodeContext, textDecoder: TextDecoder | unde
       current = ctx.reader.view.getUint8(ctx.reader.offset);
     } catch (e: unknown) {
       if (e instanceof Error && e.message === 'Offset is outside the bounds of the DataView') {
-        // TODO: Warn
-        // throw createChunkDecodeWarning(chunk, 'EOF while reading text', offset);
+        handleWarning(ctx, new DecodeWarning('EOF while reading text', ctx.reader.offset));
       }
       throw e;
     }
