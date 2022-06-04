@@ -19,12 +19,6 @@ export interface IDecodedTga {
  */
 export interface IDecodeTgaOptions {
   /**
-   * Automatically convert 64-bit images (ie. 16 bit depth) to 32-bit images.
-   */
-  // force32?: boolean;
-
-
-  /**
    * Since different TGA decoders behave slightly differently, sometimes images come out as 100%
    * transparent. When this feature is enabled, any image with ambiguous alpha (when alpha is
    * processed but attribute bits per pixel is 0) will be checked to see if the decoded image is
@@ -34,13 +28,6 @@ export interface IDecodeTgaOptions {
    * This setting is ignored when in {@link IDecodeTgaOptions.strictMode}.
    */
   detectAmbiguousAlphaChannel?: boolean;
-
-  /**
-   * A list of optional chunk types to parse or `'*'` to parse all known chunk types. By default
-   * only the chunk types required to extract the image data is parsed for performance reasons, if a
-   * chunk type is of use this option can be used to do that.
-   */
-  // parseChunkTypes?: OptionalParsedChunkTypes[] | '*';
 
   /**
    * Enables strict mode which will throw an error when the first warning is encountered. Strict
@@ -79,6 +66,8 @@ export interface IDeveloperDirectoryEntry {
 }
 
 export interface ITgaDetails {
+  width: number;
+  height: number;
   identificationField: string;
 }
 
@@ -103,10 +92,9 @@ export class DecodeError extends Error {
   offset: number;
 
   /**
-   * The partially decoded image which gives access to deocde warnings, dimensions, etc.
+   * The partially decoded image which gives access to decode warnings, dimensions, etc.
    */
-  // TODO: Export
-  // partiallyDecodedImage: Partial<IDecodedTga>;
+  partiallyDecodedImage: Partial<Exclude<IDecodedTga, 'details'> & { details: Partial<ITgaDetails> }>;
 }
 
 /**

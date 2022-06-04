@@ -4,25 +4,27 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { ITgaDecodeContext, ITgaInitialDecodeContext } from '../shared/types.js';
+import { ITgaDetails } from '../../typings/api.js';
+import { IDecodedTga, ITgaDecodeContext, ITgaInitialDecodeContext } from '../shared/types.js';
 
 export class DecodeError extends Error {
-  // readonly partiallyDecodedImage: Partial<IDecodedTga>;
+  readonly partiallyDecodedImage: Partial<Omit<IDecodedTga, 'details'> & { details: Partial<ITgaDetails> }>;
   constructor(
     ctx: ITgaInitialDecodeContext | ITgaDecodeContext,
     message: string,
     readonly offset: number
   ) {
     super(message);
-    // TODO: Set partial decoded
-    // this.partiallyDecodedImage = {
-    //   details: ('header' in ctx && ctx.header) ? {
-    //     width: ctx.header.width,
-    //     height: ctx.header.height,
-    //   } : undefined,
-    //   info: ctx.info,
-    //   warnings: ctx.warnings
-    // };
+    this.partiallyDecodedImage = {
+      details: {
+        identificationField: ctx.identificationField,
+        width: ctx.header?.width,
+        height: ctx.header?.height,
+      },
+      developerDirectory: ctx.developerDirectory,
+      extensionArea: ctx.extensionArea,
+      warnings: ctx.warnings
+    };
   }
 }
 
