@@ -94,36 +94,32 @@ export interface IExtensionArea {
   /**
    * The name of the person who created the image.
    */
-  authorName: string;
+  authorName: string | undefined;
   /**
    * Comments of the author.
    */
-  authorComments: string;
+  authorComments: string | undefined;
   /**
    * The date and time when the image was saved.
    */
-  dateTimestamp: Date;
+  dateTimestamp: Date | undefined;
   /**
    * The name of the job, allowing the author to tie images with jobs.
    */
-  jobName: string;
+  jobName: string | undefined;
   /**
    * A running total of the amount of time invested in a particular image.
    */
-  jobTime: { hours: number, minutes: number, seconds: number };
+  jobTime: { hours: number, minutes: number, seconds: number } | undefined;
   /**
    * The program the image was created within.
    */
-  softwareId: string;
+  softwareId: string | undefined;
   /**
-   * The version number of the program used to create the image, possible rage is 0 to 2.55.
+   * The version number of the program used to create the image as a number followed by a letter.
+   * Possible range is <0 to 2.55><letter> (eg. 1.17b).
    */
-  softwareVersionNumber: number;
-  /**
-   * The version letter of the program used to create the image, if specified this should be
-   * appended to the {@link softwareVersionNumber} (eg. 1.17b).
-   */
-  softwareVersionLetter: string;
+  softwareVersion: string | undefined;
   /**
    * The key color as an array in [r, g, b, a] format. The key color can be thought of as the
    * 'background color' or 'transparent color'. This could be used in image viewers for example to

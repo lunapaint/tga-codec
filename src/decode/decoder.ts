@@ -396,14 +396,20 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
   if (extensionSize !== 495) {
     handleWarning(ctx, new DecodeWarning('TGA file is a version other than v2', ctx.reader.offset - 2));
   }
-  const authorName = readText(ctx, undefined, 41);
-  const authorComments = readText(ctx, undefined, 324);
+  const authorName = readText(ctx, undefined, 41).trim() || undefined;
+  const authorComments = readText(ctx, undefined, 324).trim() || undefined;
   const dateTimestamp = readDateTimestamp(ctx);
-  const jobName = readText(ctx, undefined, 41);
+  const jobName = readText(ctx, undefined, 41).trim() || undefined;
   const jobTime = readTimestamp(ctx);
-  const softwareId = readText(ctx, undefined, 41);
+  const softwareId = readText(ctx, undefined, 41).trim() || undefined;
   const softwareVersionNumber = ctx.reader.readUint8() / 100;
   const softwareVersionLetter = readText(ctx, undefined, 2);
+  let softwareVersion: string | undefined;
+  if (softwareVersionNumber === 0 && (softwareVersionLetter === ' ' || softwareVersionLetter.length === 0)) {
+    softwareVersion = undefined;
+  } else {
+    softwareVersion = `${softwareVersionNumber}${softwareVersionLetter}`;
+  }
   const keyColorA = ctx.reader.readUint8();
   const keyColorR = ctx.reader.readUint8();
   const keyColorG = ctx.reader.readUint8();
@@ -423,10 +429,6 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
   const postageStampOffset = ctx.reader.readUint32();
   const scanLineOffset = ctx.reader.readUint32();
   const attributesType = ctx.reader.readUint8();
-  // TODO: Scan line table
-  // TODO: Postage stamp image
-  // TODO: Color correction table
-  // TODO: Handle optional extension area properties better
   return {
     extensionSize,
     authorName,
@@ -435,8 +437,7 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
     jobName,
     jobTime,
     softwareId,
-    softwareVersionNumber,
-    softwareVersionLetter,
+    softwareVersion,
     keyColor,
     aspectRatioNumerator,
     aspectRatioDenominator,
@@ -465,20 +466,26 @@ function parseDeveloperDirectory(ctx: ITgaDecodeContext): IDeveloperDirectoryEnt
   return directory;
 }
 
-function readDateTimestamp(ctx: ITgaDecodeContext): Date {
+function readDateTimestamp(ctx: ITgaDecodeContext): Date | undefined {
   const month = ctx.reader.readUint16();
   const day = ctx.reader.readUint16();
   const year = ctx.reader.readUint16();
   const hour = ctx.reader.readUint16();
   const minute = ctx.reader.readUint16();
   const second = ctx.reader.readUint16();
+  if (month === 0 && day === 0 && year === 0 && hour === 0 && minute === 0 && second === 0) {
+    return undefined;
+  }
   return new Date(year, month, day, hour, minute, second);
 }
 
-function readTimestamp(ctx: ITgaDecodeContext): { hours: number, minutes: number, seconds: number } {
+function readTimestamp(ctx: ITgaDecodeContext): { hours: number, minutes: number, seconds: number } | undefined {
   const hours = ctx.reader.readUint16();
   const minutes = ctx.reader.readUint16();
   const seconds = ctx.reader.readUint16();
+  if (hours === 0 && minutes === 0 && seconds === 0) {
+    return undefined;
+  }
   return { hours, minutes, seconds };
 }
 

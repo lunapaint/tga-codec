@@ -14,25 +14,20 @@ const commonExtensionArea: IExtensionArea = {
   aspectRatioDenominator: 0,
   aspectRatioNumerator: 0,
   attributesType: 0,
-  authorComments: '',
-  authorName: '',
+  authorComments: undefined,
+  authorName: undefined,
   colorCorrectionOffset: 0,
-  dateTimestamp: new Date('1899-12-31T08:00:00.000Z'),
+  dateTimestamp: undefined,
   extensionSize: 495,
   gammaValueDenominator: 0,
   gammaValueNumerator: 0,
-  jobName: '',
-  jobTime: {
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  },
+  jobName: undefined,
+  jobTime: undefined,
   keyColor: undefined,
   postageStampOffset: 0,
   scanLineOffset: 19119,
-  softwareId: 'Handmade Software, Inc. Image Alchemy   ',
-  softwareVersionLetter: '',
-  softwareVersionNumber: 0.32
+  softwareId: 'Handmade Software, Inc. Image Alchemy',
+  softwareVersion: '0.32'
 };
 
 describe('tga-test-suite/tombexcavator', () => {
@@ -48,7 +43,7 @@ describe('tga-test-suite/tombexcavator', () => {
       'rgb15': {
         ...commonExtensionArea,
         scanLineOffset: 79715,
-        softwareVersionNumber: 0
+        softwareVersion: undefined
       },
       'rgb15rle': commonExtensionArea,
       'rgb16rle': commonExtensionArea,
