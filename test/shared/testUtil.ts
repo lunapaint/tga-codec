@@ -8,7 +8,7 @@ import { deepStrictEqual, fail, strictEqual } from 'assert';
 import * as fs from 'fs';
 import { decodeTga } from '../../out-dev/public/tga.js';
 import { decodePng, encodePng } from '@lunapaint/png-codec';
-import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
+import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails, ITgaDetails2 } from '../../typings/api.js';
 import { join } from 'path';
 
 async function getPngImage(path: string): Promise<IImage32> {
@@ -16,8 +16,9 @@ async function getPngImage(path: string): Promise<IImage32> {
   return result.image;
 }
 
-export type ITestDecodedTga = Omit<IDecodedTga, 'image' | 'warnings' | 'details' | 'footer' | 'header'> & {
-  details: Partial<ITgaDetails>;
+// TODO: Require more details in tests
+export type ITestDecodedTga = Omit<IDecodedTga, 'image' | 'warnings' | 'details' | 'footer' | 'header' | 'details2' | 'extensionArea' | 'developerDirectory'> & {
+  details2: Partial<ITgaDetails2>;
   image: string | IImage32;
   warnings?: { message: string, offset: number }[];
   detectAmbiguousAlphaChannel?: boolean;
@@ -34,13 +35,10 @@ export function createTestsFromFolder(suiteRoot: string, expectedCount: number, 
     const withoutExtension = fileName.replace(/\.tga$/, '');
     testFiles[withoutExtension] = {
       image: `${suiteRoot}/${withoutExtension}.png`,
-      details: {
-        imageId: '',
-        width: undefined,
-        height: undefined
-      },
-      extensionArea: options?.extensionArea ? options.extensionArea[withoutExtension] : undefined,
-      developerDirectory: []
+      details2: {
+        extensionArea: options?.extensionArea ? options.extensionArea[withoutExtension] : undefined,
+        developerDirectory: []
+      }
     };
     if (options?.allowOneOffError?.includes(withoutExtension)) {
       testFiles[withoutExtension].allowOneOffError = true;
@@ -83,17 +81,21 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       } else {
         dataArraysEqual(result.image.data, expectedImage.data);
       }
-      if (testSpec.details.imageId) {
-        strictEqual(result.details.imageId, testSpec.details.imageId);
+      if (testSpec.details2.imageId) {
+        strictEqual(result.details2.imageId, testSpec.details2.imageId);
       }
-      if (testSpec.details.width) {
-        strictEqual(result.details.width, testSpec.details.width);
+      if (testSpec.details2.header?.width) {
+        strictEqual(result.details2.header.width, testSpec.details2.header.width);
       }
-      if (testSpec.details.height) {
-        strictEqual(result.details.height, testSpec.details.height);
+      if (testSpec.details2.header?.height) {
+        strictEqual(result.details2.header.height, testSpec.details2.header.height);
       }
-      deepStrictEqual(result.extensionArea, testSpec.extensionArea);
-      deepStrictEqual(result.developerDirectory, testSpec.developerDirectory);
+      if (testSpec.details2.extensionArea) {
+        deepStrictEqual(result.details2.extensionArea, testSpec.details2.extensionArea);
+      }
+      if (testSpec.details2.developerDirectory) {
+        deepStrictEqual(result.details2.developerDirectory, testSpec.details2.developerDirectory);
+      }
       if (testSpec.warnings) {
         deepStrictEqual(result.warnings.map(e => ({ message: e.message, offset: e.offset })), testSpec.warnings);
       }

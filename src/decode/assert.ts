@@ -5,10 +5,10 @@
  */
 
 import { ITgaDetails } from '../../typings/api.js';
-import { IDecodedTga, ITgaDecodeContext, ITgaInitialDecodeContext } from '../shared/types.js';
+import { IDecodedTga, ITgaDecodeContext, ITgaDetails2, ITgaInitialDecodeContext } from '../shared/types.js';
 
 export class DecodeError extends Error {
-  readonly partiallyDecodedImage: Partial<Omit<IDecodedTga, 'details'> & { details: Partial<ITgaDetails> }>;
+  readonly partiallyDecodedImage: Partial<Omit<IDecodedTga, 'details2'> & { details2: Partial<ITgaDetails2> }>;
   constructor(
     ctx: ITgaInitialDecodeContext | ITgaDecodeContext,
     message: string,
@@ -16,13 +16,13 @@ export class DecodeError extends Error {
   ) {
     super(message);
     this.partiallyDecodedImage = {
-      details: {
+      details2: {
+        header: ctx.header,
+        footer: ctx.footer,
         imageId: ctx.identificationField,
-        width: ctx.header?.width,
-        height: ctx.header?.height,
+        developerDirectory: ctx.developerDirectory,
+        extensionArea: ctx.extensionArea,
       },
-      developerDirectory: ctx.developerDirectory,
-      extensionArea: ctx.extensionArea,
       warnings: ctx.warnings
     };
   }

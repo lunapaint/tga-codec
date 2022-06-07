@@ -12,6 +12,7 @@ export {
   IDecodeTgaOptions,
   IImage32,
   ImageType,
+  ITgaDetails2,
   ITgaFooter,
   ITgaHeader,
   ScreenOrigin,

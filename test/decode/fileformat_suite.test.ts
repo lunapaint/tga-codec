@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { DecodeWarning, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
+import { DecodeWarning, IExtensionArea, IImage32, ITgaDetails, ITgaHeader } from '../../typings/api.js';
 import { createTests, ITestDecodedTga, repeatArray } from '../shared/testUtil.js';
 
 const suiteRoot = 'test/tga-test-suite/fileformat';
@@ -54,10 +54,7 @@ const expectedGreyscaleImage: IImage32 = {
   data: new Uint8Array(repeatArray(expectedGreyscaleImageLine, 128))
 };
 
-const commonDetails: Partial<ITgaDetails> = {
-  imageId: 'Truevision(R) Sample Image'
-};
-
+const commonImageId = 'Truevision(R) Sample Image';
 const commonExtensionArea: IExtensionArea = {
   extensionSize: 495,
   authorName: 'Ricky True',
@@ -76,95 +73,145 @@ const commonExtensionArea: IExtensionArea = {
   attributesType: -1,
 };
 
+// TODO: Test other header properties
+const commonHeader: Pick<ITgaHeader, 'width' | 'height'> = {
+  width: 128,
+  height: 128
+};
+
 const testFiles: { [file: string]: ITestDecodedTga } = {
   'cbw8': {
     image: expectedGreyscaleImage,
-    details: commonDetails,
-    extensionArea: {
-      ...commonExtensionArea,
-      authorComments: 'Sample 8 bit run length compressed black and white image',
-      dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
-      softwareVersion: '2',
-      postageStampOffset: 4140,
-      attributesType: 0,
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: commonImageId,
+      extensionArea: {
+        ...commonExtensionArea,
+        authorComments: 'Sample 8 bit run length compressed black and white image',
+        dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
+        softwareVersion: '2',
+        postageStampOffset: 4140,
+        attributesType: 0,
+      },
+      developerDirectory: [],
     },
-    developerDirectory: []
   },
   'ccm8': {
     image: expectedColorImage,
-    details: commonDetails,
-    extensionArea: {
-      ...commonExtensionArea,
-      authorComments: 'Sample 8 bit run length compressed color mapped image',
-      dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
-      softwareVersion: '2',
-      postageStampOffset: 4652,
-      attributesType: 0,
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: commonImageId,
+      extensionArea: {
+        ...commonExtensionArea,
+        authorComments: 'Sample 8 bit run length compressed color mapped image',
+        dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
+        softwareVersion: '2',
+        postageStampOffset: 4652,
+        attributesType: 0,
+      },
+      developerDirectory: [],
     },
-    developerDirectory: []
   },
   'ctc16': {
     image: expectedColorImage,
-    details: commonDetails,
-    extensionArea: {
-      ...commonExtensionArea,
-      authorComments: 'Sample 16 bit run length compressed true color image',
-      dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
-      softwareVersion: '2',
-      postageStampOffset: 6188,
-      attributesType: 2,
+    details2: {
+      // TODO: Test all headers
+      // header: {
+      //   ...commonHeader
+      // },
+      // TODO: Test all footers
+      footer: undefined,
+      imageId: commonImageId,
+      extensionArea: {
+        ...commonExtensionArea,
+        authorComments: 'Sample 16 bit run length compressed true color image',
+        dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
+        softwareVersion: '2',
+        postageStampOffset: 6188,
+        attributesType: 2,
+      },
+      developerDirectory: [],
     },
-    developerDirectory: []
   },
   'ctc24': {
     image: expectedColorImage,
-    details: commonDetails,
-    extensionArea: {
-      ...commonExtensionArea,
-      authorComments: 'Sample 24 bit run length compressed true color image',
-      dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
-      softwareVersion: '2',
-      postageStampOffset: 8236,
-      attributesType: 0,
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: commonImageId,
+      extensionArea: {
+        ...commonExtensionArea,
+        authorComments: 'Sample 24 bit run length compressed true color image',
+        dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
+        softwareVersion: '2',
+        postageStampOffset: 8236,
+        attributesType: 0,
+      },
+      developerDirectory: [],
     },
-    developerDirectory: []
   },
   'ctc32': {
     image: expectedColorImage,
-    details: commonDetails,
-    extensionArea: {
-      ...commonExtensionArea,
-      authorComments: 'Sample 32 bit run length compressed true color image',
-      dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
-      softwareVersion: '2',
-      postageStampOffset: 10284,
-      attributesType: 2,
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: commonImageId,
+      extensionArea: {
+        ...commonExtensionArea,
+        authorComments: 'Sample 32 bit run length compressed true color image',
+        dateTimestamp: new Date('1990-04-24T17:00:00.000Z'),
+        softwareVersion: '2',
+        postageStampOffset: 10284,
+        attributesType: 2,
+      },
+      developerDirectory: [],
     },
-    developerDirectory: []
   },
   'flag_b16': {
     image: `${suiteRoot}/flag_b16.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: []
   },
   'flag_b24': {
     image: `${suiteRoot}/flag_b24.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: []
   },
   'flag_b32': {
     image: `${suiteRoot}/flag_b32.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: [],
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
     detectAmbiguousAlphaChannel: true,
@@ -174,19 +221,27 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'flag_t16': {
     image: `${suiteRoot}/flag_t16.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: []
   },
   'flag_t32': {
     image: `${suiteRoot}/flag_t32.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: [],
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
     detectAmbiguousAlphaChannel: true,
@@ -197,103 +252,149 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 24 bit depth, origin 0
   'marbles': {
     image: `${suiteRoot}/marbles.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: []
   },
   'ubw8': {
     image: expectedGreyscaleImage,
-    details: commonDetails,
-    extensionArea: {
-      ...commonExtensionArea,
-      authorComments: 'Sample 8 bit uncompressed black and white image',
-      dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
-      softwareVersion: '1.3',
-      postageStampOffset: 16428,
-      attributesType: 0,
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: commonImageId,
+      extensionArea: {
+        ...commonExtensionArea,
+        authorComments: 'Sample 8 bit uncompressed black and white image',
+        dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
+        softwareVersion: '1.3',
+        postageStampOffset: 16428,
+        attributesType: 0,
+      },
+      developerDirectory: [],
     },
-    developerDirectory: []
   },
   'ucm8': {
     image: expectedColorImage,
-    details: commonDetails,
-    extensionArea: {
-      ...commonExtensionArea,
-      authorComments: 'Sample 8 bit uncompressed color mapped image',
-      dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-      softwareVersion: '1.4',
-      postageStampOffset: 16940,
-      attributesType: 0,
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: commonImageId,
+      extensionArea: {
+        ...commonExtensionArea,
+        authorComments: 'Sample 8 bit uncompressed color mapped image',
+        dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
+        softwareVersion: '1.4',
+        postageStampOffset: 16940,
+        attributesType: 0,
+      },
+      developerDirectory: [],
     },
-    developerDirectory: []
   },
   'utc16': {
     image: expectedColorImage,
-    details: commonDetails,
-    extensionArea: {
-      ...commonExtensionArea,
-      authorComments: 'Sample 16 bit uncompressed true color image',
-      dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
-      softwareVersion: '1.3',
-      postageStampOffset: 32812,
-      attributesType: 2,
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: commonImageId,
+      extensionArea: {
+        ...commonExtensionArea,
+        authorComments: 'Sample 16 bit uncompressed true color image',
+        dateTimestamp: new Date('1990-03-23T18:00:00.000Z'),
+        softwareVersion: '1.3',
+        postageStampOffset: 32812,
+        attributesType: 2,
+      },
+      developerDirectory: [],
     },
-    developerDirectory: []
   },
   'utc24': {
     image: expectedColorImage,
-    details: commonDetails,
-    extensionArea: {
-      ...commonExtensionArea,
-      authorComments: 'Sample 24 bit uncompressed true color image',
-      dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-      softwareVersion: '1.4',
-      postageStampOffset: 49196,
-      attributesType: 0,
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: commonImageId,
+      extensionArea: {
+        ...commonExtensionArea,
+        authorComments: 'Sample 24 bit uncompressed true color image',
+        dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
+        softwareVersion: '1.4',
+        postageStampOffset: 49196,
+        attributesType: 0,
+      },
+      developerDirectory: [],
     },
-    developerDirectory: []
   },
   'utc32': {
     image: expectedColorImage,
-    details: commonDetails,
-    extensionArea: {
-      ...commonExtensionArea,
-      authorComments: 'Sample 32 bit uncompressed true color image',
-      dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
-      softwareVersion: '1.4',
-      postageStampOffset: 65580,
-      attributesType: 2,
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: commonImageId,
+      extensionArea: {
+        ...commonExtensionArea,
+        authorComments: 'Sample 32 bit uncompressed true color image',
+        dateTimestamp: new Date('1990-03-24T18:00:00.000Z'),
+        softwareVersion: '1.4',
+        postageStampOffset: 65580,
+        attributesType: 2,
+      },
+      developerDirectory: [],
     },
-    developerDirectory: []
   },
   // Uncompressed true color, 16 bit depth, origin 0
   'xing_b16': {
     image: `${suiteRoot}/xing_b16.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: []
   },
   // Uncompressed true color, 24 bit depth, origin 0
   'xing_b24': {
     image: `${suiteRoot}/xing_b24.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: []
   },
   // Uncompressed true color, 32 bit depth, origin 0
   'xing_b32': {
     image: `${suiteRoot}/xing_b32.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: [],
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
     detectAmbiguousAlphaChannel: true,
@@ -304,29 +405,41 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 16 bit depth, origin 2
   'xing_t16': {
     image: `${suiteRoot}/xing_t16.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: []
   },
   // Uncompressed true color, 24 bit depth, origin 2
   'xing_t24': {
     image: `${suiteRoot}/xing_t24.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: []
   },
   // Uncompressed true color, 32 bit depth, origin 2
   'xing_t32': {
     image: `${suiteRoot}/xing_t32.png`,
-    details: {
-      imageId: ''
+    details2: {
+      // header: {
+      //   ...commonHeader
+      // },
+      footer: undefined,
+      imageId: '',
+      extensionArea: undefined,
+      developerDirectory: [],
     },
-    extensionArea: undefined,
-    developerDirectory: [],
     // Different editors decode differently, we want to retain the RGB channel information but
     // respect the attribute bits/type as declared in the file
     detectAmbiguousAlphaChannel: true,

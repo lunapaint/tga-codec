@@ -87,17 +87,13 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
 
   return {
     image: ctx.image,
-    details: {
+    details2: {
+      header: ctx.header,
       imageId: ctx.identificationField,
-      width: ctx.image.width,
-      height: ctx.image.height,
-      developerDirectoryOffset: ctx.footer.developerDirectoryOffset,
-      extensionAreaOffset: ctx.footer.extensionAreaOffset,
+      footer: ctx.footer,
+      extensionArea: ctx.extensionArea,
+      developerDirectory: ctx.developerDirectory,
     },
-    header: ctx.header,
-    footer: ctx.footer,
-    extensionArea: ctx.extensionArea,
-    developerDirectory: ctx.developerDirectory,
     warnings: ctx.warnings
   };
 }

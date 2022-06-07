@@ -25,26 +25,28 @@ export interface IDecodedTga {
    */
   image: IImage32;
 
+  details2: ITgaDetails2;
+
   // TODO: Split into ITgaHeader and ITgaFooter sections, move ImageId into header and make a note it's not technically part of the header
   /**
    * Details about the image, this is mostly useful internally as they are used to decode the image.
    * However, these could be presented in an image viewer.
    */
-  details: ITgaDetails;
+  // details: ITgaDetails;
 
-  header: ITgaHeader;
+  // header: ITgaHeader;
 
-  footer: ITgaFooter | undefined;
+  // footer: ITgaFooter | undefined;
 
-  /**
-   * The {@link IExtensionArea} of the TGA file if it exists.
-   */
-  extensionArea: IExtensionArea | undefined;
+  // /**
+  //  * The {@link IExtensionArea} of the TGA file if it exists.
+  //  */
+  // extensionArea: IExtensionArea | undefined;
 
-  /**
-   * Developer directory entries in the TGA file.
-   */
-  developerDirectory: IDeveloperDirectoryEntry[];
+  // /**
+  //  * Developer directory entries in the TGA file.
+  //  */
+  // developerDirectory: IDeveloperDirectoryEntry[];
 
   /**
    * Any warnings that were encountered during decoding. Warnings are generally safe to ignore, here
@@ -93,10 +95,10 @@ export interface ITgaDetails2 {
    *
    * Field, 0-255 bytes
    */
-  imageId: string;
-  footer: ITgaFooter;
-  extensionArea: IExtensionArea;
-  developerDirectory: IDeveloperDirectoryEntry[];
+  imageId?: string;
+  footer?: ITgaFooter;
+  extensionArea?: IExtensionArea;
+  developerDirectory?: IDeveloperDirectoryEntry[];
 }
 
 export interface ITgaHeader {
