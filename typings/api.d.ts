@@ -101,6 +101,8 @@ export interface ITgaDetails2 {
   developerDirectory?: IDeveloperDirectoryEntry[];
 }
 
+// TODO: Move color map into object
+// TODO: Move origin into object
 export interface ITgaHeader {
   /**
    * The length in bytes of the image ID (field 6).

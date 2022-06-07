@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { DecodeWarning, IExtensionArea, IImage32, ITgaDetails, ITgaHeader } from '../../typings/api.js';
+import { ColorMapType, DecodeWarning, IExtensionArea, IImage32, ImageType, ITgaDetails, ITgaHeader, ScreenOrigin } from '../../typings/api.js';
 import { createTests, ITestDecodedTga, repeatArray } from '../shared/testUtil.js';
 
 const suiteRoot = 'test/tga-test-suite/fileformat';
@@ -74,18 +74,32 @@ const commonExtensionArea: IExtensionArea = {
 };
 
 // TODO: Test other header properties
-const commonHeader: Pick<ITgaHeader, 'width' | 'height'> = {
+const commonHeader: ITgaHeader = {
+  idLength: 26,
+  colorMapType: ColorMapType.NoColorMap,
+  imageType: ImageType.NoImageData,
+  colorMapOrigin: 0,
+  colorMapLength: 0,
+  colorMapDepth: 0,
+  xOrigin: 0,
+  yOrigin: 0,
   width: 128,
-  height: 128
+  height: 128,
+  bitDepth: 0 as any,
+  imageDescriptor: 0,
+  attributeBitsPerPixel: 0,
+  screenOrigin: ScreenOrigin.BottomLeft,
 };
 
 const testFiles: { [file: string]: ITestDecodedTga } = {
   'cbw8': {
     image: expectedGreyscaleImage,
     details2: {
-      // header: {
-      //   ...commonHeader
-      // },
+      header: {
+        ...commonHeader,
+        imageType: ImageType.RunLengthEncodedGrayscale,
+        bitDepth: 8
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {
@@ -102,9 +116,14 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'ccm8': {
     image: expectedColorImage,
     details2: {
-      // header: {
-      //   ...commonHeader
-      // },
+      header: {
+        ...commonHeader,
+        imageType: ImageType.RunLengthEncodedColorMapped,
+        bitDepth: 8,
+        colorMapType: ColorMapType.ColorMap,
+        colorMapLength: 256,
+        colorMapDepth: 16
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {
@@ -118,14 +137,18 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
       developerDirectory: [],
     },
   },
+  // TODO: Test all headers
+  // TODO: Test all footers
   'ctc16': {
     image: expectedColorImage,
     details2: {
-      // TODO: Test all headers
-      // header: {
-      //   ...commonHeader
-      // },
-      // TODO: Test all footers
+      header: {
+        ...commonHeader,
+        imageType: ImageType.RunLengthEncodedTrueColor,
+        bitDepth: 16,
+        imageDescriptor: 1,
+        attributeBitsPerPixel: 1,
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {

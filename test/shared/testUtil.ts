@@ -81,14 +81,14 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       } else {
         dataArraysEqual(result.image.data, expectedImage.data);
       }
+      if (testSpec.details2.header) {
+        deepStrictEqual(result.details2.header, testSpec.details2.header);
+      }
       if (testSpec.details2.imageId) {
         strictEqual(result.details2.imageId, testSpec.details2.imageId);
       }
-      if (testSpec.details2.header?.width) {
-        strictEqual(result.details2.header.width, testSpec.details2.header.width);
-      }
-      if (testSpec.details2.header?.height) {
-        strictEqual(result.details2.header.height, testSpec.details2.header.height);
+      if (testSpec.details2.footer) {
+        strictEqual(result.details2.footer, testSpec.details2.footer);
       }
       if (testSpec.details2.extensionArea) {
         deepStrictEqual(result.details2.extensionArea, testSpec.details2.extensionArea);
