@@ -5,16 +5,15 @@
  */
 
 import { IDeveloperDirectoryEntry, IExtensionArea } from '../../typings/api.js';
-import { ColorMapType, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, InterleavingFlag, IReadPixelDelegate, ITgaDecodeContext, ITgaFooterDetails, ITgaHeaderDetails, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
+import { ColorMapType, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, IReadPixelDelegate, ITgaDecodeContext, ITgaFooter, ITgaHeader, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
 import { DecodeError, DecodeWarning, handleWarning } from './assert.js';
 import { ByteStreamReader } from './byteStreamReader.js';
 import { readText } from './text.js';
 import { isValidBitDepth, isValidColorMapDepth, isValidImageType } from './validate.js';
 
 const enum ImageDescriptorMask {
-  AttributeBits    = 0b00001111,
-  ScreenOrigin     = 0b00110000,
-  InterleavingFlag = 0b11000000
+  AttributeBits = 0b00001111,
+  ScreenOrigin  = 0b00110000
 }
 
 const enum ImageDescriptorShift {
@@ -95,13 +94,15 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
       developerDirectoryOffset: ctx.footer.developerDirectoryOffset,
       extensionAreaOffset: ctx.footer.extensionAreaOffset,
     },
+    header: ctx.header,
+    footer: ctx.footer,
     extensionArea: ctx.extensionArea,
     developerDirectory: ctx.developerDirectory,
     warnings: ctx.warnings
   };
 }
 
-function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeaderDetails {
+function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeader {
   const idLength = ctx.reader.readUint8();
   const colorMapTypeRaw = ctx.reader.readUint8();
   let colorMapType: ColorMapType;
@@ -388,10 +389,10 @@ function readPixel32BitNoAlpha(ctx: ITgaDecodeContext, imageData: Uint8Array, im
 }
 
 function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined {
-  if (ctx.footer!.extensionAreaOffset === 0) {
+  if (ctx.footer?.extensionAreaOffset === undefined || ctx.footer.extensionAreaOffset === 0) {
     return undefined;
   }
-  ctx.reader.offset = ctx.footer!.extensionAreaOffset;
+  ctx.reader.offset = ctx.footer.extensionAreaOffset;
   const extensionSize = ctx.reader.readUint16();
   if (extensionSize !== 495) {
     handleWarning(ctx, new DecodeWarning('TGA file is a version other than v2', ctx.reader.offset - 2));
@@ -461,7 +462,7 @@ function parseExtensionArea(ctx: ITgaDecodeContext): IExtensionArea | undefined 
 }
 
 function parseDeveloperDirectory(ctx: ITgaDecodeContext): IDeveloperDirectoryEntry[] {
-  if (ctx.footer!.developerDirectoryOffset === 0) {
+  if (ctx.footer?.developerDirectoryOffset === undefined || ctx.footer.developerDirectoryOffset === 0) {
     return [];
   }
   ctx.reader.offset = ctx.footer!.developerDirectoryOffset;
@@ -499,7 +500,7 @@ function readTimestamp(ctx: ITgaDecodeContext): { hours: number, minutes: number
   return { hours, minutes, seconds };
 }
 
-function parseFooter(ctx: ITgaDecodeContext): ITgaFooterDetails {
+function parseFooter(ctx: ITgaDecodeContext): ITgaFooter {
   // The footer is the last 26 bytes of the file and importantly includes the offsets of the
   // extension area and developer directory
 

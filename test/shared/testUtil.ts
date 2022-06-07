@@ -16,7 +16,7 @@ async function getPngImage(path: string): Promise<IImage32> {
   return result.image;
 }
 
-export type ITestDecodedTga = Omit<IDecodedTga, 'image' | 'warnings' | 'details'> & {
+export type ITestDecodedTga = Omit<IDecodedTga, 'image' | 'warnings' | 'details' | 'footer' | 'header'> & {
   details: Partial<ITgaDetails>;
   image: string | IImage32;
   warnings?: { message: string, offset: number }[];
