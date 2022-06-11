@@ -150,8 +150,10 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeader {
       origin: colorMapOrigin
     } : undefined,
     imageType,
-    xOrigin,
-    yOrigin,
+    origin: {
+      x: xOrigin,
+      y: yOrigin,
+    },
     width,
     height,
     bitDepth,

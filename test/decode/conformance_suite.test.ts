@@ -75,8 +75,10 @@ const commonHeader: ITgaHeader = {
   idLength: 26,
   imageType: ImageType.NoImageData,
   colorMap: undefined,
-  xOrigin: 0,
-  yOrigin: 0,
+  origin: {
+    x: 0,
+    y: 0,
+  },
   width: 128,
   height: 128,
   bitDepth: 0 as any,

@@ -92,7 +92,6 @@ export interface ITgaDetails {
   developerDirectory?: IDeveloperDirectoryEntry[];
 }
 
-// TODO: Move origin into object
 export interface ITgaHeader {
   /**
    * The length in bytes of the image ID (field 6).
@@ -111,21 +110,28 @@ export interface ITgaHeader {
    */
   imageType: ImageType;
   /**
-   * These bytes specify the absolute horizontal coordinate for the lower left corner of the image
-   * as it is positioned on a display device having an origin at the lower left of the screen. This
-   * is typically ignored in modern software.
-   *
-   * Field 5.1, 16 bit unsigned
-   */
-  xOrigin: number;
-  /**
-   * These bytes specify the absolute vertical coordinate for the lower left corner of the image as
-   * it is positioned on a display device having an origin at the lower left of the screen. This is
+   * These bytes specify the absolute  coordinate for the lower left corner of the image as it is
+   * positioned on a display device having an origin at the lower left of the screen. This is
    * typically ignored in modern software.
-   *
-   * Field 5.2, 16 bit unsigned
    */
-  yOrigin: number;
+  origin: {
+    /**
+     * These bytes specify the absolute horizontal coordinate for the lower left corner of the image
+     * as it is positioned on a display device having an origin at the lower left of the screen. This
+     * is typically ignored in modern software.
+     *
+     * Field 5.1, 16 bit unsigned
+     */
+    x: number;
+    /**
+     * These bytes specify the absolute vertical coordinate for the lower left corner of the image as
+     * it is positioned on a display device having an origin at the lower left of the screen. This is
+     * typically ignored in modern software.
+     *
+     * Field 5.2, 16 bit unsigned
+     */
+    y: number;
+  };
   /**
    * The width of the image.
    *

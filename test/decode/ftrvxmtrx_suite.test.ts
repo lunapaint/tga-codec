@@ -14,8 +14,10 @@ const commonHeader: ITgaHeader = {
   idLength: 0,
   imageType: ImageType.NoImageData,
   colorMap: undefined,
-  xOrigin: 0,
-  yOrigin: 0,
+  origin: {
+    x: 0,
+    y: 0,
+  },
   width: 64,
   height: 64,
   bitDepth: 0 as any,
@@ -68,7 +70,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         ...commonHeader,
         imageType: ImageType.UncompressedGrayscale,
         bitDepth: 16,
-        yOrigin: 16448,
+        origin: {
+          x: 0,
+          y: 16448,
+        },
         imageDescriptor: 40,
         attributeBitsPerPixel: 8,
         screenOrigin: ScreenOrigin.TopLeft,
@@ -91,7 +96,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedGrayscale,
         bitDepth: 16,
-        yOrigin: 16448,
+        origin: {
+          x: 0,
+          y: 16448,
+        },
         imageDescriptor: 40,
         attributeBitsPerPixel: 8,
         screenOrigin: ScreenOrigin.TopLeft,
@@ -129,7 +137,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
         bitDepth: 24,
-        yOrigin: 16448,
+        origin: {
+          x: 0,
+          y: 16448,
+        },
         imageDescriptor: 32,
         screenOrigin: ScreenOrigin.TopLeft,
       },
@@ -173,7 +184,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedTrueColor,
         bitDepth: 32,
-        yOrigin: 16448,
+        origin: {
+          x: 0,
+          y: 16448,
+        },
         imageDescriptor: 40,
         attributeBitsPerPixel: 8,
         screenOrigin: ScreenOrigin.TopLeft
@@ -222,7 +236,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
           length: 59,
           origin: 0
         },
-        yOrigin: 16448,
+        origin: {
+          x: 0,
+          y: 16448,
+        },
         imageDescriptor: 32,
         screenOrigin: ScreenOrigin.TopLeft
       },
