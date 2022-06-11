@@ -5,14 +5,37 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { ColorMapType, ImageType, ITgaHeader, ScreenOrigin } from '../../typings/api.js';
 import { createTests, ITestDecodedTga } from '../shared/testUtil.js';
 
 const suiteRoot = 'test/tga-test-suite/ftrvxmtrx';
+
+const commonHeader: ITgaHeader = {
+  idLength: 0,
+  colorMapType: ColorMapType.NoColorMap,
+  imageType: ImageType.NoImageData,
+  colorMapOrigin: 0,
+  colorMapLength: 0,
+  colorMapDepth: 0,
+  xOrigin: 0,
+  yOrigin: 0,
+  width: 64,
+  height: 64,
+  bitDepth: 0 as any,
+  imageDescriptor: 0,
+  attributeBitsPerPixel: 0,
+  screenOrigin: ScreenOrigin.BottomLeft,
+};
 
 const testFiles: { [file: string]: ITestDecodedTga } = {
   'monochrome8_bottom_left': {
     image: `${suiteRoot}/monochrome8_bottom_left.png`,
     details2: {
+      header: {
+        ...commonHeader,
+        imageType: ImageType.UncompressedGrayscale,
+        bitDepth: 8
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -22,6 +45,11 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'monochrome8_bottom_left_rle': {
     image: `${suiteRoot}/monochrome8_bottom_left_rle.png`,
     details2: {
+      header: {
+        ...commonHeader,
+        imageType: ImageType.RunLengthEncodedGrayscale,
+        bitDepth: 8
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -31,6 +59,15 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'monochrome16_top_left': {
     image: `${suiteRoot}/monochrome16_top_left.png`,
     details2: {
+      header: {
+        ...commonHeader,
+        imageType: ImageType.UncompressedGrayscale,
+        bitDepth: 16,
+        yOrigin: 16448,
+        imageDescriptor: 40,
+        attributeBitsPerPixel: 8,
+        screenOrigin: ScreenOrigin.TopLeft,
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -41,6 +78,15 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'monochrome16_top_left_rle': {
     image: `${suiteRoot}/monochrome16_top_left_rle.png`,
     details2: {
+      header: {
+        ...commonHeader,
+        imageType: ImageType.RunLengthEncodedGrayscale,
+        bitDepth: 16,
+        yOrigin: 16448,
+        imageDescriptor: 40,
+        attributeBitsPerPixel: 8,
+        screenOrigin: ScreenOrigin.TopLeft,
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -49,6 +95,11 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb24_bottom_left_rle': {
     image: `${suiteRoot}/rgb24_bottom_left_rle.png`,
     details2: {
+      header: {
+        ...commonHeader,
+        imageType: ImageType.RunLengthEncodedTrueColor,
+        bitDepth: 24
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -57,6 +108,14 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb24_top_left': {
     image: `${suiteRoot}/rgb24_top_left.png`,
     details2: {
+      header: {
+        ...commonHeader,
+        imageType: ImageType.UncompressedTrueColor,
+        bitDepth: 24,
+        yOrigin: 16448,
+        imageDescriptor: 32,
+        screenOrigin: ScreenOrigin.TopLeft,
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -65,6 +124,14 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb24_top_left_colormap': {
     image: `${suiteRoot}/rgb24_top_left_colormap.png`,
     details2: {
+      header: {
+        ...commonHeader,
+        imageType: ImageType.UncompressedColorMapped,
+        bitDepth: 8,
+        colorMapDepth: 24,
+        colorMapLength: 29,
+        colorMapType: ColorMapType.ColorMap,
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -74,6 +141,15 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb32_top_left_rle': {
     image: `${suiteRoot}/rgb32_top_left_rle.png`,
     details2: {
+      header: {
+        ...commonHeader,
+        imageType: ImageType.RunLengthEncodedTrueColor,
+        bitDepth: 32,
+        yOrigin: 16448,
+        imageDescriptor: 40,
+        attributeBitsPerPixel: 8,
+        screenOrigin: ScreenOrigin.TopLeft
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -83,6 +159,13 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb32_bottom_left': {
     image: `${suiteRoot}/rgb32_bottom_left.png`,
     details2: {
+      header: {
+        ...commonHeader,
+        imageType: ImageType.UncompressedTrueColor,
+        bitDepth: 32,
+        imageDescriptor: 8,
+        attributeBitsPerPixel: 8
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -93,6 +176,17 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'rgb32_top_left_rle_colormap': {
     image: `${suiteRoot}/rgb32_top_left_rle_colormap.png`,
     details2: {
+      header: {
+        ...commonHeader,
+        imageType: ImageType.RunLengthEncodedColorMapped,
+        bitDepth: 8,
+        colorMapDepth: 32,
+        colorMapLength: 59,
+        colorMapType: ColorMapType.ColorMap,
+        yOrigin: 16448,
+        imageDescriptor: 32,
+        screenOrigin: ScreenOrigin.TopLeft
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
