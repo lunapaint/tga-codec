@@ -8,7 +8,7 @@ import { deepStrictEqual, fail, strictEqual } from 'assert';
 import * as fs from 'fs';
 import { decodeTga } from '../../out-dev/public/tga.js';
 import { decodePng, encodePng } from '@lunapaint/png-codec';
-import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails, ITgaDetails2 } from '../../typings/api.js';
+import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
 import { join } from 'path';
 
 async function getPngImage(path: string): Promise<IImage32> {
@@ -17,9 +17,9 @@ async function getPngImage(path: string): Promise<IImage32> {
 }
 
 // TODO: Require more details in tests
-export type ITestDecodedTga = Omit<IDecodedTga, 'image' | 'warnings' | 'details' | 'footer' | 'header' | 'details2' | 'extensionArea' | 'developerDirectory'> & {
-  details2: Partial<ITgaDetails2>;
+export type ITestDecodedTga = Omit<IDecodedTga, 'image' | 'warnings' | 'details'> & {
   image: string | IImage32;
+  details: Partial<ITgaDetails>;
   warnings?: { message: string, offset: number }[];
   detectAmbiguousAlphaChannel?: boolean;
   allowOneOffError?: boolean;
@@ -35,7 +35,7 @@ export function createTestsFromFolder(suiteRoot: string, expectedCount: number, 
     const withoutExtension = fileName.replace(/\.tga$/, '');
     testFiles[withoutExtension] = {
       image: `${suiteRoot}/${withoutExtension}.png`,
-      details2: {
+      details: {
         extensionArea: options?.extensionArea ? options.extensionArea[withoutExtension] : undefined,
         developerDirectory: []
       }
@@ -81,20 +81,20 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       } else {
         dataArraysEqual(result.image.data, expectedImage.data);
       }
-      if (testSpec.details2.header) {
-        deepStrictEqual(result.details2.header, testSpec.details2.header);
+      if (testSpec.details.header) {
+        deepStrictEqual(result.details.header, testSpec.details.header);
       }
-      if (testSpec.details2.imageId) {
-        strictEqual(result.details2.imageId, testSpec.details2.imageId);
+      if (testSpec.details.imageId) {
+        strictEqual(result.details.imageId, testSpec.details.imageId);
       }
-      if (testSpec.details2.footer) {
-        deepStrictEqual(result.details2.footer, testSpec.details2.footer);
+      if (testSpec.details.footer) {
+        deepStrictEqual(result.details.footer, testSpec.details.footer);
       }
-      if (testSpec.details2.extensionArea) {
-        deepStrictEqual(result.details2.extensionArea, testSpec.details2.extensionArea);
+      if (testSpec.details.extensionArea) {
+        deepStrictEqual(result.details.extensionArea, testSpec.details.extensionArea);
       }
-      if (testSpec.details2.developerDirectory) {
-        deepStrictEqual(result.details2.developerDirectory, testSpec.details2.developerDirectory);
+      if (testSpec.details.developerDirectory) {
+        deepStrictEqual(result.details.developerDirectory, testSpec.details.developerDirectory);
       }
       if (testSpec.warnings) {
         deepStrictEqual(result.warnings.map(e => ({ message: e.message, offset: e.offset })), testSpec.warnings);

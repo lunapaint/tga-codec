@@ -30,7 +30,7 @@ const commonHeader: ITgaHeader = {
 const testFiles: { [file: string]: ITestDecodedTga } = {
   'monochrome8_bottom_left': {
     image: `${suiteRoot}/monochrome8_bottom_left.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedGrayscale,
@@ -48,7 +48,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // RLE encoding has a mix of both rle and raw sections
   'monochrome8_bottom_left_rle': {
     image: `${suiteRoot}/monochrome8_bottom_left_rle.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedGrayscale,
@@ -66,7 +66,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncommon 16-bit greyscale
   'monochrome16_top_left': {
     image: `${suiteRoot}/monochrome16_top_left.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedGrayscale,
@@ -89,7 +89,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // RLE encoding has a mix of both rle and raw sections
   'monochrome16_top_left_rle': {
     image: `${suiteRoot}/monochrome16_top_left_rle.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedGrayscale,
@@ -110,7 +110,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'rgb24_bottom_left_rle': {
     image: `${suiteRoot}/rgb24_bottom_left_rle.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedTrueColor,
@@ -127,7 +127,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'rgb24_top_left': {
     image: `${suiteRoot}/rgb24_top_left.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
@@ -147,7 +147,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'rgb24_top_left_colormap': {
     image: `${suiteRoot}/rgb24_top_left_colormap.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedColorMapped,
@@ -168,7 +168,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Transparent pixels stored as 0x00000000
   'rgb32_top_left_rle': {
     image: `${suiteRoot}/rgb32_top_left_rle.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedTrueColor,
@@ -190,7 +190,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Transparent pixels stored as 0x00000000
   'rgb32_bottom_left': {
     image: `${suiteRoot}/rgb32_bottom_left.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
@@ -211,7 +211,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Image says no alpha support but 32-bit color maps always use alpha
   'rgb32_top_left_rle_colormap': {
     image: `${suiteRoot}/rgb32_top_left_rle_colormap.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedColorMapped,

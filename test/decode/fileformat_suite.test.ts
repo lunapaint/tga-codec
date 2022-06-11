@@ -93,7 +93,7 @@ const commonHeader: ITgaHeader = {
 const testFiles: { [file: string]: ITestDecodedTga } = {
   'cbw8': {
     image: expectedGreyscaleImage,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedGrayscale,
@@ -117,7 +117,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'ccm8': {
     image: expectedColorImage,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedColorMapped,
@@ -144,7 +144,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'ctc16': {
     image: expectedColorImage,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedTrueColor,
@@ -170,7 +170,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'ctc24': {
     image: expectedColorImage,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedTrueColor,
@@ -194,7 +194,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'ctc32': {
     image: expectedColorImage,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedTrueColor,
@@ -220,7 +220,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'flag_b16': {
     image: `${suiteRoot}/flag_b16.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         idLength: 0,
@@ -240,7 +240,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'flag_b24': {
     image: `${suiteRoot}/flag_b24.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         idLength: 0,
@@ -260,7 +260,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'flag_b32': {
     image: `${suiteRoot}/flag_b32.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         idLength: 0,
@@ -286,7 +286,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'flag_t16': {
     image: `${suiteRoot}/flag_t16.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         idLength: 0,
@@ -308,7 +308,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'flag_t32': {
     image: `${suiteRoot}/flag_t32.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         idLength: 0,
@@ -337,7 +337,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 24 bit depth, origin 0
   'marbles': {
     image: `${suiteRoot}/marbles.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         idLength: 0,
@@ -357,7 +357,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'ubw8': {
     image: expectedGreyscaleImage,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedGrayscale,
@@ -381,7 +381,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'ucm8': {
     image: expectedColorImage,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedColorMapped,
@@ -408,7 +408,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'utc16': {
     image: expectedColorImage,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
@@ -434,7 +434,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'utc24': {
     image: expectedColorImage,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
@@ -458,7 +458,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   },
   'utc32': {
     image: expectedColorImage,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
@@ -485,7 +485,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 16 bit depth, origin 0
   'xing_b16': {
     image: `${suiteRoot}/xing_b16.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
@@ -506,7 +506,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 24 bit depth, origin 0
   'xing_b24': {
     image: `${suiteRoot}/xing_b24.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
@@ -527,7 +527,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 32 bit depth, origin 0
   'xing_b32': {
     image: `${suiteRoot}/xing_b32.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
@@ -554,7 +554,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 16 bit depth, origin 2
   'xing_t16': {
     image: `${suiteRoot}/xing_t16.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
@@ -577,7 +577,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 24 bit depth, origin 2
   'xing_t24': {
     image: `${suiteRoot}/xing_t24.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,
@@ -600,7 +600,7 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   // Uncompressed true color, 32 bit depth, origin 2
   'xing_t32': {
     image: `${suiteRoot}/xing_t32.png`,
-    details2: {
+    details: {
       header: {
         ...commonHeader,
         imageType: ImageType.UncompressedTrueColor,

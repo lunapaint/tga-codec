@@ -25,28 +25,10 @@ export interface IDecodedTga {
    */
   image: IImage32;
 
-  details2: ITgaDetails2;
-
-  // TODO: Split into ITgaHeader and ITgaFooter sections, move ImageId into header and make a note it's not technically part of the header
   /**
-   * Details about the image, this is mostly useful internally as they are used to decode the image.
-   * However, these could be presented in an image viewer.
+   * The details of the TGA including internals on how it was encoded as well as other metadata.
    */
-  // details: ITgaDetails;
-
-  // header: ITgaHeader;
-
-  // footer: ITgaFooter | undefined;
-
-  // /**
-  //  * The {@link IExtensionArea} of the TGA file if it exists.
-  //  */
-  // extensionArea: IExtensionArea | undefined;
-
-  // /**
-  //  * Developer directory entries in the TGA file.
-  //  */
-  // developerDirectory: IDeveloperDirectoryEntry[];
+  details: ITgaDetails;
 
   /**
    * Any warnings that were encountered during decoding. Warnings are generally safe to ignore, here
@@ -88,7 +70,10 @@ export interface IDecodeTgaOptions {
   strictMode?: boolean;
 }
 
-export interface ITgaDetails2 {
+/**
+   * The details of the TGA including internals on how it was encoded as well as other metadata.
+ */
+export interface ITgaDetails {
   header: ITgaHeader;
   /**
    * Optional identifying information about the image.
@@ -97,7 +82,13 @@ export interface ITgaDetails2 {
    */
   imageId?: string;
   footer?: ITgaFooter;
+  /**
+   * The {@link IExtensionArea} of the TGA file if it exists.
+   */
   extensionArea?: IExtensionArea;
+  /**
+   * Developer directory entries in the TGA file.
+   */
   developerDirectory?: IDeveloperDirectoryEntry[];
 }
 
@@ -317,32 +308,6 @@ export interface IDeveloperDirectoryEntry {
    * The length of the entry.
    */
   length: number;
-}
-
-/**
- * Details about the TGA.
- */
-export interface ITgaDetails {
-  /**
-   * The width of the image.
-   */
-  width: number;
-  /**
-   * The height of the image.
-   */
-  height: number;
-  /**
-   * Optional identifying information about the image.
-   */
-  imageId: string;
-  /**
-   * The byte offset of the {@link IDecodedTga.extensionArea}.
-   */
-  extensionAreaOffset?: number;
-  /**
-   * The byte offset of the {@link IDecodedTga.developerDirectory}.
-   */
-  developerDirectoryOffset?: number;
 }
 
 /**

@@ -4,11 +4,10 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { ITgaDetails } from '../../typings/api.js';
-import { IDecodedTga, ITgaDecodeContext, ITgaDetails2, ITgaInitialDecodeContext } from '../shared/types.js';
+import { IDecodedTga, ITgaDecodeContext, ITgaDetails, ITgaInitialDecodeContext } from '../shared/types.js';
 
 export class DecodeError extends Error {
-  readonly partiallyDecodedImage: Partial<Omit<IDecodedTga, 'details2'> & { details2: Partial<ITgaDetails2> }>;
+  readonly partiallyDecodedImage: Partial<Omit<IDecodedTga, 'details'> & { details: Partial<ITgaDetails> }>;
   constructor(
     ctx: ITgaInitialDecodeContext | ITgaDecodeContext,
     message: string,
@@ -16,7 +15,7 @@ export class DecodeError extends Error {
   ) {
     super(message);
     this.partiallyDecodedImage = {
-      details2: {
+      details: {
         header: ctx.header,
         footer: ctx.footer,
         imageId: ctx.identificationField,

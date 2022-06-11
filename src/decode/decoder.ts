@@ -87,7 +87,7 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
 
   return {
     image: ctx.image,
-    details2: {
+    details: {
       header: ctx.header,
       imageId: ctx.identificationField,
       footer: ctx.footer,
