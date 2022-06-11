@@ -184,11 +184,11 @@ function parseColorMap(ctx: ITgaDecodeContext, colorMap: ITgaColorMap): IReadPix
       readPixel = readPixel32Bit;
       break;
   }
-  return (ctx, imageData, imageOffset, view, viewOffset) => {
+  return (imageData, imageOffset, view, viewOffset) => {
     // Pull the color index of view and pass in the ctx's view in case view is a separate decoded
     // array
     const colorIndex = view.getUint8(viewOffset);
-    readPixel(ctx, imageData, imageOffset, ctx.reader.view, colorMapOffset + colorIndex * bytesPerEntry);
+    readPixel(imageData, imageOffset, ctx.reader.view, colorMapOffset + colorIndex * bytesPerEntry);
     return 1;
   };
 }
@@ -240,7 +240,7 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
     let imageOffset = 0;
     for (let y = 0; y < image.height; y++) {
       for (let x = 0; x < image.width; x++) {
-        offset += readPixel(ctx, image.data, imageOffset, view, offset);
+        offset += readPixel(image.data, imageOffset, view, offset);
         imageOffset += 4;
       }
     }
@@ -249,7 +249,7 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
     for (let y = image.height - 1; y >= 0; y--) {
       imageOffset = ctx.header.width * y * 4;
       for (let x = 0; x < image.width; x++) {
-        offset += readPixel(ctx, image.data, imageOffset, view, offset);
+        offset += readPixel(image.data, imageOffset, view, offset);
         imageOffset += 4;
       }
     }
@@ -302,7 +302,7 @@ function decodeRunLengthEncoding(ctx: ITgaDecodeContext): Uint8Array {
   return result;
 }
 
-function readPixel8BitGreyscale(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
+function readPixel8BitGreyscale(imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   // Bits stored as 0bGGGGGGGG
   imageData[imageOffset    ] = view.getUint8(viewOffset);
   imageData[imageOffset + 1] = imageData[imageOffset    ];
@@ -311,7 +311,7 @@ function readPixel8BitGreyscale(ctx: ITgaDecodeContext, imageData: Uint8Array, i
   return 1;
 }
 
-function readPixel16BitGreyscale(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
+function readPixel16BitGreyscale(imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   // Bits stored as 0bAAAAAAAA 0bGGGGGGGG
   imageData[imageOffset    ] = view.getUint8(viewOffset    );
   imageData[imageOffset + 1] = imageData[imageOffset    ];
@@ -331,7 +331,7 @@ let currentValue = 0;
 // 00000 -> 00000 << 3 | 00000 >> 2 = 00000000
 // 11000 -> 11000 << 3 | 11000 >> 2 = 11000110
 // 11111 -> 11111 << 3 | 11111 >> 2 = 11111111
-function readPixel15Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
+function readPixel15Bit(imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   currentValue = view.getUint16(viewOffset, true);
   // Bits stored as 0b_RRRRRGG 0bGGGBBBBB
   // See explanation of this in readPixel15Bit
@@ -345,7 +345,7 @@ function readPixel15Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffs
   imageData[imageOffset + 3] = 255;
   return 2;
 }
-function readPixel16Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
+function readPixel16Bit(imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   currentValue = view.getUint16(viewOffset, true);
   // Bits stored as 0bARRRRRGG 0bGGGBBBBB
   // Get the 5-bit values first
@@ -361,7 +361,7 @@ function readPixel16Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffs
   return 2;
 }
 
-function readPixel24Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
+function readPixel24Bit(imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   // Bytes stored as BGR
   imageData[imageOffset    ] = view.getUint8(viewOffset + 2);
   imageData[imageOffset + 1] = view.getUint8(viewOffset + 1);
@@ -370,7 +370,7 @@ function readPixel24Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffs
   return 3;
 }
 
-function readPixel32Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
+function readPixel32Bit(imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   // Bytes stored as BGRA
   imageData[imageOffset    ] = view.getUint8(viewOffset + 2);
   imageData[imageOffset + 1] = view.getUint8(viewOffset + 1);
@@ -379,7 +379,7 @@ function readPixel32Bit(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffs
   return 4;
 }
 
-function readPixel32BitNoAlpha(ctx: ITgaDecodeContext, imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
+function readPixel32BitNoAlpha(imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
   // Bytes stored as BGRA, A gets ignored when attribute bits is 0
   imageData[imageOffset    ] = view.getUint8(viewOffset + 2);
   imageData[imageOffset + 1] = view.getUint8(viewOffset + 1);
