@@ -73,7 +73,6 @@ const commonExtensionArea: IExtensionArea = {
   attributesType: -1,
 };
 
-// TODO: Test other header properties
 const commonHeader: ITgaHeader = {
   idLength: 26,
   colorMapType: ColorMapType.NoColorMap,
@@ -100,7 +99,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageType: ImageType.RunLengthEncodedGrayscale,
         bitDepth: 8
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 8238
+      },
       imageId: commonImageId,
       extensionArea: {
         ...commonExtensionArea,
@@ -124,7 +126,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         colorMapLength: 256,
         colorMapDepth: 16
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 8750
+      },
       imageId: commonImageId,
       extensionArea: {
         ...commonExtensionArea,
@@ -137,8 +142,6 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
       developerDirectory: [],
     },
   },
-  // TODO: Test all headers
-  // TODO: Test all footers
   'ctc16': {
     image: expectedColorImage,
     details2: {
@@ -149,7 +152,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 1,
         attributeBitsPerPixel: 1,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 14382
+      },
       imageId: commonImageId,
       extensionArea: {
         ...commonExtensionArea,
@@ -170,7 +176,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageType: ImageType.RunLengthEncodedTrueColor,
         bitDepth: 24,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 20526
+      },
       imageId: commonImageId,
       extensionArea: {
         ...commonExtensionArea,
@@ -193,7 +202,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 8,
         attributeBitsPerPixel: 8
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 26670
+      },
       imageId: commonImageId,
       extensionArea: {
         ...commonExtensionArea,
@@ -217,7 +229,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         width: 124,
         height: 124
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -234,7 +249,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         width: 124,
         height: 124
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -251,7 +269,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         width: 124,
         height: 124
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -276,7 +297,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 32,
         screenOrigin: 2,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -295,7 +319,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 32,
         screenOrigin: 2,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -319,7 +346,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         width: 1419,
         height: 1001,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -333,7 +363,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageType: ImageType.UncompressedGrayscale,
         bitDepth: 8,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 20526
+      },
       imageId: commonImageId,
       extensionArea: {
         ...commonExtensionArea,
@@ -357,7 +390,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         colorMapLength: 256,
         colorMapDepth: 16
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 21038
+      },
       imageId: commonImageId,
       extensionArea: {
         ...commonExtensionArea,
@@ -380,7 +416,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 1,
         attributeBitsPerPixel: 1,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 41006
+      },
       imageId: commonImageId,
       extensionArea: {
         ...commonExtensionArea,
@@ -401,7 +440,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageType: ImageType.UncompressedTrueColor,
         bitDepth: 24,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 61486
+      },
       imageId: commonImageId,
       extensionArea: {
         ...commonExtensionArea,
@@ -424,7 +466,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 8,
         attributeBitsPerPixel: 8,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 81966
+      },
       imageId: commonImageId,
       extensionArea: {
         ...commonExtensionArea,
@@ -449,7 +494,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         height: 164,
         idLength: 0,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -467,7 +515,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         height: 164,
         idLength: 0,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -485,7 +536,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         height: 164,
         idLength: 0,
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -511,7 +565,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 32,
         screenOrigin: 2
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -531,7 +588,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 32,
         screenOrigin: 2
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],
@@ -551,7 +611,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 32,
         screenOrigin: 2
       },
-      footer: undefined,
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: [],

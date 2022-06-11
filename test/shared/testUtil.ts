@@ -88,7 +88,7 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
         strictEqual(result.details2.imageId, testSpec.details2.imageId);
       }
       if (testSpec.details2.footer) {
-        strictEqual(result.details2.footer, testSpec.details2.footer);
+        deepStrictEqual(result.details2.footer, testSpec.details2.footer);
       }
       if (testSpec.details2.extensionArea) {
         deepStrictEqual(result.details2.extensionArea, testSpec.details2.extensionArea);

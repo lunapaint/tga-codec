@@ -36,6 +36,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageType: ImageType.UncompressedGrayscale,
         bitDepth: 8
       },
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -49,6 +53,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedGrayscale,
         bitDepth: 8
+      },
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
       },
       imageId: '',
       extensionArea: undefined,
@@ -67,6 +75,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 40,
         attributeBitsPerPixel: 8,
         screenOrigin: ScreenOrigin.TopLeft,
+      },
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
       },
       imageId: '',
       extensionArea: undefined,
@@ -87,6 +99,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         attributeBitsPerPixel: 8,
         screenOrigin: ScreenOrigin.TopLeft,
       },
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -99,6 +115,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedTrueColor,
         bitDepth: 24
+      },
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
       },
       imageId: '',
       extensionArea: undefined,
@@ -116,6 +136,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         imageDescriptor: 32,
         screenOrigin: ScreenOrigin.TopLeft,
       },
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -131,6 +155,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         colorMapDepth: 24,
         colorMapLength: 29,
         colorMapType: ColorMapType.ColorMap,
+      },
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
       },
       imageId: '',
       extensionArea: undefined,
@@ -150,6 +178,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         attributeBitsPerPixel: 8,
         screenOrigin: ScreenOrigin.TopLeft
       },
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
+      },
       imageId: '',
       extensionArea: undefined,
       developerDirectory: []
@@ -165,6 +197,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         bitDepth: 32,
         imageDescriptor: 8,
         attributeBitsPerPixel: 8
+      },
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
       },
       imageId: '',
       extensionArea: undefined,
@@ -186,6 +222,10 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         yOrigin: 16448,
         imageDescriptor: 32,
         screenOrigin: ScreenOrigin.TopLeft
+      },
+      footer: {
+        developerDirectoryOffset: 0,
+        extensionAreaOffset: 0
       },
       imageId: '',
       extensionArea: undefined,
