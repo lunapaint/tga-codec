@@ -19,7 +19,6 @@ async function getPngImage(path: string): Promise<IImage32> {
 export type ITestDecodedTga = Omit<IDecodedTga, 'image' | 'warnings' | 'details'> & {
   image: string | IImage32;
   details: Omit<ITgaDetails, 'header' | 'footer'> & { header: ITgaHeader | null, footer: ITgaFooter | undefined | null };
-  // TODO: Require warnings to be defined
   warnings?: { message: string, offset: number }[];
   detectAmbiguousAlphaChannel?: boolean;
   allowOneOffError?: boolean;
@@ -104,9 +103,7 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       if (testSpec.details.developerDirectory) {
         deepStrictEqual(result.details.developerDirectory, testSpec.details.developerDirectory);
       }
-      if (testSpec.warnings) {
-        deepStrictEqual(result.warnings.map(e => ({ message: e.message, offset: e.offset })), testSpec.warnings);
-      }
+      deepStrictEqual(result.warnings.map(e => ({ message: e.message, offset: e.offset })), testSpec.warnings || []);
     });
   }
 }
