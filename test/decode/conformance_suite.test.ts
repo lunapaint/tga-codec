@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
+import { ColorMapType, IExtensionArea, IImage32, ImageType, ITgaDetails, ITgaHeader, ScreenOrigin } from '../../typings/api.js';
 import { createTests, ITestDecodedTga, repeatArray } from '../shared/testUtil.js';
 
 const suiteRoot = 'test/tga-test-suite/conformance';
@@ -54,7 +54,6 @@ const expectedGreyscaleImage: IImage32 = {
 };
 
 const commonImageId = 'Truevision(R) Sample Image';
-
 const commonExtensionArea: IExtensionArea = {
   extensionSize: 495,
   authorName: 'Ricky True',
@@ -72,14 +71,32 @@ const commonExtensionArea: IExtensionArea = {
   scanLineOffset: 0,
   attributesType: -1,
 };
+const commonHeader: ITgaHeader = {
+  idLength: 26,
+  colorMapType: ColorMapType.NoColorMap,
+  imageType: ImageType.NoImageData,
+  colorMapOrigin: 0,
+  colorMapLength: 0,
+  colorMapDepth: 0,
+  xOrigin: 0,
+  yOrigin: 0,
+  width: 128,
+  height: 128,
+  bitDepth: 0 as any,
+  imageDescriptor: 0,
+  attributeBitsPerPixel: 0,
+  screenOrigin: ScreenOrigin.BottomLeft,
+};
 
 const testFiles: { [file: string]: ITestDecodedTga } = {
   'cbw8': {
     image: expectedGreyscaleImage,
     details2: {
-      // header: {
-      //   ...commonHeader
-      // },
+      header: {
+        ...commonHeader,
+        bitDepth: 8,
+        imageType: ImageType.RunLengthEncodedGrayscale
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {
@@ -96,9 +113,14 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'ccm8': {
     image: expectedColorImage,
     details2: {
-      // header: {
-      //   ...commonHeader
-      // },
+      header: {
+        ...commonHeader,
+        bitDepth: 8,
+        imageType: ImageType.RunLengthEncodedColorMapped,
+        colorMapDepth: 16,
+        colorMapLength: 256,
+        colorMapType: ColorMapType.ColorMap
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {
@@ -115,9 +137,11 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'ctc24': {
     image: expectedColorImage,
     details2: {
-      // header: {
-      //   ...commonHeader
-      // },
+      header: {
+        ...commonHeader,
+        bitDepth: 24,
+        imageType: ImageType.RunLengthEncodedTrueColor
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {
@@ -134,9 +158,11 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'ubw8': {
     image: expectedGreyscaleImage,
     details2: {
-      // header: {
-      //   ...commonHeader
-      // },
+      header: {
+        ...commonHeader,
+        imageType: ImageType.UncompressedGrayscale,
+        bitDepth: 8
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {
@@ -153,9 +179,14 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'ucm8': {
     image: expectedColorImage,
     details2: {
-      // header: {
-      //   ...commonHeader
-      // },
+      header: {
+        ...commonHeader,
+        imageType: ImageType.UncompressedColorMapped,
+        bitDepth: 8,
+        colorMapDepth: 16,
+        colorMapLength: 256,
+        colorMapType: ColorMapType.ColorMap
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {
@@ -172,9 +203,13 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'utc16': {
     image: expectedColorImage,
     details2: {
-      // header: {
-      //   ...commonHeader
-      // },
+      header: {
+        ...commonHeader,
+        imageType: ImageType.UncompressedTrueColor,
+        bitDepth: 16,
+        imageDescriptor: 1,
+        attributeBitsPerPixel: 1
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {
@@ -191,9 +226,11 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'utc24': {
     image: expectedColorImage,
     details2: {
-      // header: {
-      //   ...commonHeader
-      // },
+      header: {
+        ...commonHeader,
+        bitDepth: 24,
+        imageType: ImageType.UncompressedTrueColor
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {
@@ -210,9 +247,13 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
   'utc32': {
     image: expectedColorImage,
     details2: {
-      // header: {
-      //   ...commonHeader
-      // },
+      header: {
+        ...commonHeader,
+        imageType: ImageType.UncompressedTrueColor,
+        bitDepth: 32,
+        imageDescriptor: 8,
+        attributeBitsPerPixel: 8
+      },
       footer: undefined,
       imageId: commonImageId,
       extensionArea: {
