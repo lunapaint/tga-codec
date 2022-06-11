@@ -80,7 +80,7 @@ export interface ITgaDetails {
    *
    * Field, 0-255 bytes
    */
-  imageId?: string;
+  imageId: string;
   footer?: ITgaFooter;
   /**
    * The {@link IExtensionArea} of the TGA file if it exists.

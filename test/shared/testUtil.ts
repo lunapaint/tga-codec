@@ -8,7 +8,7 @@ import { deepStrictEqual, fail, strictEqual } from 'assert';
 import * as fs from 'fs';
 import { decodeTga } from '../../out-dev/public/tga.js';
 import { decodePng, encodePng } from '@lunapaint/png-codec';
-import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails } from '../../typings/api.js';
+import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails, ITgaFooter, ITgaHeader } from '../../typings/api.js';
 import { join } from 'path';
 
 async function getPngImage(path: string): Promise<IImage32> {
@@ -16,10 +16,10 @@ async function getPngImage(path: string): Promise<IImage32> {
   return result.image;
 }
 
-// TODO: Require more details in tests
 export type ITestDecodedTga = Omit<IDecodedTga, 'image' | 'warnings' | 'details'> & {
   image: string | IImage32;
-  details: Partial<ITgaDetails>;
+  details: Omit<ITgaDetails, 'header' | 'footer'> & { header: ITgaHeader | null, footer: ITgaFooter | undefined | null };
+  // TODO: Require warnings to be defined
   warnings?: { message: string, offset: number }[];
   detectAmbiguousAlphaChannel?: boolean;
   allowOneOffError?: boolean;
@@ -36,6 +36,9 @@ export function createTestsFromFolder(suiteRoot: string, expectedCount: number, 
     testFiles[withoutExtension] = {
       image: `${suiteRoot}/${withoutExtension}.png`,
       details: {
+        header: null,
+        footer: null,
+        imageId: '',
         extensionArea: options?.extensionArea ? options.extensionArea[withoutExtension] : undefined,
         developerDirectory: []
       }
@@ -81,14 +84,19 @@ export function createTests(suiteRoot: string, testFiles: { [file: string]: ITes
       } else {
         dataArraysEqual(result.image.data, expectedImage.data);
       }
-      if (testSpec.details.header) {
+      if (testSpec.details.header !== null) {
         deepStrictEqual(result.details.header, testSpec.details.header);
       }
-      if (testSpec.details.imageId) {
-        strictEqual(result.details.imageId, testSpec.details.imageId);
-      }
-      if (testSpec.details.footer) {
-        deepStrictEqual(result.details.footer, testSpec.details.footer);
+      strictEqual(result.details.imageId, testSpec.details.imageId || '');
+      if (testSpec.details.footer !== null) {
+        if (testSpec.details.footer === undefined) {
+          deepStrictEqual(result.details.footer, {
+            developerDirectoryOffset: 0,
+            extensionAreaOffset: 0
+          });
+        } else {
+          deepStrictEqual(result.details.footer, testSpec.details.footer);
+        }
       }
       if (testSpec.details.extensionArea) {
         deepStrictEqual(result.details.extensionArea, testSpec.details.extensionArea);
