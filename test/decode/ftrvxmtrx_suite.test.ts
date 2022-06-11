@@ -12,11 +12,8 @@ const suiteRoot = 'test/tga-test-suite/ftrvxmtrx';
 
 const commonHeader: ITgaHeader = {
   idLength: 0,
-  colorMapType: ColorMapType.NoColorMap,
   imageType: ImageType.NoImageData,
-  colorMapOrigin: 0,
-  colorMapLength: 0,
-  colorMapDepth: 0,
+  colorMap: undefined,
   xOrigin: 0,
   yOrigin: 0,
   width: 64,
@@ -152,9 +149,12 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         ...commonHeader,
         imageType: ImageType.UncompressedColorMapped,
         bitDepth: 8,
-        colorMapDepth: 24,
-        colorMapLength: 29,
-        colorMapType: ColorMapType.ColorMap,
+        colorMap: {
+          type: ColorMapType.ColorMap,
+          depth: 24,
+          length: 29,
+          origin: 0
+        }
       },
       footer: {
         developerDirectoryOffset: 0,
@@ -216,9 +216,12 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         ...commonHeader,
         imageType: ImageType.RunLengthEncodedColorMapped,
         bitDepth: 8,
-        colorMapDepth: 32,
-        colorMapLength: 59,
-        colorMapType: ColorMapType.ColorMap,
+        colorMap: {
+          type: ColorMapType.ColorMap,
+          depth: 32,
+          length: 59,
+          origin: 0
+        },
         yOrigin: 16448,
         imageDescriptor: 32,
         screenOrigin: ScreenOrigin.TopLeft

@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { IDeveloperDirectoryEntry, IExtensionArea } from '../../typings/api.js';
+import { IDeveloperDirectoryEntry, IExtensionArea, ITgaColorMap } from '../../typings/api.js';
 import { ColorMapType, IDecodedTga, IDecodeTgaOptions, IImage32, ImageType, IReadPixelDelegate, ITgaDecodeContext, ITgaFooter, ITgaHeader, ITgaInitialDecodeContext, ScreenOrigin } from '../shared/types.js';
 import { DecodeError, DecodeWarning, handleWarning } from './assert.js';
 import { ByteStreamReader } from './byteStreamReader.js';
@@ -57,13 +57,13 @@ export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaO
 
   ctx.reader.offset = colorMapOffset;
 
-  if (ctx.header.colorMapType === ColorMapType.ColorMap) {
-    ctx.colorMap = parseColorMap(ctx);
+  if (ctx.header.colorMap?.type === ColorMapType.ColorMap) {
+    ctx.colorMap = parseColorMap(ctx, ctx.header.colorMap);
   }
 
   ctx.hasAlpha = (
     (
-      ctx.colorMap && ctx.header.colorMapDepth === 32
+      ctx.colorMap && ctx.header.colorMap?.depth === 32
     ) || (
       (
         ctx.header.attributeBitsPerPixel > 0 ||
@@ -143,11 +143,13 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeader {
   const screenOrigin = ((imageDescriptor & ImageDescriptorMask.ScreenOrigin) >> ImageDescriptorShift.ScreenOrigin) as ScreenOrigin;
   return {
     idLength,
-    colorMapType,
+    colorMap: colorMapType !== ColorMapType.NoColorMap ? {
+      type: colorMapType,
+      depth: colorMapDepth,
+      length: colorMapLength,
+      origin: colorMapOrigin
+    } : undefined,
     imageType,
-    colorMapOrigin,
-    colorMapLength,
-    colorMapDepth,
     xOrigin,
     yOrigin,
     width,
@@ -159,13 +161,13 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeader {
   };
 }
 
-function parseColorMap(ctx: ITgaDecodeContext): IReadPixelDelegate {
+function parseColorMap(ctx: ITgaDecodeContext, colorMap: ITgaColorMap): IReadPixelDelegate {
   const colorMapOffset = ctx.reader.offset;
-  const bytesPerEntry = Math.ceil(ctx.header.colorMapDepth / 8);
+  const bytesPerEntry = Math.ceil(colorMap.depth / 8);
   // Skip the length of the color map
-  ctx.reader.offset += ctx.header.colorMapLength * bytesPerEntry;
+  ctx.reader.offset += colorMap.length * bytesPerEntry;
   let readPixel: IReadPixelDelegate;
-  switch (ctx.header.colorMapDepth) {
+  switch (colorMap.depth) {
     case 15: readPixel = readPixel15Bit; break;
     case 16:
       if (ctx.hasAlpha) {

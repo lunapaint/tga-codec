@@ -92,7 +92,6 @@ export interface ITgaDetails {
   developerDirectory?: IDeveloperDirectoryEntry[];
 }
 
-// TODO: Move color map into object
 // TODO: Move origin into object
 export interface ITgaHeader {
   /**
@@ -102,36 +101,15 @@ export interface ITgaHeader {
    */
   idLength: number;
   /**
-   * The type of color map.
-   *
-   * Field 2, 8 bit unsigned
+   * The optional color map of the TGA.
    */
-  colorMapType: ColorMapType;
+  colorMap: ITgaColorMap | undefined,
   /**
    * The type of image.
    *
    * Field 3, 8 bit unsigned
    */
   imageType: ImageType;
-  /**
-   * The index of the starting entry when loading the color map. This allows ignoring the beginning
-   * of the color map.
-   *
-   * Field 4.1, 16 bit unsigned
-   */
-  colorMapOrigin: number;
-  /**
-   * The total number of entries in the color map.
-   *
-   * Field 4.2, 16 bit unsigned
-   */
-  colorMapLength: number;
-  /**
-   * The bits per entry of the color map. This is typically 15, 16, 24 or 32.
-   *
-   * Field 4.3, 8 bit unsigned
-   */
-  colorMapDepth: number;
   /**
    * These bytes specify the absolute horizontal coordinate for the lower left corner of the image
    * as it is positioned on a display device having an origin at the lower left of the screen. This
@@ -336,6 +314,34 @@ export interface IImage32 {
  * \* Alpha bits may get ignored
  */
 export type BitDepth = 8 | 15 | 16 | 24 | 32;
+
+export interface ITgaColorMap {
+  /**
+   * The type of color map.
+   *
+   * Field 2, 8 bit unsigned
+   */
+  type: ColorMapType;
+  /**
+   * The index of the starting entry when loading the color map. This allows ignoring the beginning
+   * of the color map.
+   *
+   * Field 4.1, 16 bit unsigned
+   */
+  origin: number;
+  /**
+   * The total number of entries in the color map.
+   *
+   * Field 4.2, 16 bit unsigned
+   */
+  length: number;
+  /**
+   * The bits per entry of the color map. This is typically 15, 16, 24 or 32.
+   *
+   * Field 4.3, 8 bit unsigned
+   */
+  depth: number;
+}
 
 export const enum ColorMapType {
   NoColorMap = 0,

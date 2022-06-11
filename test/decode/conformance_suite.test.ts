@@ -73,11 +73,8 @@ const commonExtensionArea: IExtensionArea = {
 };
 const commonHeader: ITgaHeader = {
   idLength: 26,
-  colorMapType: ColorMapType.NoColorMap,
   imageType: ImageType.NoImageData,
-  colorMapOrigin: 0,
-  colorMapLength: 0,
-  colorMapDepth: 0,
+  colorMap: undefined,
   xOrigin: 0,
   yOrigin: 0,
   width: 128,
@@ -120,9 +117,12 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         ...commonHeader,
         bitDepth: 8,
         imageType: ImageType.RunLengthEncodedColorMapped,
-        colorMapDepth: 16,
-        colorMapLength: 256,
-        colorMapType: ColorMapType.ColorMap
+        colorMap: {
+          type: ColorMapType.ColorMap,
+          depth: 16,
+          length: 256,
+          origin: 0
+        }
       },
       footer: {
         developerDirectoryOffset: 0,
@@ -195,9 +195,12 @@ const testFiles: { [file: string]: ITestDecodedTga } = {
         ...commonHeader,
         imageType: ImageType.UncompressedColorMapped,
         bitDepth: 8,
-        colorMapDepth: 16,
-        colorMapLength: 256,
-        colorMapType: ColorMapType.ColorMap
+        colorMap: {
+          type: ColorMapType.ColorMap,
+          depth: 16,
+          length: 256,
+          origin: 0
+        }
       },
       footer: {
         developerDirectoryOffset: 0,
