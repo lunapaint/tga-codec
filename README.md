@@ -13,6 +13,40 @@ You can try it out on [`vscode.dev`](https://vscode.dev/) by installing the Luna
 - **Readable Codebase**: A big part of this was a learning exercise for me so I put some effort in to make the code as readable as possible to help others on the same journey.
 - **Error tolerant**: Images will still load with warnings unless a critical error is hit.
 
+
+## Install
+
+The supported way of installing the project is through npm:
+
+```
+npm install @lunapaint/tga-codec
+```
+
+Alternatively, you could add the repo as a git submodule, or download the source from the GitHub [releases page](https://github.com/lunapaint/tga-codec/releases).
+
+
+## API
+
+Basic usage:
+
+```ts
+import { decodeTga } from '@lunapaint/tga-codec';
+import * as fs from 'fs/promises';
+
+async function decode(filepath) {
+  const data = await fs.readFile(filepath);
+  const decoded = await decodeTga(data);
+  console.log('decoded image', decoded.image.data);
+  // [r, g, b, a, ...]
+}
+```
+
+The full API is documented as a TypeScript `.d.ts` declaration file. The view the API:
+
+- [github.dev](https://github.dev/lunapaint/tga-codec/blob/main/typings/api.d.ts): View on the web in VS Code, which has symbol support out of the box. Try showing the Outline view and triggering the `Go to Symbol in Editor` command
+- [github.com](https://github.com/lunapaint/tga-codec/blob/main/typings/api.d.ts): View the raw file in github.com.
+
+
 ## Decoder support details
 
 While writing this codec I became aware that other TGA decoders are inconsistent, don't handle seemingly common cases and the spec is ambiguous. Some examples of these issues:
