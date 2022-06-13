@@ -13,3 +13,11 @@ git submodule update --init --recursive
 ```sh
 npm run watch
 ```
+
+## Decoding an image
+
+```sh
+# Decode an existing tga image and print object to console
+npm run decode <file>
+```
+
