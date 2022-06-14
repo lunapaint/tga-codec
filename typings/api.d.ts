@@ -17,6 +17,14 @@
 export function decodeTga(data: Readonly<Uint8Array>, options?: IDecodeTgaOptions): Promise<IDecodedTga>;
 
 /**
+ * Encodes a tga file.
+ *
+ * @param data The image data in rgba format.
+ * @param options Options to configure how encoding happens.
+ */
+export function encodeTga(data: Readonly<IImage32>, options?: IEncodeTgaOptions): Promise<IEncodedTga>;
+
+/**
  * A TGA that has been successfully decoded.
  */
 export interface IDecodedTga {
@@ -68,6 +76,46 @@ export interface IDecodeTgaOptions {
    * would has failed in strict mode in {@link IDecodedTga.warnings}.
    */
   strictMode?: boolean;
+}
+
+/**
+ * A tga that has been successfully decoded.
+ */
+export interface IEncodedTga {
+  data: Uint8Array;
+
+  /**
+   * Any warnings that were encountered during encoding. Warnings typically fall into the following
+   * categories:
+   *
+   * - An explicitly provided color type must be changed in order to encode the image (eg.
+   * specifying Truecolor but having more than one transparent pixel).
+   *
+   * Strict mode can be enabled via {@link IEncodePngOptions.strictMode} which will throw an error
+   * when any warning is encountered.
+   */
+  warnings: EncodeWarning[];
+
+  /**
+   * Any informational messages when encoding. These are things of note but not important enough to
+   * be a warning.
+   */
+  info: string[];
+}
+
+// TODO: Docs
+export interface IEncodeTgaOptions {
+  /**
+   * The bit depth to encode with. When unspecified, the library will scan the image and determine
+   * the best value based on the content, it's best to pass this in if know to avoid the scan
+   * iterating over every pixel in the image.
+   */
+  bitDepth?: BitDepth;
+
+  /**
+   * Enabled strict encoding which will throw when warnings are encountered.
+   */
+   strictMode?: boolean;
 }
 
 /**
@@ -391,6 +439,26 @@ export class DecodeError extends Error {
  * A warning occurred during decoding.
  */
 export class DecodeWarning extends Error {
+  /**
+   * The byte offset of the warning in the datastream.
+   */
+  offset: number;
+}
+
+/**
+ * A critical error occurred during encoding.
+ */
+export class EncodeError extends Error {
+  /**
+   * The byte offset of the error in the datastream.
+   */
+  offset: number;
+}
+
+/**
+ * A warning occurred during encoding.
+ */
+ export class EncodeWarning extends Error {
   /**
    * The byte offset of the warning in the datastream.
    */

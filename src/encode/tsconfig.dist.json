@@ -3,11 +3,9 @@
   "compilerOptions": {
     "removeComments": true,
     "sourceMap": false,
-    "outDir": "../../out-dist/public"
+    "outDir": "../../out-dist/encode"
   },
   "references": [
-    { "path": "../decode/tsconfig.dist.json" },
-    { "path": "../encode/tsconfig.dist.json" },
     { "path": "../shared/tsconfig.dist.json" }
   ]
 }

@@ -19,9 +19,12 @@ export {
 } from '../../typings/api.js';
 
 import {
+  BitDepth,
   DecodeWarning,
+  EncodeWarning,
   IDecodeTgaOptions,
   IDeveloperDirectoryEntry,
+  IEncodeTgaOptions,
   IExtensionArea,
   IImage32,
   ITgaFooter,
@@ -63,3 +66,10 @@ export interface IByteStreamReader {
 }
 
 export type ColorMapDepth = 15 | 16 | 24 | 32;
+
+export interface IEncodeContext {
+  bitDepth: BitDepth;
+  options: IEncodeTgaOptions;
+  warnings: EncodeWarning[];
+  info: string[];
+}
