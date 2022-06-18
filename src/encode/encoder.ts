@@ -23,6 +23,7 @@ export async function encodeTga(image: Readonly<IImage32>, options: IEncodeTgaOp
   if (ctx.imageId.length > 0) {
     sections.push(writeImageId(ctx));
   }
+  sections.push(writeImageData(ctx));
   // console.log('sections', sections);
 
   // Merge sections into a single typed array
@@ -69,7 +70,6 @@ function writeTgaHeader(ctx: IEncodeContext): Uint8Array {
   // TODO: Support setting y origin
   stream.writeUint16(0);
   // Width
-  console.log('offset', stream.offset);
   stream.writeUint16(ctx.image.width);
   // Height
   stream.writeUint16(ctx.image.height);
@@ -92,8 +92,22 @@ function writeImageId(ctx: IEncodeContext): Uint8Array {
   return stream.array;
 }
 
-// function writeImageData(ctx: IEncodeContext): Uint8Array {
-// }
+function writeImageData(ctx: IEncodeContext): Uint8Array {
+  const stream = new ByteStream(ctx.image.width * ctx.image.height * 4, true);
+  let imageOffset = 0;
+  for (let y = ctx.image.height - 1; y >= 0; y--) {
+    imageOffset = ctx.image.width * y * 4;
+    for (let x = 0; x < ctx.image.width; x++) {
+      // Bytes stored as BGRA
+      stream.writeUint8(ctx.image.data[imageOffset + 2]);
+      stream.writeUint8(ctx.image.data[imageOffset + 1]);
+      stream.writeUint8(ctx.image.data[imageOffset + 0]);
+      stream.writeUint8(ctx.image.data[imageOffset + 3]);
+      imageOffset += 4;
+    }
+  }
+  return stream.array;
+}
 
 
   // let i = 0;
