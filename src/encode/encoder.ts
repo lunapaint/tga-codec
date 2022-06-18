@@ -10,15 +10,10 @@ import { EncodeError, EncodeWarning } from './assert.js';
 import { ByteStream } from './byteStream.js';
 
 export async function encodeTga(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): Promise<IEncodedTga> {
-  if (image.data.length !== image.width * image.height * 4) {
-    throw new EncodeError(`Provided image data length (${image.data.length}) is not expected length (${image.width * image.height * 4})`, Math.min(image.data.length, image.width * image.height * 4) - 1);
-  }
+  const ctx = analyze(image, options);
 
   // Create all file sections
   const sections: Uint8Array[] = [];
-
-  const ctx = analyze(image, options);
-
   sections.push(writeTgaHeader(ctx));
   if (ctx.imageId.length > 0) {
     sections.push(writeImageId(ctx));
@@ -85,7 +80,9 @@ function writeTgaHeader(ctx: IEncodeContext): Uint8Array {
 
 function writeImageId(ctx: IEncodeContext): Uint8Array {
   const stream = new ByteStream(ctx.imageId.length, true);
-
+  for (let i = 0; i < ctx.imageId.length; i++) {
+    stream.writeUint8(ctx.imageId.charCodeAt(i));
+  }
   stream.assertAtEnd();
   return stream.array;
 }
@@ -107,32 +104,27 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
   return stream.array;
 }
 
-
-  // let i = 0;
-  // // Keyword
-  // for (; i < keyword.length; i++) {
-  //   stream.writeUint8(keyword.charCodeAt(i));
-  // }
-  // // Null separator
-  // stream.writeUint8(0);
-  // // Text
-  // for (i = 0; i < text.length; i++) {
-  //   stream.writeUint8(text.charCodeAt(i));
-  // }
-// }
-
 function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): IEncodeContext {
   const warnings: EncodeWarning[] = [];
   const info: string[] = [];
 
+  if (image.width > 65535) {
+    throw new EncodeError(`Image width is out of range (${image.width} > 65535)`, -1);
+  }
+  if (image.height > 65535) {
+    throw new EncodeError(`Image height is out of range (${image.height} > 65535)`, -1);
+  }
+  if (image.data.length !== image.width * image.height * 4) {
+    throw new EncodeError(`Provided image data length (${image.data.length}) is not expected length (${image.width * image.height * 4})`, Math.min(image.data.length, image.width * image.height * 4) - 1);
+  }
   if (options.imageId && options.imageId.length > 255) {
-    throw new EncodeError(`Image ID length is out of range (${options.imageId} > 255)`, -1);
+    throw new EncodeError(`Image ID length is out of range (${options.imageId.length} > 255)`, -1);
   }
   if (options.origin && (options.origin.x || 0) > 65535) {
-    throw new EncodeError(`IEncodeTGAOptions.origin.x is out of range (${options.origin.x} > 65535)`, -1);
+    throw new EncodeError(`X origin is out of range (${options.origin.x} > 65535)`, -1);
   }
   if (options.origin && (options.origin.y || 0) > 65535) {
-    throw new EncodeError(`IEncodeTGAOptions.origin.y is out of range (${options.origin.y} > 65535)`, -1);
+    throw new EncodeError(`Y origin is out of range (${options.origin.y} > 65535)`, -1);
   }
 
   // TODO: Analyze image and get actual bit depth
