@@ -6,7 +6,7 @@
 
 import { IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
 import { IEncodeContext, IImage32, ImageType } from '../shared/types.js';
-import { EncodeError, EncodeWarning } from './assert.js';
+import { EncodeError, EncodeWarning, handleWarning } from './assert.js';
 import { ByteStream } from './byteStream.js';
 
 export async function encodeTga(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): Promise<IEncodedTga> {
@@ -156,6 +156,10 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
 function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): IEncodeContext {
   const warnings: EncodeWarning[] = [];
   const info: string[] = [];
+  const partialCtx: Pick<IEncodeContext, 'options' | 'warnings'> = {
+    options,
+    warnings
+  };
 
   if (image.width > 65535) {
     throw new EncodeError(`Image width is out of range (${image.width} > 65535)`, -1);
@@ -174,6 +178,12 @@ function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): IE
   }
   if (options.origin && (options.origin.y || 0) > 65535) {
     throw new EncodeError(`Y origin is out of range (${options.origin.y} > 65535)`, -1);
+  }
+  if (options.screenOrigin === ScreenOrigin.BottomRight) {
+    handleWarning(partialCtx, new EncodeWarning('This image is encoded using a bottom right screen origin, many image editors won\'t read this correctly', 17));
+  }
+  if (options.screenOrigin === ScreenOrigin.TopRight) {
+    handleWarning(partialCtx, new EncodeWarning('This image is encoded using a top right screen origin, many image editors won\'t read this correctly', 17));
   }
 
   // TODO: Analyze image and get actual bit depth

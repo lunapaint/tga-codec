@@ -5,6 +5,7 @@
  */
 
 import { deepStrictEqual } from 'assert';
+import { IEncodedTga } from '../../../typings/api.js';
 import { decodeTga } from '../../decode/decoder.js';
 import { encodeTga } from '../../encode/encoder.js';
 import { IDecodedTga, IEncodeTgaOptions, IImage32, ScreenOrigin } from '../../shared/types.js';
@@ -23,11 +24,12 @@ const testImage: Readonly<IImage32> = {
   height: 2
 };
 
-async function assertEncodeDecodeResult<T>(options: IEncodeTgaOptions, getTestProperty: (decoded: IDecodedTga) => T, expected: T, warnings: string[] = []) {
+async function assertEncodeDecodeResult<T>(options: IEncodeTgaOptions, getTestProperty: (decoded: IDecodedTga) => T, expected: T, decodeWarnings: string[] = [], encodeWarnings: string[] = []) {
   const encoded = await encodeTga(testImage, options);
   const decoded = await decodeTga(encoded.data);
   deepStrictEqual(getTestProperty(decoded), expected);
-  deepStrictEqual(decoded.warnings.map(e => e.message), warnings);
+  deepStrictEqual(encoded.warnings.map(e => e.message), encodeWarnings);
+  deepStrictEqual(decoded.warnings.map(e => e.message), decodeWarnings);
 }
 
 describe('encoder', () => {
@@ -59,14 +61,20 @@ describe('encoder', () => {
           await assertEncodeDecodeResult({}, e => e.image, testImage);
           await assertEncodeDecodeResult({ screenOrigin: ScreenOrigin.BottomLeft }, e => e.image, testImage);
         });
-        it('top left', async () => {
-          await assertEncodeDecodeResult({ screenOrigin: ScreenOrigin.TopLeft }, e => e.image, testImage, ['This image is encoded using a top right screen origin, many image editors won\'t read this correctly']);
-        });
         it('bottom right', async () => {
-          await assertEncodeDecodeResult({ screenOrigin: ScreenOrigin.BottomRight }, e => e.image, testImage);
+          await assertEncodeDecodeResult({ screenOrigin: ScreenOrigin.BottomRight }, e => e.image, testImage,
+            ['This image is encoded using a bottom right screen origin, many image editors won\'t read this correctly'],
+            ['This image is encoded using a bottom right screen origin, many image editors won\'t read this correctly']
+         );
+        });
+        it('top left', async () => {
+          await assertEncodeDecodeResult({ screenOrigin: ScreenOrigin.TopLeft }, e => e.image, testImage);
         });
         it('top right', async () => {
-          await assertEncodeDecodeResult({ screenOrigin: ScreenOrigin.TopRight }, e => e.image, testImage, 'This image is encoded using a top right screen origin, many image editors won\'t read this correctly']);
+          await assertEncodeDecodeResult({ screenOrigin: ScreenOrigin.TopRight }, e => e.image, testImage,
+            ['This image is encoded using a top right screen origin, many image editors won\'t read this correctly'],
+            ['This image is encoded using a top right screen origin, many image editors won\'t read this correctly']
+          );
         });
       });
     });
