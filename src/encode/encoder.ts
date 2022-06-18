@@ -126,7 +126,13 @@ function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): IE
   const info: string[] = [];
 
   if (options.imageId && options.imageId.length > 255) {
-    throw new EncodeError(`Image ID length too high ${options.imageId} > 255`, -1);
+    throw new EncodeError(`Image ID length is out of range (${options.imageId} > 255)`, -1);
+  }
+  if (options.origin && (options.origin.x || 0) > 65535) {
+    throw new EncodeError(`IEncodeTGAOptions.origin.x is out of range (${options.origin.x} > 65535)`, -1);
+  }
+  if (options.origin && (options.origin.y || 0) > 65535) {
+    throw new EncodeError(`IEncodeTGAOptions.origin.y is out of range (${options.origin.y} > 65535)`, -1);
   }
 
   // TODO: Analyze image and get actual bit depth
