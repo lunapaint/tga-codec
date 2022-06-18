@@ -4,9 +4,9 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { BitDepth, IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
+import { IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
 import { IByteStream, IEncodeContext, IImage32, ImageType, IWritePixelDelegate } from '../shared/types.js';
-import { EncodeError, EncodeWarning, handleWarning } from './assert.js';
+import { analyze } from './analyze.js';
 import { ByteStream } from './byteStream.js';
 
 export async function encodeTga(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): Promise<IEncodedTga> {
@@ -98,6 +98,8 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
   let imageOffset = 0;
   let writePixel: IWritePixelDelegate;
   switch (ctx.bitDepth) {
+    case 15: writePixel = writePixel15Bit; break;
+    case 16: writePixel = writePixel16Bit; break;
     case 24: writePixel = writePixel24Bit; break;
     case 32: writePixel = writePixel32Bit; break;
     default:
@@ -146,81 +148,36 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
   return stream.array;
 }
 
-function writePixel24Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number): number {
+function writePixel15Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number) {
+  // Bits stored as 0b_RRRRRGG 0bGGGBBBBB
+  stream.writeUint16(
+    (((imageData[imageOffset + 0] >> 3) & 0x1f) << 10) |
+    (((imageData[imageOffset + 1] >> 3) & 0x1f) <<  5) |
+    (((imageData[imageOffset + 2] >> 3) & 0x1f) <<  0)
+  );
+}
+
+function writePixel16Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number) {
+  // Bits stored as 0bARRRRRGG 0bGGGBBBBB
+  stream.writeUint16(
+    (((imageData[imageOffset + 0] >> 3) & 0x1f) << 10) |
+    (((imageData[imageOffset + 1] >> 3) & 0x1f) <<  5) |
+    (((imageData[imageOffset + 2] >> 3) & 0x1f) <<  0) |
+    (imageData[imageOffset + 3] === 255 ? (1 << 15) : 0)
+  );
+}
+
+function writePixel24Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number) {
   // Bytes stored as BGR
   stream.writeUint8(imageData[imageOffset + 2]);
   stream.writeUint8(imageData[imageOffset + 1]);
   stream.writeUint8(imageData[imageOffset + 0]);
-  return 3;
 }
 
-function writePixel32Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number): number {
+function writePixel32Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number) {
   // Bytes stored as BGRA
   stream.writeUint8(imageData[imageOffset + 2]);
   stream.writeUint8(imageData[imageOffset + 1]);
   stream.writeUint8(imageData[imageOffset + 0]);
   stream.writeUint8(imageData[imageOffset + 3]);
-  return 4;
-}
-
-function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): IEncodeContext {
-  const warnings: EncodeWarning[] = [];
-  const info: string[] = [];
-  const partialCtx: Pick<IEncodeContext, 'options' | 'warnings'> = {
-    options,
-    warnings
-  };
-
-  if (image.width > 65535) {
-    throw new EncodeError(`Image width is out of range (${image.width} > 65535)`, -1);
-  }
-  if (image.height > 65535) {
-    throw new EncodeError(`Image height is out of range (${image.height} > 65535)`, -1);
-  }
-  if (image.data.length !== image.width * image.height * 4) {
-    throw new EncodeError(`Provided image data length (${image.data.length}) is not expected length (${image.width * image.height * 4})`, Math.min(image.data.length, image.width * image.height * 4) - 1);
-  }
-  if (options.imageId && options.imageId.length > 255) {
-    throw new EncodeError(`Image ID length is out of range (${options.imageId.length} > 255)`, -1);
-  }
-  if (options.origin && (options.origin.x || 0) > 65535) {
-    throw new EncodeError(`X origin is out of range (${options.origin.x} > 65535)`, -1);
-  }
-  if (options.origin && (options.origin.y || 0) > 65535) {
-    throw new EncodeError(`Y origin is out of range (${options.origin.y} > 65535)`, -1);
-  }
-  if (options.screenOrigin === ScreenOrigin.BottomRight) {
-    handleWarning(partialCtx, new EncodeWarning('This image is encoded using a bottom right screen origin, many image editors won\'t read this correctly', 17));
-  }
-  if (options.screenOrigin === ScreenOrigin.TopRight) {
-    handleWarning(partialCtx, new EncodeWarning('This image is encoded using a top right screen origin, many image editors won\'t read this correctly', 17));
-  }
-
-  // Analyze data
-  const pixelCount = image.width * image.height;
-  const indexCount = pixelCount * 4;
-  let hasTransparency = false;
-  for (let i = 0; i < indexCount; i += 4) {
-    hasTransparency ||= image.data[i + 3] < 255;
-  }
-
-  // TODO: Support setting options.bitDepth explicitly
-  // TODO: Support more bit depths
-  let bitDepth: BitDepth | undefined = options.bitDepth;
-  if (!bitDepth) {
-    bitDepth = hasTransparency ? 32 : 24;
-  }
-
-  if (bitDepth === 24 && hasTransparency) {
-    handleWarning({ options, warnings }, new EncodeWarning(`Cannot encode 24 bit image without data loss as it contains transparent colors`, 0));
-  }
-
-  return {
-    bitDepth,
-    imageId: options.imageId || '',
-    options,
-    warnings,
-    info,
-    image
-  };
 }

@@ -27,7 +27,7 @@ const testImage: Readonly<IImage32> = {
 async function assertEncodeDecodeResult<T>(options: IEncodeTgaOptions, getTestProperty: (decoded: IDecodedTga) => T, expected: T, decodeWarnings: string[] = [], encodeWarnings: string[] = []) {
   const encoded = await encodeTga(testImage, options);
   const decoded = await decodeTga(encoded.data);
-  deepStrictEqual(decoded.image, testImage, 'Image data that was encoded and redecoded doesn\'t match original');
+  deepStrictEqual(decoded.image, testImage, 'Image data that was encoded and re-decoded doesn\'t match original');
   deepStrictEqual(getTestProperty(decoded), expected);
   deepStrictEqual(encoded.warnings.map(e => e.message), encodeWarnings);
   deepStrictEqual(decoded.warnings.map(e => e.message), decodeWarnings);
@@ -49,12 +49,17 @@ describe('encoder', () => {
     });
     describe('options', () => {
       describe('bitDepth', () => {
+        it('15', async () => {
+          await assertEncodeDecodeResult({ }, e => e.details.header.bitDepth, 15);
+          await assertEncodeDecodeResult({ bitDepth: 15 }, e => e.details.header.bitDepth, 15);
+        });
+        it('16', async () => {
+          await assertEncodeDecodeResult({ bitDepth: 16 }, e => e.details.header.bitDepth, 16);
+        });
         it('24', async () => {
-          await assertEncodeDecodeResult({ }, e => e.details.header.bitDepth, 24);
-          await assertEncodeDecodeResult({ bitDepth: 24 }, e => e.details.header.bitDepth, 24);
           await assertEncodeDecodeResult({ bitDepth: 24 }, e => e.details.header.bitDepth, 24);
         });
-        it('24 (transparent image)', async () => {
+        it('24 (transparency data loss)', async () => {
           const encoded = await encodeTga({
             data: new Uint8Array([
               255, 0, 0, 255,
