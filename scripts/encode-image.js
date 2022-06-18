@@ -16,7 +16,7 @@ async function encode(file) {
   console.log('Encoding: ' + file);
   const originalData = await fs.readFile(file);
   const decoded = await decoder.decodeTga(originalData);
-  const encoded = await encoder.encodeTga(decoded.image);
+  const encoded = await encoder.encodeTga(decoded.image, { screenOrigin: 3 });
   const filename = join(dirname(file), `${basename(file, '.tga')}_tga-codec.tga`);
   fs.writeFile(filename, encoded.data);
   console.log(`wrote ${encoded.data.length} bytes to ${filename}`);

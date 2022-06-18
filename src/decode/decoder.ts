@@ -141,6 +141,14 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeader {
   const imageDescriptor = ctx.reader.readUint8();
   const attributeBitsPerPixel = (imageDescriptor & ImageDescriptorMask.AttributeBits) >> ImageDescriptorShift.AttributeBits;
   const screenOrigin = ((imageDescriptor & ImageDescriptorMask.ScreenOrigin) >> ImageDescriptorShift.ScreenOrigin) as ScreenOrigin;
+  // While the spec does defines TopRight and BottomRight, these are basically never used and
+  // often unsupported by image editors. Because of this a warning is added when they are used.
+  if (screenOrigin === ScreenOrigin.BottomRight) {
+    handleWarning(ctx, new DecodeWarning('This image is encoded using a bottom right screen origin, many image editors won\'t read this correctly', ctx.reader.offset - 1));
+  }
+  if (screenOrigin === ScreenOrigin.TopRight) {
+    handleWarning(ctx, new DecodeWarning('This image is encoded using a top right screen origin, many image editors won\'t read this correctly', ctx.reader.offset - 1));
+  }
   return {
     idLength,
     colorMap: colorMapType !== ColorMapType.NoColorMap ? {
@@ -233,25 +241,49 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
     view = new DataView(decoded.buffer, decoded.byteOffset, decoded.length);
     offset = 0;
   }
-  // While the spec does define TopRight and BottomRight, these are basically never used and
-  // seemingly never supported to save by image editors. It's also very difficult to find sample
-  // files to test against.
-  if (ctx.header.screenOrigin === ScreenOrigin.TopLeft) {
-    let imageOffset = 0;
-    for (let y = 0; y < image.height; y++) {
-      for (let x = 0; x < image.width; x++) {
-        offset += readPixel(image.data, imageOffset, view, offset);
-        imageOffset += 4;
+  switch (ctx.header.screenOrigin) {
+    case ScreenOrigin.BottomLeft: {
+      let imageOffset = 0;
+      for (let y = image.height - 1; y >= 0; y--) {
+        imageOffset = ctx.header.width * y * 4;
+        for (let x = 0; x < image.width; x++) {
+          offset += readPixel(image.data, imageOffset, view, offset);
+          imageOffset += 4;
+        }
       }
+      break;
     }
-  } else {
-    let imageOffset = 0;
-    for (let y = image.height - 1; y >= 0; y--) {
-      imageOffset = ctx.header.width * y * 4;
-      for (let x = 0; x < image.width; x++) {
-        offset += readPixel(image.data, imageOffset, view, offset);
-        imageOffset += 4;
+    case ScreenOrigin.BottomRight: {
+      let imageOffset = 0;
+      for (let y = image.height - 1; y >= 0; y--) {
+        imageOffset = (ctx.header.width * y + (ctx.header.width - 1)) * 4;
+        for (let x = 0; x < image.width; x++) {
+          offset += readPixel(image.data, imageOffset, view, offset);
+          imageOffset -= 4;
+        }
       }
+      break;
+    }
+    case ScreenOrigin.TopLeft: {
+      let imageOffset = 0;
+      for (let y = 0; y < image.height; y++) {
+        for (let x = 0; x < image.width; x++) {
+          offset += readPixel(image.data, imageOffset, view, offset);
+          imageOffset += 4;
+        }
+      }
+      break;
+    }
+    case ScreenOrigin.TopRight: {
+      let imageOffset = 0;
+      for (let y = 0; y < image.height; y++) {
+        imageOffset = (ctx.header.width * y + (ctx.header.width - 1)) * 4;
+        for (let x = 0; x < image.width; x++) {
+          offset += readPixel(image.data, imageOffset, view, offset);
+          imageOffset -= 4;
+        }
+      }
+      break;
     }
   }
   if (ctx.ambiguousAlpha && !ctx.options.strictMode && ctx.options.detectAmbiguousAlphaChannel) {

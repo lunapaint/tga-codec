@@ -110,6 +110,19 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
         }
       }
       break;
+    case ScreenOrigin.BottomRight:
+      for (let y = ctx.image.height - 1; y >= 0; y--) {
+        imageOffset = (ctx.image.width * y + (ctx.image.width - 1)) * 4;
+        for (let x = 0; x < ctx.image.width; x++) {
+          // Bytes stored as BGRA
+          stream.writeUint8(ctx.image.data[imageOffset + 2]);
+          stream.writeUint8(ctx.image.data[imageOffset + 1]);
+          stream.writeUint8(ctx.image.data[imageOffset + 0]);
+          stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          imageOffset -= 4;
+        }
+      }
+      break;
     case ScreenOrigin.TopLeft:
       for (let y = 0; y < ctx.image.height; y++) {
         imageOffset = ctx.image.width * y * 4;
@@ -120,6 +133,19 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
           stream.writeUint8(ctx.image.data[imageOffset + 0]);
           stream.writeUint8(ctx.image.data[imageOffset + 3]);
           imageOffset += 4;
+        }
+      }
+      break;
+    case ScreenOrigin.TopRight:
+      for (let y = 0; y < ctx.image.height; y++) {
+        imageOffset = (ctx.image.width * y + (ctx.image.width - 1)) * 4;
+        for (let x = 0; x < ctx.image.width; x++) {
+          // Bytes stored as BGRA
+          stream.writeUint8(ctx.image.data[imageOffset + 2]);
+          stream.writeUint8(ctx.image.data[imageOffset + 1]);
+          stream.writeUint8(ctx.image.data[imageOffset + 0]);
+          stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          imageOffset -= 4;
         }
       }
       break;
