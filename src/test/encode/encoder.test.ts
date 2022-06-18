@@ -27,6 +27,7 @@ const testImage: Readonly<IImage32> = {
 async function assertEncodeDecodeResult<T>(options: IEncodeTgaOptions, getTestProperty: (decoded: IDecodedTga) => T, expected: T, decodeWarnings: string[] = [], encodeWarnings: string[] = []) {
   const encoded = await encodeTga(testImage, options);
   const decoded = await decodeTga(encoded.data);
+  deepStrictEqual(decoded.image, testImage, 'Image data that was encoded and redecoded doesn\'t match original');
   deepStrictEqual(getTestProperty(decoded), expected);
   deepStrictEqual(encoded.warnings.map(e => e.message), encodeWarnings);
   deepStrictEqual(decoded.warnings.map(e => e.message), decodeWarnings);
@@ -47,6 +48,36 @@ describe('encoder', () => {
       await throwsAsync(async () => await encodeTga(testImage, { imageId: 'a'.repeat(256) }), 'Image ID length is out of range (256 > 255)');
     });
     describe('options', () => {
+      describe('bitDepth', () => {
+        it('24', async () => {
+          await assertEncodeDecodeResult({ }, e => e.details.header.bitDepth, 24);
+          await assertEncodeDecodeResult({ bitDepth: 24 }, e => e.details.header.bitDepth, 24);
+          await assertEncodeDecodeResult({ bitDepth: 24 }, e => e.details.header.bitDepth, 24);
+        });
+        it('24 (transparent image)', async () => {
+          const encoded = await encodeTga({
+            data: new Uint8Array([
+              255, 0, 0, 255,
+              0, 255, 0, 255,
+              0, 0, 255, 128, // <- alpha
+              255, 255, 255, 255
+            ]),
+            width: 2,
+            height: 2
+          }, { bitDepth: 24 });
+          deepStrictEqual(encoded.warnings.map(e => e.message), ['Cannot encode 24 bit image without data loss as it contains transparent colors']);
+          const decoded = await decodeTga(encoded.data);
+          deepStrictEqual(decoded.image.data, new Uint8Array([
+            255, 0, 0, 255,
+            0, 255, 0, 255,
+            0, 0, 255, 255, // <- lost alpha
+            255, 255, 255, 255
+          ]));
+        });
+        it('32', async () => {
+          await assertEncodeDecodeResult({ bitDepth: 32 }, e => e.details.header.bitDepth, 32);
+        });
+      });
       describe('header', () => {
         it('origin', async () => {
           await assertEncodeDecodeResult({}, e => e.details.header.origin, { x: 0, y: 0 });

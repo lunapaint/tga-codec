@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
+import { BitDepth, IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
 import { IEncodeContext, IImage32, ImageType } from '../shared/types.js';
 import { EncodeError, EncodeWarning, handleWarning } from './assert.js';
 import { ByteStream } from './byteStream.js';
@@ -67,14 +67,13 @@ function writeTgaHeader(ctx: IEncodeContext): Uint8Array {
   // Height
   stream.writeUint16(ctx.image.height);
   // Bit depth
-  // TODO: Support other bit depths
-  stream.writeUint8(32);
+  stream.writeUint8(ctx.bitDepth);
   // Image descriptor
   // TODO: Support image origin
   // TODO: Support other alpha channel bits
   const imageDescriptor = (
     // alpha channel bits
-    8 |
+    (ctx.bitDepth === 32 ? 8 : 0) |
     // screen origin
     (ctx.options.screenOrigin ?? ScreenOrigin.BottomLeft) << 4
   );
@@ -94,7 +93,8 @@ function writeImageId(ctx: IEncodeContext): Uint8Array {
 }
 
 function writeImageData(ctx: IEncodeContext): Uint8Array {
-  const stream = new ByteStream(ctx.image.width * ctx.image.height * 4, true);
+  const bytesPerPixel = Math.ceil(ctx.bitDepth / 8);
+  const stream = new ByteStream(ctx.image.width * ctx.image.height * bytesPerPixel, true);
   let imageOffset = 0;
   switch (ctx.options.screenOrigin ?? ScreenOrigin.BottomLeft) {
     case ScreenOrigin.BottomLeft:
@@ -105,7 +105,9 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
           stream.writeUint8(ctx.image.data[imageOffset + 2]);
           stream.writeUint8(ctx.image.data[imageOffset + 1]);
           stream.writeUint8(ctx.image.data[imageOffset + 0]);
-          stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          if (ctx.bitDepth === 32) {
+            stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          }
           imageOffset += 4;
         }
       }
@@ -118,7 +120,9 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
           stream.writeUint8(ctx.image.data[imageOffset + 2]);
           stream.writeUint8(ctx.image.data[imageOffset + 1]);
           stream.writeUint8(ctx.image.data[imageOffset + 0]);
-          stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          if (ctx.bitDepth === 32) {
+            stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          }
           imageOffset -= 4;
         }
       }
@@ -131,7 +135,9 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
           stream.writeUint8(ctx.image.data[imageOffset + 2]);
           stream.writeUint8(ctx.image.data[imageOffset + 1]);
           stream.writeUint8(ctx.image.data[imageOffset + 0]);
-          stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          if (ctx.bitDepth === 32) {
+            stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          }
           imageOffset += 4;
         }
       }
@@ -144,12 +150,15 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
           stream.writeUint8(ctx.image.data[imageOffset + 2]);
           stream.writeUint8(ctx.image.data[imageOffset + 1]);
           stream.writeUint8(ctx.image.data[imageOffset + 0]);
-          stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          if (ctx.bitDepth === 32) {
+            stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          }
           imageOffset -= 4;
         }
       }
       break;
   }
+  stream.assertAtEnd();
   return stream.array;
 }
 
@@ -186,8 +195,25 @@ function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): IE
     handleWarning(partialCtx, new EncodeWarning('This image is encoded using a top right screen origin, many image editors won\'t read this correctly', 17));
   }
 
-  // TODO: Analyze image and get actual bit depth
-  const bitDepth = options.bitDepth || 32;
+  // Analyze data
+  const pixelCount = image.width * image.height;
+  const indexCount = pixelCount * 4;
+  let hasTransparency = false;
+  for (let i = 0; i < indexCount; i += 4) {
+    hasTransparency ||= image.data[i + 3] < 255;
+  }
+
+  // TODO: Support setting options.bitDepth explicitly
+  // TODO: Support more bit depths
+  let bitDepth: BitDepth | undefined = options.bitDepth;
+  if (!bitDepth) {
+    bitDepth = hasTransparency ? 32 : 24;
+  }
+
+  if (bitDepth === 24 && hasTransparency) {
+    handleWarning({ options, warnings }, new EncodeWarning(`Cannot encode 24 bit image without data loss as it contains transparent colors`, 0));
+  }
+
   return {
     bitDepth,
     imageId: options.imageId || '',
