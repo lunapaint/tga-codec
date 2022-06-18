@@ -89,3 +89,9 @@ export interface IByteStream {
   writeArray(values: Uint8Array): void;
   assertAtEnd(): void;
 }
+
+export interface IColorMap {
+  colorToIndexMap: Map<number, number>;
+  bitDepth: number;
+
+}

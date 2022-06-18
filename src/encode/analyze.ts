@@ -5,7 +5,7 @@
  */
 
 import { BitDepth, IEncodeTgaOptions, ImageType, ScreenOrigin } from '../../typings/api.js';
-import { IEncodeContext, IImage32 } from '../shared/types.js';
+import { IColorMap, IEncodeContext, IImage32 } from '../shared/types.js';
 import { EncodeError, EncodeWarning, handleWarning } from './assert.js';
 
 export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): IEncodeContext {
@@ -91,14 +91,14 @@ function detectTransparencyOnly(image: IImage32): boolean {
 }
 
 // TODO: This should play nicely with color maps and greyscale
-function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageType, bitDepth: BitDepth } {
+function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageType, bitDepth: BitDepth, colorMap?: IColorMap } {
   const pixelCount = image.width * image.height;
   const indexCount = pixelCount * 4;
   let hasNon2BitTransparency = false;
   let hasTransparency = false;
   let cannotEncode5Bit = false;
   let hasColor = false;
-  const colorMap: Set<number> = new Set();
+  const uniqueColors: Set<number> = new Set();
   for (let i = 0; i < indexCount; i += 4) {
     hasNon2BitTransparency ||= image.data[i + 3] > 0 && image.data[i + 3] < 255;
     hasTransparency ||= image.data[i + 3] < 255;
@@ -116,17 +116,46 @@ function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageTyp
         image.data[i    ] !== image.data[i + 2]
       );
     }
-    colorMap.add(
-      (image.data[i    ] << 24) +
-      (image.data[i + 1] << 16) +
-      (image.data[i + 2] << 8 ) +
-      (image.data[i + 3]      )
-    );
+    // Stop counting colors after the maximum of 255 is reached
+    if (uniqueColors.size < 256) {
+      uniqueColors.add(
+        (image.data[i    ] << 24) +
+        (image.data[i + 1] << 16) +
+        (image.data[i + 2] << 8 ) +
+        (image.data[i + 3]      )
+      );
+    }
   }
-  // if (colorMap.size < 255) {
-  //   // TODO: Create and use color map
-  //   return { imageType: ImageType.RunLengthEncodedColorMapped, bitDepth: 8 };
-  // }
+  if (uniqueColors.size < 255) {
+    const colorToIndexMap: Map</*0xRRGGBBAA*/number, /*colorIndex*/number> = new Map();
+    let i = 0;
+    for (const color of uniqueColors) {
+      colorToIndexMap.set(color, i++);
+    }
+    let colorMap: IColorMap;
+    if (!cannotEncode5Bit) {
+      if (hasTransparency) {
+        if (hasNon2BitTransparency) {
+          colorMap = { colorToIndexMap, bitDepth: 32 };
+        } else {
+          colorMap = { colorToIndexMap, bitDepth: 16 };
+        }
+      } else {
+        colorMap = { colorToIndexMap, bitDepth: 15 };
+      }
+    } else {
+      if (hasTransparency) {
+        colorMap = { colorToIndexMap, bitDepth: 32 };
+      } else {
+        colorMap = { colorToIndexMap, bitDepth: 24 };
+      }
+    }
+    return {
+      imageType: ImageType.RunLengthEncodedColorMapped,
+      bitDepth: 8,
+      colorMap
+    };
+  }
   if (!hasColor) {
     if (hasTransparency) {
       return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 16 };
