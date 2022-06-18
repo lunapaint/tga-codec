@@ -5,7 +5,7 @@
  */
 
 import { deepStrictEqual } from 'assert';
-import { IEncodedTga } from '../../../typings/api.js';
+import { IEncodedTga, ImageType } from '../../../typings/api.js';
 import { decodeTga } from '../../decode/decoder.js';
 import { encodeTga } from '../../encode/encoder.js';
 import { IDecodedTga, IEncodeTgaOptions, IImage32, ScreenOrigin } from '../../shared/types.js';
@@ -51,13 +51,13 @@ describe('encoder', () => {
       describe('bitDepth', () => {
         it('15', async () => {
           await assertEncodeDecodeResult({ }, e => e.details.header.bitDepth, 15);
-          await assertEncodeDecodeResult({ bitDepth: 15 }, e => e.details.header.bitDepth, 15);
+          await assertEncodeDecodeResult({ imageType: ImageType.UncompressedTrueColor, bitDepth: 15 }, e => e.details.header.bitDepth, 15);
         });
         it('16', async () => {
-          await assertEncodeDecodeResult({ bitDepth: 16 }, e => e.details.header.bitDepth, 16);
+          await assertEncodeDecodeResult({ imageType: ImageType.UncompressedTrueColor, bitDepth: 16 }, e => e.details.header.bitDepth, 16);
         });
         it('24', async () => {
-          await assertEncodeDecodeResult({ bitDepth: 24 }, e => e.details.header.bitDepth, 24);
+          await assertEncodeDecodeResult({ imageType: ImageType.UncompressedTrueColor, bitDepth: 24 }, e => e.details.header.bitDepth, 24);
         });
         it('24 (transparency data loss)', async () => {
           const encoded = await encodeTga({
@@ -69,7 +69,7 @@ describe('encoder', () => {
             ]),
             width: 2,
             height: 2
-          }, { bitDepth: 24 });
+          }, { imageType: ImageType.UncompressedTrueColor, bitDepth: 24 });
           deepStrictEqual(encoded.warnings.map(e => e.message), ['Cannot encode 24 bit image without data loss as it contains transparent colors']);
           const decoded = await decodeTga(encoded.data);
           deepStrictEqual(decoded.image.data, new Uint8Array([
@@ -80,7 +80,7 @@ describe('encoder', () => {
           ]));
         });
         it('32', async () => {
-          await assertEncodeDecodeResult({ bitDepth: 32 }, e => e.details.header.bitDepth, 32);
+          await assertEncodeDecodeResult({ imageType: ImageType.UncompressedTrueColor, bitDepth: 32 }, e => e.details.header.bitDepth, 32);
         });
       });
       describe('header', () => {

@@ -109,8 +109,17 @@ export interface IEncodeTgaOptions {
    * The bit depth to encode with. When unspecified, the library will scan the image and determine
    * the best value based on the content, it's best to pass this in if know to avoid the scan
    * iterating over every pixel in the image.
+   *
+   * {@link imageType} must be specified when the bit depth is.
    */
   bitDepth?: BitDepth;
+
+  /**
+   * TODO: ...
+   *
+   * {@link bitDepth} must be specified when the image type is.
+   */
+  imageType?: ImageType;
 
   /**
    * Enabled strict encoding which will throw when warnings are encountered.

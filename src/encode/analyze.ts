@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { BitDepth, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
+import { BitDepth, IEncodeTgaOptions, ImageType, ScreenOrigin } from '../../typings/api.js';
 import { IEncodeContext, IImage32 } from '../shared/types.js';
 import { EncodeError, EncodeWarning, handleWarning } from './assert.js';
 
@@ -40,15 +40,23 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
   if (options.screenOrigin === ScreenOrigin.TopRight) {
     handleWarning(partialCtx, new EncodeWarning('This image is encoded using a top right screen origin, many image editors won\'t read this correctly', 17));
   }
+  if (options.bitDepth !== undefined && options.imageType === undefined || options.bitDepth === undefined && options.imageType !== undefined) {
+    throw new EncodeError('Bit depth and image type options must be used together', -1);
+  }
+  // TODO: Validate bit depth and image types are compatible
 
   // Analyze data
   // TODO: Support setting options.bitDepth explicitly
   // TODO: Support more bit depths
   let bitDepth: BitDepth | undefined = options.bitDepth;
+  let imageType: ImageType | undefined = options.imageType;
 
   // TODO: Warn about other explicit bit depth data loss
   // Detect transparency if the bit depth does not support it
   if (bitDepth === 24) {
+    if (!imageType) {
+      throw new Error('Unreachable');
+    }
     if (detectTransparencyOnly(image)) {
       // Warn about data loss
       handleWarning({ options, warnings }, new EncodeWarning(`Cannot encode 24 bit image without data loss as it contains transparent colors`, 0));
@@ -57,7 +65,9 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
 
   // Determine the best bit depth
   if (!bitDepth) {
-    bitDepth = detectIdealBitDepth(image);
+    const result = detectIdealImageTypeAndBitDepth(image);
+    bitDepth = result.bitDepth;
+    imageType = result.imageType;
   }
 
   return {
@@ -81,12 +91,13 @@ function detectTransparencyOnly(image: IImage32): boolean {
 }
 
 // TODO: This should play nicely with color maps and greyscale
-function detectIdealBitDepth(image: IImage32): BitDepth {
+function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageType, bitDepth: BitDepth } {
   const pixelCount = image.width * image.height;
   const indexCount = pixelCount * 4;
   let hasNon2BitTransparency = false;
   let hasTransparency = false;
   let cannotEncode5Bit = false;
+  let hasColor = false;
   for (let i = 0; i < indexCount; i += 4) {
     hasNon2BitTransparency ||= image.data[i + 3] > 0 && image.data[i + 3] < 255;
     hasTransparency ||= image.data[i + 3] < 255;
@@ -98,20 +109,32 @@ function detectIdealBitDepth(image: IImage32): BitDepth {
         !canEncode5Bit(image.data[i + 3])
       );
     }
+    if (!hasColor) {
+      hasColor = (
+        image.data[i    ] !== image.data[i + 1] ||
+        image.data[i    ] !== image.data[i + 2]
+      );
+    }
+  }
+  if (!hasColor) {
+    if (hasTransparency) {
+      return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 16 };
+    }
+    return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 8 };
   }
   if (!cannotEncode5Bit) {
     if (hasTransparency) {
       if (hasNon2BitTransparency) {
-        return 32;
+        return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 };
       }
-      return 16;
+      return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 16 };
     }
-    return 15;
+    return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 15 };
   }
   if (hasTransparency) {
-    return 32;
+    return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 };
   }
-  return 24;
+  return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 24 };
 }
 
 /**
