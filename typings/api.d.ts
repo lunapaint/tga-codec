@@ -146,6 +146,10 @@ export interface IEncodeTgaOptions {
      */
     y?: number;
   };
+  /**
+   * The screen origin defines in what order the image data is encoded.
+   */
+  screenOrigin?: ScreenOrigin;
 }
 
 /**

@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { IEncodedTga, IEncodeTgaOptions } from '../../typings/api.js';
+import { IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
 import { IEncodeContext, IImage32, ImageType } from '../shared/types.js';
 import { EncodeError, EncodeWarning } from './assert.js';
 import { ByteStream } from './byteStream.js';
@@ -72,7 +72,13 @@ function writeTgaHeader(ctx: IEncodeContext): Uint8Array {
   // Image descriptor
   // TODO: Support image origin
   // TODO: Support other alpha channel bits
-  stream.writeUint8(8);
+  const imageDescriptor = (
+    // alpha channel bits
+    8 |
+    // screen origin
+    (ctx.options.screenOrigin ?? ScreenOrigin.BottomLeft) << 4
+  );
+  stream.writeUint8(imageDescriptor);
 
   stream.assertAtEnd();
   return stream.array;
@@ -90,16 +96,33 @@ function writeImageId(ctx: IEncodeContext): Uint8Array {
 function writeImageData(ctx: IEncodeContext): Uint8Array {
   const stream = new ByteStream(ctx.image.width * ctx.image.height * 4, true);
   let imageOffset = 0;
-  for (let y = ctx.image.height - 1; y >= 0; y--) {
-    imageOffset = ctx.image.width * y * 4;
-    for (let x = 0; x < ctx.image.width; x++) {
-      // Bytes stored as BGRA
-      stream.writeUint8(ctx.image.data[imageOffset + 2]);
-      stream.writeUint8(ctx.image.data[imageOffset + 1]);
-      stream.writeUint8(ctx.image.data[imageOffset + 0]);
-      stream.writeUint8(ctx.image.data[imageOffset + 3]);
-      imageOffset += 4;
-    }
+  switch (ctx.options.screenOrigin ?? ScreenOrigin.BottomLeft) {
+    case ScreenOrigin.BottomLeft:
+      for (let y = ctx.image.height - 1; y >= 0; y--) {
+        imageOffset = ctx.image.width * y * 4;
+        for (let x = 0; x < ctx.image.width; x++) {
+          // Bytes stored as BGRA
+          stream.writeUint8(ctx.image.data[imageOffset + 2]);
+          stream.writeUint8(ctx.image.data[imageOffset + 1]);
+          stream.writeUint8(ctx.image.data[imageOffset + 0]);
+          stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          imageOffset += 4;
+        }
+      }
+      break;
+    case ScreenOrigin.TopLeft:
+      for (let y = 0; y < ctx.image.height; y++) {
+        imageOffset = ctx.image.width * y * 4;
+        for (let x = 0; x < ctx.image.width; x++) {
+          // Bytes stored as BGRA
+          stream.writeUint8(ctx.image.data[imageOffset + 2]);
+          stream.writeUint8(ctx.image.data[imageOffset + 1]);
+          stream.writeUint8(ctx.image.data[imageOffset + 0]);
+          stream.writeUint8(ctx.image.data[imageOffset + 3]);
+          imageOffset += 4;
+        }
+      }
+      break;
   }
   return stream.array;
 }
