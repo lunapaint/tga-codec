@@ -68,7 +68,9 @@ export interface IByteStreamReader {
 export type ColorMapDepth = 15 | 16 | 24 | 32;
 
 export interface IEncodeContext {
+  image: IImage32;
   bitDepth: BitDepth;
+  imageId: string;
   options: IEncodeTgaOptions;
   warnings: EncodeWarning[];
   info: string[];

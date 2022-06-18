@@ -7,7 +7,7 @@
 import { IEncodeContext } from '../shared/types.js';
 
 export class EncodeError extends Error {
-  constructor(message: string, readonly offset: number ) {
+  constructor(message: string, readonly offset: number) {
     super(message);
   }
 }

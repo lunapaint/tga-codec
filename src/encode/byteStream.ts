@@ -10,7 +10,10 @@ export class ByteStream {
 
   offset: number = 0;
 
-  constructor(length: number) {
+  constructor(
+    length: number,
+    private readonly _le: boolean
+  ) {
     this.array = new Uint8Array(length);
     this.view = new DataView(this.array.buffer, this.array.byteOffset, this.array.byteLength);
   }
@@ -21,12 +24,12 @@ export class ByteStream {
   }
 
   writeUint16(value: number) {
-    this.view.setUint16(this.offset, value);
+    this.view.setUint16(this.offset, value, this._le);
     this.offset += 2;
   }
 
   writeUint32(value: number) {
-    this.view.setUint32(this.offset, value);
+    this.view.setUint32(this.offset, value, this._le);
     this.offset += 4;
   }
 

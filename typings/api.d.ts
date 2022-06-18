@@ -115,7 +115,14 @@ export interface IEncodeTgaOptions {
   /**
    * Enabled strict encoding which will throw when warnings are encountered.
    */
-   strictMode?: boolean;
+  strictMode?: boolean;
+
+  /**
+   * Optional identifying information about the image.
+   *
+   * Field, 0-255 bytes
+   */
+  imageId?: string;
 }
 
 /**

@@ -4,8 +4,8 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-const decoder = require('../out-dist/tgaDecoder');
-const encoder = require('../out-dist/tgaEncoder');
+const decoder = require('../out-dist/decode/decoder');
+const encoder = require('../out-dist/encode/encoder');
 const fs = require('fs/promises');
 const { dirname, basename, extname, join } = require('path');
 
@@ -18,8 +18,8 @@ async function encode(file) {
   const decoded = await decoder.decodeTga(originalData);
   const encoded = await encoder.encodeTga(decoded.image);
   const filename = join(dirname(file), `${basename(file, '.tga')}_tga-codec.tga`);
-  fs.writeFile(filename, encoded);
-  console.log(`wrote ${encoded.length} bytes to ${filename}`);
+  fs.writeFile(filename, encoded.data);
+  console.log(`wrote ${encoded.data.length} bytes to ${filename}`);
 }
 
 if (process.argv.length < 3) {
