@@ -8,7 +8,7 @@
 import { ColorMapType, ImageType, ITgaHeader, ScreenOrigin } from '../../../typings/api.js';
 import { createTests, ITestDecodedTga } from '../shared/testUtil.js';
 
-const suiteRoot = '../tga-test-suite/ftrvxmtrx';
+const suiteRoot = 'fixtures/tga-test-suite/ftrvxmtrx';
 
 const commonHeader: ITgaHeader = {
   idLength: 0,

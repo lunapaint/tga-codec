@@ -8,7 +8,7 @@
 import { IExtensionArea } from '../../../typings/api.js';
 import { createTestsFromFolder } from '../shared/testUtil.js';
 
-const suiteRoot = '../tga-test-suite/tombexcavator';
+const suiteRoot = 'fixtures/tga-test-suite/tombexcavator';
 
 const commonExtensionArea: IExtensionArea = {
   aspectRatio: undefined,

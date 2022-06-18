@@ -1,5 +1,6 @@
 out-dist/
 out-dev/
+out-test/
 node_modules/
 .nyc_output/
 encoded/

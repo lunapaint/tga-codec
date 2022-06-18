@@ -7,7 +7,7 @@
 import { ColorMapType, IExtensionArea, IImage32, ImageType, ITgaDetails, ITgaHeader, ScreenOrigin } from '../../../typings/api.js';
 import { createTests, ITestDecodedTga, repeatArray } from '../shared/testUtil.js';
 
-const suiteRoot = '../tga-test-suite/conformance';
+const suiteRoot = 'fixtures/tga-test-suite/conformance';
 
 // All lines are this pattern repeated twice:
 // 8x red, 8x green, 8x blue, 8x black, 8x red, 8x green, 8x blue, 8x white

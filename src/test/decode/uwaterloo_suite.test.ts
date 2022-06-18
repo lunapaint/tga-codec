@@ -7,7 +7,7 @@
 
 import { createTestsFromFolder } from '../shared/testUtil.js';
 
-const suiteRoot = '../tga-test-suite/uwaterloo';
+const suiteRoot = 'fixtures/tga-test-suite/uwaterloo';
 
 describe('tga-test-suite/uwaterloo', () => {
   createTestsFromFolder(suiteRoot, 32);
