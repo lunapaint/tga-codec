@@ -1,3 +1,3 @@
 [submodule "test/tga-test-suite"]
-	path = src/test/tga-test-suite
+	path = test/tga-test-suite
 	url = https://github.com/lunapaint/tga-test-suite
