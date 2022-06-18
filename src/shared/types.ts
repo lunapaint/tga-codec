@@ -10,6 +10,7 @@ export {
   ColorMapType,
   IDecodedTga,
   IDecodeTgaOptions,
+  IEncodeTgaOptions,
   IImage32,
   ImageType,
   ITgaDetails,
