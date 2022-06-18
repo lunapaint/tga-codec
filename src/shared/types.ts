@@ -76,3 +76,16 @@ export interface IEncodeContext {
   warnings: EncodeWarning[];
   info: string[];
 }
+
+export type IWritePixelDelegate = (stream: IByteStream, imageData: Uint8Array, imageOffset: number) => void;
+
+export interface IByteStream {
+  readonly array: Uint8Array;
+  readonly view: DataView;
+  offset: number;
+  writeUint8(value: number): void;
+  writeUint16(value: number): void;
+  writeUint32(value: number): void;
+  writeArray(values: Uint8Array): void;
+  assertAtEnd(): void;
+}

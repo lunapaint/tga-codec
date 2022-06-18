@@ -5,7 +5,7 @@
  */
 
 import { BitDepth, IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
-import { IEncodeContext, IImage32, ImageType } from '../shared/types.js';
+import { IByteStream, IEncodeContext, IImage32, ImageType, IWritePixelDelegate } from '../shared/types.js';
 import { EncodeError, EncodeWarning, handleWarning } from './assert.js';
 import { ByteStream } from './byteStream.js';
 
@@ -96,18 +96,20 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
   const bytesPerPixel = Math.ceil(ctx.bitDepth / 8);
   const stream = new ByteStream(ctx.image.width * ctx.image.height * bytesPerPixel, true);
   let imageOffset = 0;
+  let writePixel: IWritePixelDelegate;
+  switch (ctx.bitDepth) {
+    case 24: writePixel = writePixel24Bit; break;
+    case 32: writePixel = writePixel32Bit; break;
+    default:
+      // TODO: Implement other bit depths
+      throw new Error('NYI');
+  }
   switch (ctx.options.screenOrigin ?? ScreenOrigin.BottomLeft) {
     case ScreenOrigin.BottomLeft:
       for (let y = ctx.image.height - 1; y >= 0; y--) {
         imageOffset = ctx.image.width * y * 4;
         for (let x = 0; x < ctx.image.width; x++) {
-          // Bytes stored as BGRA
-          stream.writeUint8(ctx.image.data[imageOffset + 2]);
-          stream.writeUint8(ctx.image.data[imageOffset + 1]);
-          stream.writeUint8(ctx.image.data[imageOffset + 0]);
-          if (ctx.bitDepth === 32) {
-            stream.writeUint8(ctx.image.data[imageOffset + 3]);
-          }
+          writePixel(stream, ctx.image.data, imageOffset);
           imageOffset += 4;
         }
       }
@@ -116,13 +118,7 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
       for (let y = ctx.image.height - 1; y >= 0; y--) {
         imageOffset = (ctx.image.width * y + (ctx.image.width - 1)) * 4;
         for (let x = 0; x < ctx.image.width; x++) {
-          // Bytes stored as BGRA
-          stream.writeUint8(ctx.image.data[imageOffset + 2]);
-          stream.writeUint8(ctx.image.data[imageOffset + 1]);
-          stream.writeUint8(ctx.image.data[imageOffset + 0]);
-          if (ctx.bitDepth === 32) {
-            stream.writeUint8(ctx.image.data[imageOffset + 3]);
-          }
+          writePixel(stream, ctx.image.data, imageOffset);
           imageOffset -= 4;
         }
       }
@@ -131,13 +127,7 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
       for (let y = 0; y < ctx.image.height; y++) {
         imageOffset = ctx.image.width * y * 4;
         for (let x = 0; x < ctx.image.width; x++) {
-          // Bytes stored as BGRA
-          stream.writeUint8(ctx.image.data[imageOffset + 2]);
-          stream.writeUint8(ctx.image.data[imageOffset + 1]);
-          stream.writeUint8(ctx.image.data[imageOffset + 0]);
-          if (ctx.bitDepth === 32) {
-            stream.writeUint8(ctx.image.data[imageOffset + 3]);
-          }
+          writePixel(stream, ctx.image.data, imageOffset);
           imageOffset += 4;
         }
       }
@@ -146,13 +136,7 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
       for (let y = 0; y < ctx.image.height; y++) {
         imageOffset = (ctx.image.width * y + (ctx.image.width - 1)) * 4;
         for (let x = 0; x < ctx.image.width; x++) {
-          // Bytes stored as BGRA
-          stream.writeUint8(ctx.image.data[imageOffset + 2]);
-          stream.writeUint8(ctx.image.data[imageOffset + 1]);
-          stream.writeUint8(ctx.image.data[imageOffset + 0]);
-          if (ctx.bitDepth === 32) {
-            stream.writeUint8(ctx.image.data[imageOffset + 3]);
-          }
+          writePixel(stream, ctx.image.data, imageOffset);
           imageOffset -= 4;
         }
       }
@@ -160,6 +144,23 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
   }
   stream.assertAtEnd();
   return stream.array;
+}
+
+function writePixel24Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number): number {
+  // Bytes stored as BGR
+  stream.writeUint8(imageData[imageOffset + 2]);
+  stream.writeUint8(imageData[imageOffset + 1]);
+  stream.writeUint8(imageData[imageOffset + 0]);
+  return 3;
+}
+
+function writePixel32Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number): number {
+  // Bytes stored as BGRA
+  stream.writeUint8(imageData[imageOffset + 2]);
+  stream.writeUint8(imageData[imageOffset + 1]);
+  stream.writeUint8(imageData[imageOffset + 0]);
+  stream.writeUint8(imageData[imageOffset + 3]);
+  return 4;
 }
 
 function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): IEncodeContext {

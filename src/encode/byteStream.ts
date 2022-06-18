@@ -4,7 +4,9 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-export class ByteStream {
+import { IByteStream } from '../shared/types.js';
+
+export class ByteStream implements IByteStream {
   readonly array: Uint8Array;
   readonly view: DataView;
 
