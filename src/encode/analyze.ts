@@ -98,6 +98,7 @@ function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageTyp
   let hasTransparency = false;
   let cannotEncode5Bit = false;
   let hasColor = false;
+  const colorMap: Set<number> = new Set();
   for (let i = 0; i < indexCount; i += 4) {
     hasNon2BitTransparency ||= image.data[i + 3] > 0 && image.data[i + 3] < 255;
     hasTransparency ||= image.data[i + 3] < 255;
@@ -115,7 +116,17 @@ function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageTyp
         image.data[i    ] !== image.data[i + 2]
       );
     }
+    colorMap.add(
+      (image.data[i    ] << 24) +
+      (image.data[i + 1] << 16) +
+      (image.data[i + 2] << 8 ) +
+      (image.data[i + 3]      )
+    );
   }
+  // if (colorMap.size < 255) {
+  //   // TODO: Create and use color map
+  //   return { imageType: ImageType.RunLengthEncodedColorMapped, bitDepth: 8 };
+  // }
   if (!hasColor) {
     if (hasTransparency) {
       return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 16 };
