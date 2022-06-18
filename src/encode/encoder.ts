@@ -64,11 +64,9 @@ function writeTgaHeader(ctx: IEncodeContext): Uint8Array {
 
   // Image Specification
   // X origin
-  // TODO: Support setting x origin
-  stream.writeUint16(0);
+  stream.writeUint16(ctx.options.origin?.x || 0);
   // X origin
-  // TODO: Support setting y origin
-  stream.writeUint16(0);
+  stream.writeUint16(ctx.options.origin?.y || 0);
   // Width
   stream.writeUint16(ctx.image.width);
   // Height

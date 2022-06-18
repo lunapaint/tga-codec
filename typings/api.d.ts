@@ -123,6 +123,29 @@ export interface IEncodeTgaOptions {
    * Field, 0-255 bytes
    */
   imageId?: string;
+  /**
+   * These bytes specify the absolute  coordinate for the lower left corner of the image as it is
+   * positioned on a display device having an origin at the lower left of the screen. This is
+   * typically ignored in modern software.
+   */
+  origin?: {
+    /**
+     * These bytes specify the absolute horizontal coordinate for the lower left corner of the image
+     * as it is positioned on a display device having an origin at the lower left of the screen. This
+     * is typically ignored in modern software.
+     *
+     * Field 5.1, 16 bit unsigned
+     */
+    x?: number;
+    /**
+     * These bytes specify the absolute vertical coordinate for the lower left corner of the image as
+     * it is positioned on a display device having an origin at the lower left of the screen. This is
+     * typically ignored in modern software.
+     *
+     * Field 5.2, 16 bit unsigned
+     */
+    y?: number;
+  };
 }
 
 /**
