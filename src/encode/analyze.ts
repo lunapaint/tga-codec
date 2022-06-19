@@ -165,23 +165,23 @@ function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageTyp
   // TODO: RLE is typically better
   if (!hasColor) {
     if (hasTransparency) {
-      return { imageType: ImageType.UncompressedGrayscale, bitDepth: 16 };
+      return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 16 };
     }
-    return { imageType: ImageType.UncompressedGrayscale, bitDepth: 8 };
+    return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 8 };
   }
   if (!cannotEncode5Bit) {
     if (hasTransparency) {
       if (hasNon2BitTransparency) {
-        return { imageType: ImageType.UncompressedTrueColor, bitDepth: 32 };
+        return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 };
       }
-      return { imageType: ImageType.UncompressedTrueColor, bitDepth: 16 };
+      return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 16 };
     }
-    return { imageType: ImageType.UncompressedTrueColor, bitDepth: 15 };
+    return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 15 };
   }
   if (hasTransparency) {
-    return { imageType: ImageType.UncompressedTrueColor, bitDepth: 32 };
+    return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 };
   }
-  return { imageType: ImageType.UncompressedTrueColor, bitDepth: 24 };
+  return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 24 };
 }
 
 /**

@@ -10,26 +10,7 @@ import { DecodeError, DecodeWarning, handleWarning } from './assert.js';
 import { ByteStreamReader } from './byteStreamReader.js';
 import { readText } from './text.js';
 import { isValidBitDepth, isValidColorMapDepth, isValidImageType } from './validate.js';
-
-const enum ImageDescriptorMask {
-  AttributeBits = 0b00001111,
-  ScreenOrigin  = 0b00110000
-}
-
-const enum ImageDescriptorShift {
-  AttributeBits    = 0,
-  ScreenOrigin     = 4,
-  InterleavingFlag = 6
-}
-
-const enum ImageTypeMask {
-  RunLengthEncoded = 0b00001000
-}
-
-const enum RunLengthEncodingMask {
-  PixelCount = 0b01111111,
-  IsRle      = 0b10000000
-}
+import { ImageDescriptorMask, ImageDescriptorShift, ImageTypeMask, RunLengthEncodingMask } from '../shared/constants.js';
 
 export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions = {}): Promise<IDecodedTga> {
   const initialCtx: ITgaInitialDecodeContext = {
@@ -304,7 +285,7 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
 }
 
 function decodeRunLengthEncoding(ctx: ITgaDecodeContext): Uint8Array {
-  // Decode the array into another array. This is a slow but simple approach, it would be better to
+  // Decode the array into another array. This is a slow but simple approach, it would be faster to
   // do this in-place.
   const bytesPerPixel = Math.ceil(ctx.header.bitDepth / 8);
   const result = new Uint8Array(ctx.header.width * ctx.header.height * bytesPerPixel);

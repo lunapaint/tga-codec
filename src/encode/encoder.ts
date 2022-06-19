@@ -5,9 +5,12 @@
  */
 
 import { ColorMapType, IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
-import { IByteStream, IEncodeContext, IImage32, ImageType, IWritePixelDelegate } from '../shared/types.js';
+import { ImageDescriptorMask, ImageDescriptorShift, ImageTypeMask, RunLengthEncodingMask } from '../shared/constants.js';
+import { IByteStream, IEncodeContext, IImage32, IWritePixelDelegate } from '../shared/types.js';
 import { analyze } from './analyze.js';
+import { handleWarning } from './assert.js';
 import { ByteStream } from './byteStream.js';
+import { encodeRunLengthEncoding } from './rle.js';
 
 export async function encodeTga(image: Readonly<IImage32>, options: IEncodeTgaOptions = {}): Promise<IEncodedTga> {
   const ctx = analyze(image, options);
@@ -46,10 +49,8 @@ function writeTgaHeader(ctx: IEncodeContext): Uint8Array {
   // Image ID
   stream.writeUint8(ctx.imageId.length);
   // Color Map Type
-  // TODO: Support encoding color map
   stream.writeUint8(ctx.colorMap ? ColorMapType.ColorMap : ColorMapType.NoColorMap);
   // Image Type
-  // TODO: Support other image types
   stream.writeUint8(ctx.imageType);
 
   // Color Map Specification
@@ -74,9 +75,9 @@ function writeTgaHeader(ctx: IEncodeContext): Uint8Array {
   // Image descriptor
   const imageDescriptor = (
     // alpha channel bits
-    (ctx.bitDepth === 32 ? 8 : 0) |
+    ((ctx.bitDepth === 32 ? 8 : 0) & ImageDescriptorMask.AttributeBits) |
     // screen origin
-    (ctx.options.screenOrigin ?? ScreenOrigin.BottomLeft) << 4
+    ((ctx.options.screenOrigin ?? ScreenOrigin.BottomLeft) << ImageDescriptorShift.ScreenOrigin & ImageDescriptorMask.ScreenOrigin)
   );
   stream.writeUint8(imageDescriptor);
 
@@ -191,6 +192,12 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
       break;
   }
   stream.assertAtEnd();
+
+  if (ctx.imageType & ImageTypeMask.RunLengthEncoded) {
+    // TODO: Ideally when the RLE result is larger, this would warn only when the option was
+    // explicit, otherwise switch to unencoded
+    return encodeRunLengthEncoding(ctx, stream.array);
+  }
   return stream.array;
 }
 
