@@ -239,9 +239,9 @@ function writePixel16Bit(stream: IByteStream, imageData: Uint8Array, imageOffset
 }
 
 function writePixel16BitGreyscale(stream: IByteStream, imageData: Uint8Array, imageOffset: number) {
-  // Bits stored as 0bAAAAAAAA 0bGGGGGGGG
-  stream.writeUint8(imageData[imageOffset + 3]);
+  // Bits stored as 0bGGGGGGGG 0bAAAAAAAA
   stream.writeUint8(imageData[imageOffset    ]);
+  stream.writeUint8(imageData[imageOffset + 3]);
 }
 
 function writePixel24Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number) {

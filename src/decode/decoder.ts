@@ -325,7 +325,7 @@ function readPixel8BitGreyscale(imageData: Uint8Array, imageOffset: number, view
 }
 
 function readPixel16BitGreyscale(imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
-  // Bits stored as 0bAAAAAAAA 0bGGGGGGGG
+  // Bits stored as 0bGGGGGGGG 0bAAAAAAAA
   imageData[imageOffset    ] = view.getUint8(viewOffset    );
   imageData[imageOffset + 1] = imageData[imageOffset    ];
   imageData[imageOffset + 2] = imageData[imageOffset    ];
