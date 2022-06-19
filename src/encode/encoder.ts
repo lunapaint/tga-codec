@@ -166,7 +166,6 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
       case 24: writePixel = writePixel24Bit; break;
       case 32: writePixel = writePixel32Bit; break;
       default:
-        // TODO: Implement other bit depths
         throw new Error('NYI');
     }
   }
@@ -211,8 +210,6 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
   stream.assertAtEnd();
 
   if (ctx.imageType & ImageTypeMask.RunLengthEncoded) {
-    // TODO: Ideally when the RLE result is larger, this would warn only when the option was
-    // explicit, otherwise switch to unencoded
     return encodeRunLengthEncoding(ctx, stream.array);
   }
   return stream.array;

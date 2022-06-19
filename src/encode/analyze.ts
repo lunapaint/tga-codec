@@ -43,16 +43,12 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
   if (options.bitDepth !== undefined && options.imageType === undefined || options.bitDepth === undefined && options.imageType !== undefined) {
     throw new EncodeError('Bit depth and image type options must be used together', -1);
   }
-  // TODO: Validate bit depth and image types are compatible
 
   // Analyze data
-  // TODO: Support setting options.bitDepth explicitly
-  // TODO: Support more bit depths
   let imageType: ImageType | undefined = options.imageType;
   let bitDepth: BitDepth | undefined = options.bitDepth;
   let colorMap: IColorMap | undefined = undefined;
 
-  // TODO: Warn about other explicit bit depth data loss
   // Detect transparency if the bit depth does not support it
   if (bitDepth === 24) {
     if (detectTransparencyOnly(image)) {
@@ -166,7 +162,6 @@ function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageTyp
       colorMap
     };
   }
-  // TODO: RLE is typically better
   if (!hasColor) {
     if (hasTransparency) {
       return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 16 };
