@@ -73,9 +73,13 @@ function writeTgaHeader(ctx: IEncodeContext): Uint8Array {
   // Bit depth
   stream.writeUint8(ctx.bitDepth);
   // Image descriptor
+  let alphaBits = 0;
+  if (ctx.bitDepth === 32) {
+    alphaBits = 8;
+  }
   const imageDescriptor = (
     // alpha channel bits
-    ((ctx.bitDepth === 32 ? 8 : 0) & ImageDescriptorMask.AttributeBits) |
+    (alphaBits & ImageDescriptorMask.AttributeBits) |
     // screen origin
     ((ctx.options.screenOrigin ?? ScreenOrigin.BottomLeft) << ImageDescriptorShift.ScreenOrigin & ImageDescriptorMask.ScreenOrigin)
   );

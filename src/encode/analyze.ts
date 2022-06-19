@@ -148,11 +148,8 @@ function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageTyp
     let colorMap: IColorMap;
     if (!cannotEncode5Bit) {
       if (hasTransparency) {
-        if (hasNon2BitTransparency) {
-          colorMap = { colorToIndexMap, bitDepth: 32 };
-        } else {
-          colorMap = { colorToIndexMap, bitDepth: 16 };
-        }
+        // 2-bit transparency doesn't seem to be supported by any editor, use 32-bit to be safe
+        colorMap = { colorToIndexMap, bitDepth: 32 };
       } else {
         colorMap = { colorToIndexMap, bitDepth: 15 };
       }
