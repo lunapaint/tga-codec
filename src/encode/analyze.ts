@@ -48,15 +48,13 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
   // Analyze data
   // TODO: Support setting options.bitDepth explicitly
   // TODO: Support more bit depths
-  let bitDepth: BitDepth | undefined = options.bitDepth;
   let imageType: ImageType | undefined = options.imageType;
+  let bitDepth: BitDepth | undefined = options.bitDepth;
+  let colorMap: IColorMap | undefined = undefined;
 
   // TODO: Warn about other explicit bit depth data loss
   // Detect transparency if the bit depth does not support it
   if (bitDepth === 24) {
-    if (!imageType) {
-      throw new Error('Unreachable');
-    }
     if (detectTransparencyOnly(image)) {
       // Warn about data loss
       handleWarning({ options, warnings }, new EncodeWarning(`Cannot encode 24 bit image without data loss as it contains transparent colors`, 0));
@@ -68,10 +66,18 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
     const result = detectIdealImageTypeAndBitDepth(image);
     bitDepth = result.bitDepth;
     imageType = result.imageType;
+    colorMap = result.colorMap;
+  }
+
+  // This shouldn't exist but is here to catch problems just in case
+  if (!imageType) {
+    throw new Error('No ImageType set');
   }
 
   return {
     bitDepth,
+    imageType,
+    colorMap,
     imageId: options.imageId || '',
     options,
     warnings,
@@ -127,7 +133,7 @@ function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageTyp
     }
   }
   if (uniqueColors.size < 255) {
-    const colorToIndexMap: Map</*0xRRGGBBAA*/number, /*colorIndex*/number> = new Map();
+    const colorToIndexMap: Map<number, number> = new Map();
     let i = 0;
     for (const color of uniqueColors) {
       colorToIndexMap.set(color, i++);
@@ -151,39 +157,38 @@ function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageTyp
       }
     }
     return {
-      imageType: ImageType.RunLengthEncodedColorMapped,
+      imageType: ImageType.UncompressedColorMapped,
       bitDepth: 8,
       colorMap
     };
   }
+  // TODO: RLE is typically better
   if (!hasColor) {
     if (hasTransparency) {
-      return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 16 };
+      return { imageType: ImageType.UncompressedGrayscale, bitDepth: 16 };
     }
-    return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 8 };
+    return { imageType: ImageType.UncompressedGrayscale, bitDepth: 8 };
   }
   if (!cannotEncode5Bit) {
     if (hasTransparency) {
       if (hasNon2BitTransparency) {
-        return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 };
+        return { imageType: ImageType.UncompressedTrueColor, bitDepth: 32 };
       }
-      return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 16 };
+      return { imageType: ImageType.UncompressedTrueColor, bitDepth: 16 };
     }
-    return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 15 };
+    return { imageType: ImageType.UncompressedTrueColor, bitDepth: 15 };
   }
   if (hasTransparency) {
-    return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 };
+    return { imageType: ImageType.UncompressedTrueColor, bitDepth: 32 };
   }
-  return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 24 };
+  return { imageType: ImageType.UncompressedTrueColor, bitDepth: 24 };
 }
 
 /**
  * Ensure the number can be decoded to the same number using `(x << 3) | (x >> 2)`
  */
 function canEncode5Bit(value: number): boolean {
-  // The least significant 3 bits must equal the most significant 3 bits:
-  // zyx__zyx
-  // imageData[imageOffset    ] = (imageData[imageOffset    ] << 3) | (imageData[imageOffset    ] >> 2);
-
+  // If the 3 least significant bits must equal the 3 most significant bits the number can be
+  // encoded in 5 bits (ie. xyz__xyz)
   return ((value >> 5) & 7) === (value & 7);
 }

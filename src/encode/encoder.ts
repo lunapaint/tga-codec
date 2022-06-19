@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
+import { ColorMapType, IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
 import { IByteStream, IEncodeContext, IImage32, ImageType, IWritePixelDelegate } from '../shared/types.js';
 import { analyze } from './analyze.js';
 import { ByteStream } from './byteStream.js';
@@ -17,6 +17,9 @@ export async function encodeTga(image: Readonly<IImage32>, options: IEncodeTgaOp
   sections.push(writeTgaHeader(ctx));
   if (ctx.imageId.length > 0) {
     sections.push(writeImageId(ctx));
+  }
+  if (ctx.colorMap) {
+    sections.push(writeColorMap(ctx));
   }
   sections.push(writeImageData(ctx));
   // console.log('sections', sections);
@@ -44,18 +47,18 @@ function writeTgaHeader(ctx: IEncodeContext): Uint8Array {
   stream.writeUint8(ctx.imageId.length);
   // Color Map Type
   // TODO: Support encoding color map
-  stream.writeUint8(0);
+  stream.writeUint8(ctx.colorMap ? ColorMapType.ColorMap : ColorMapType.NoColorMap);
   // Image Type
   // TODO: Support other image types
-  stream.writeUint8(ImageType.UncompressedTrueColor);
+  stream.writeUint8(ctx.imageType);
 
   // Color Map Specification
   // First entry index
   stream.writeUint16(0);
   // Length
-  stream.writeUint16(0);
+  stream.writeUint16(ctx.colorMap?.colorToIndexMap.size ?? 0);
   // Size
-  stream.writeUint8(0);
+  stream.writeUint8(ctx.colorMap?.bitDepth ?? 0);
 
   // Image Specification
   // X origin
@@ -92,19 +95,64 @@ function writeImageId(ctx: IEncodeContext): Uint8Array {
   return stream.array;
 }
 
-function writeImageData(ctx: IEncodeContext): Uint8Array {
-  const bytesPerPixel = Math.ceil(ctx.bitDepth / 8);
-  const stream = new ByteStream(ctx.image.width * ctx.image.height * bytesPerPixel, true);
-  let imageOffset = 0;
+function writeColorMap(ctx: IEncodeContext): Uint8Array {
+  const cm = ctx.colorMap;
+  if (!cm) {
+    throw new Error('Cannot write color map undefined');
+  }
+  const bitsPerPixel = Math.ceil(cm.bitDepth / 8);
+  const stream = new ByteStream(cm.colorToIndexMap.size * bitsPerPixel, true);
+
   let writePixel: IWritePixelDelegate;
-  switch (ctx.bitDepth) {
+  switch (cm.bitDepth) {
     case 15: writePixel = writePixel15Bit; break;
     case 16: writePixel = writePixel16Bit; break;
     case 24: writePixel = writePixel24Bit; break;
     case 32: writePixel = writePixel32Bit; break;
     default:
-      // TODO: Implement other bit depths
-      throw new Error('NYI');
+      throw new Error(`Unsupported bit depth for color map "${cm.bitDepth}"`);
+  }
+
+  const sortedColors = Array.from(cm.colorToIndexMap.entries()).sort((a, b) => a[1] - b[1]).map(e => e[0]);
+  for (const color of sortedColors) {
+    writePixel(stream, new Uint8Array([
+      (color >> 24) & 0xFF,
+      (color >> 16) & 0xFF,
+      (color >>  8) & 0xFF,
+      (color      ) & 0xFF,
+    ]), 0);
+  }
+
+  stream.assertAtEnd();
+  return stream.array;
+}
+
+function writeImageData(ctx: IEncodeContext): Uint8Array {
+  const bytesPerPixel = Math.ceil(ctx.bitDepth / 8);
+  const stream = new ByteStream(ctx.image.width * ctx.image.height * bytesPerPixel, true);
+  let imageOffset = 0;
+  let writePixel: IWritePixelDelegate;
+  if (ctx.colorMap) {
+    const cm = ctx.colorMap;
+    writePixel = (stream: IByteStream, imageData: Uint8Array, imageOffset: number) => {
+      const colorIndex = cm.colorToIndexMap.get(
+        (imageData[imageOffset    ] << 24) +
+        (imageData[imageOffset + 1] << 16) +
+        (imageData[imageOffset + 2] << 8 ) +
+        (imageData[imageOffset + 3]      )
+      )!;
+      stream.writeUint8(colorIndex);
+    };
+  } else {
+    switch (ctx.bitDepth) {
+      case 15: writePixel = writePixel15Bit; break;
+      case 16: writePixel = writePixel16Bit; break;
+      case 24: writePixel = writePixel24Bit; break;
+      case 32: writePixel = writePixel32Bit; break;
+      default:
+        // TODO: Implement other bit depths
+        throw new Error('NYI');
+    }
   }
   switch (ctx.options.screenOrigin ?? ScreenOrigin.BottomLeft) {
     case ScreenOrigin.BottomLeft:
