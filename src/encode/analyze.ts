@@ -61,6 +61,14 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
     }
   }
 
+  if (imageType === ImageType.RunLengthEncodedColorMapped || imageType === ImageType.UncompressedColorMapped) {
+    const result = detectIdealImageTypeAndBitDepth(image);
+    if (!result.colorMap) {
+      throw new EncodeError(`Image has too many colors to encode using a color map`, -1);
+    }
+    colorMap = result.colorMap;
+  }
+
   // Determine the best bit depth
   if (!bitDepth) {
     const result = detectIdealImageTypeAndBitDepth(image);
@@ -96,7 +104,6 @@ function detectTransparencyOnly(image: IImage32): boolean {
   return hasTransparency;
 }
 
-// TODO: This should play nicely with color maps and greyscale
 function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageType, bitDepth: BitDepth, colorMap?: IColorMap } {
   const pixelCount = image.width * image.height;
   const indexCount = pixelCount * 4;

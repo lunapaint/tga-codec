@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { ColorMapType, IEncodedTga, IEncodeTgaOptions, ScreenOrigin } from '../../typings/api.js';
+import { ColorMapType, IEncodedTga, IEncodeTgaOptions, ImageType, ScreenOrigin } from '../../typings/api.js';
 import { ImageDescriptorMask, ImageDescriptorShift, ImageTypeMask, RunLengthEncodingMask } from '../shared/constants.js';
 import { IByteStream, IEncodeContext, IImage32, IWritePixelDelegate } from '../shared/types.js';
 import { analyze } from './analyze.js';
@@ -144,8 +144,21 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
     };
   } else {
     switch (ctx.bitDepth) {
+      case 8:
+        if (ctx.imageType === ImageType.UncompressedGrayscale || ctx.imageType === ImageType.RunLengthEncodedGrayscale) {
+          writePixel = writePixel8BitGreyscale;
+        } else {
+          throw new Error(`Unsupported image type (${ctx.imageType}) with bit depth (${ctx.bitDepth})`);
+        }
+        break;
       case 15: writePixel = writePixel15Bit; break;
-      case 16: writePixel = writePixel16Bit; break;
+      case 16:
+        if (ctx.imageType === ImageType.UncompressedGrayscale || ctx.imageType === ImageType.RunLengthEncodedGrayscale) {
+          writePixel = writePixel16BitGreyscale;
+        } else {
+          writePixel = writePixel16Bit;
+        }
+        break;
       case 24: writePixel = writePixel24Bit; break;
       case 32: writePixel = writePixel32Bit; break;
       default:
@@ -201,6 +214,11 @@ function writeImageData(ctx: IEncodeContext): Uint8Array {
   return stream.array;
 }
 
+function writePixel8BitGreyscale(stream: IByteStream, imageData: Uint8Array, imageOffset: number) {
+  // Bits stored as 0bGGGGGGGG
+  stream.writeUint8(imageData[imageOffset    ]);
+}
+
 function writePixel15Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number) {
   // Bits stored as 0b_RRRRRGG 0bGGGBBBBB
   stream.writeUint16(
@@ -218,6 +236,12 @@ function writePixel16Bit(stream: IByteStream, imageData: Uint8Array, imageOffset
     (((imageData[imageOffset + 2] >> 3) & 0x1f) <<  0) |
     (imageData[imageOffset + 3] === 255 ? (1 << 15) : 0)
   );
+}
+
+function writePixel16BitGreyscale(stream: IByteStream, imageData: Uint8Array, imageOffset: number) {
+  // Bits stored as 0bAAAAAAAA 0bGGGGGGGG
+  stream.writeUint8(imageData[imageOffset + 3]);
+  stream.writeUint8(imageData[imageOffset    ]);
 }
 
 function writePixel24Bit(stream: IByteStream, imageData: Uint8Array, imageOffset: number) {

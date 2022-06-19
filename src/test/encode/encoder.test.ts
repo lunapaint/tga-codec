@@ -35,6 +35,17 @@ const testGreyscaleImage: Readonly<IImage32> = {
   height: 2
 };
 
+const testBadRleImage: Readonly<IImage32> = {
+  data: new Uint8Array([
+    0, 0, 0, 255,
+    32, 32, 32, 255,
+    128, 128, 128, 255,
+    255, 255, 255, 255,
+  ]),
+  width: 2,
+  height: 2
+};
+
 interface IEncodeDecodeResultOptions {
   customImage?: Readonly<IImage32>;
   decodeWarnings?: string[];
@@ -106,19 +117,46 @@ describe('encoder', () => {
         });
       });
       describe('imageType', () => {
-        describe('RunLengthEncodedColorMapped', async () => {
+        it('UncompressedColorMapped', async () => {
+          await assertEncodeDecodeResult({ imageType: ImageType.UncompressedColorMapped, bitDepth: 8 },
+            e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
+            { imageType: ImageType.UncompressedColorMapped, bitDepth: 8 }
+          );
+        });
+        it('UncompressedTrueColor', async () => {
+          await assertEncodeDecodeResult({ imageType: ImageType.UncompressedTrueColor, bitDepth: 32 },
+            e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
+            { imageType: ImageType.UncompressedTrueColor, bitDepth: 32 }
+          );
+        });
+        it('UncompressedGrayscale', async () => {
+          await assertEncodeDecodeResult({ imageType: ImageType.UncompressedGrayscale, bitDepth: 8 },
+            e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
+            { imageType: ImageType.UncompressedGrayscale, bitDepth: 8 }, {
+              customImage: testGreyscaleImage
+            }
+          );
+        });
+        it('RunLengthEncodedColorMapped', async () => {
           await assertEncodeDecodeResult({ imageType: ImageType.RunLengthEncodedColorMapped, bitDepth: 8 },
             e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
             { imageType: ImageType.RunLengthEncodedColorMapped, bitDepth: 8 }
           );
         });
-        describe('RunLengthEncodedTrueColor', async () => {
+        it('RunLengthEncodedTrueColor', async () => {
           await assertEncodeDecodeResult({ imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 },
             e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
             { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 }
           );
+          await assertEncodeDecodeResult({ imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 },
+            e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
+            { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 }, {
+              customImage: testBadRleImage,
+              encodeWarnings: ['RLE encoded was used but it is larger than unencoded would be']
+            }
+          );
         });
-        describe('RunLengthEncodedGrayscale', async () => {
+        it('RunLengthEncodedGrayscale', async () => {
           await assertEncodeDecodeResult({ imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 8 },
             e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
             { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 8 }, {
