@@ -292,7 +292,7 @@ function decodeRunLengthEncoding(ctx: ITgaDecodeContext): Uint8Array {
   let byte = 0;
   let count = 0;
   let i = 0, j = 0, k = 0;
-  while (i < result.length - 1) {
+  while (i < result.length) {
     byte = ctx.reader.readUint8();
     count = (byte & RunLengthEncodingMask.PixelCount) + 1;
     if (byte & RunLengthEncodingMask.IsRle) {

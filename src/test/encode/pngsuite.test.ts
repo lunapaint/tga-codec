@@ -16,7 +16,6 @@ const suiteRoot = 'fixtures/pngsuite/png';
 
 describe('pngsuite', () => {
   const files = readdirSync(suiteRoot);
-  console.log('files', files);
   describe('decoded png image should equal re-encoded tga image', () => {
     for (const f of files) {
       // Skip invalid files
