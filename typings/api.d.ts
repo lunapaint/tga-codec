@@ -103,7 +103,9 @@ export interface IEncodedTga {
   info: string[];
 }
 
-// TODO: Docs
+/**
+ * A set of options to configure how encoding happens.
+ */
 export interface IEncodeTgaOptions {
   /**
    * The bit depth to encode with. When unspecified, the library will scan the image and determine
@@ -115,7 +117,7 @@ export interface IEncodeTgaOptions {
   bitDepth?: BitDepth;
 
   /**
-   * TODO: ...
+   * Defines how to encode the image.
    *
    * {@link bitDepth} must be specified when the image type is.
    */
