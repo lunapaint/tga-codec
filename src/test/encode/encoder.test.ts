@@ -78,7 +78,7 @@ describe('encoder', () => {
     describe('options', () => {
       describe('bitDepth', () => {
         it('8 (color map)', async () => {
-          await assertEncodeDecodeResult({ }, e => ({ bitDepth: e.details.header.bitDepth, imageType: e.details.header.imageType }), { bitDepth: 8, imageType: ImageType.UncompressedColorMapped });
+          await assertEncodeDecodeResult({ }, e => ({ bitDepth: e.details.header.bitDepth, imageType: e.details.header.imageType }), { bitDepth: 8, imageType: ImageType.RunLengthEncodedColorMapped });
         });
         it('15', async () => {
           await assertEncodeDecodeResult({ imageType: ImageType.UncompressedTrueColor, bitDepth: 15 }, e => e.details.header.bitDepth, 15);

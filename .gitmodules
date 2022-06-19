@@ -1,3 +1,6 @@
 [submodule "fixtures/tga-test-suite"]
 	path = fixtures/tga-test-suite
 	url = https://github.com/lunapaint/tga-test-suite
+[submodule "fixtures/pngsuite"]
+	path = fixtures/pngsuite
+	url = https://github.com/lunapaint/pngsuite
