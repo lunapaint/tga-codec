@@ -10,6 +10,7 @@ export {
   ColorMapType,
   IDecodedTga,
   IDecodeTgaOptions,
+  IEncodeTgaOptions,
   IImage32,
   ImageType,
   ITgaDetails,
@@ -19,11 +20,15 @@ export {
 } from '../../typings/api.js';
 
 import {
+  BitDepth,
   DecodeWarning,
+  EncodeWarning,
   IDecodeTgaOptions,
   IDeveloperDirectoryEntry,
+  IEncodeTgaOptions,
   IExtensionArea,
   IImage32,
+  ImageType,
   ITgaFooter,
   ITgaHeader,
 } from '../../typings/api.js';
@@ -63,3 +68,36 @@ export interface IByteStreamReader {
 }
 
 export type ColorMapDepth = 15 | 16 | 24 | 32;
+
+export interface IEncodeContext {
+  image: IImage32;
+  bitDepth: BitDepth;
+  imageType: ImageType;
+  colorMap: IColorMap | undefined;
+  imageId: string;
+  options: IEncodeTgaOptions;
+  warnings: EncodeWarning[];
+  info: string[];
+}
+
+export type IWritePixelDelegate = (stream: IByteStream, imageData: Uint8Array, imageOffset: number) => void;
+
+export interface IByteStream {
+  readonly array: Uint8Array;
+  readonly view: DataView;
+  offset: number;
+  writeUint8(value: number): void;
+  writeUint16(value: number): void;
+  assertAtEnd(): void;
+}
+
+export interface IColorMap {
+  /**
+   * Maps the color in 0xRRGGBBAA format to the color index in the color map.
+   */
+  colorToIndexMap: Map<number, number>;
+  /**
+   * The bit depth of the colors within the color map.
+   */
+  bitDepth: number;
+}

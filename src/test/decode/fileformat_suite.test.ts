@@ -5,10 +5,10 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { ColorMapType, DecodeWarning, IExtensionArea, IImage32, ImageType, ITgaDetails, ITgaHeader, ScreenOrigin } from '../../typings/api.js';
+import { ColorMapType, DecodeWarning, IExtensionArea, IImage32, ImageType, ITgaDetails, ITgaHeader, ScreenOrigin } from '../../../typings/api.js';
 import { createTests, ITestDecodedTga, repeatArray } from '../shared/testUtil.js';
 
-const suiteRoot = 'test/tga-test-suite/fileformat';
+const suiteRoot = 'fixtures/tga-test-suite/fileformat';
 
 // All lines are this pattern repeated twice:
 // 8x red, 8x green, 8x blue, 8x black, 8x red, 8x green, 8x blue, 8x white

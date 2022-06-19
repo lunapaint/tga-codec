@@ -17,6 +17,14 @@
 export function decodeTga(data: Readonly<Uint8Array>, options?: IDecodeTgaOptions): Promise<IDecodedTga>;
 
 /**
+ * Encodes a tga file.
+ *
+ * @param data The image data in rgba format.
+ * @param options Options to configure how encoding happens.
+ */
+export function encodeTga(data: Readonly<IImage32>, options?: IEncodeTgaOptions): Promise<IEncodedTga>;
+
+/**
  * A TGA that has been successfully decoded.
  */
 export interface IDecodedTga {
@@ -68,6 +76,91 @@ export interface IDecodeTgaOptions {
    * would has failed in strict mode in {@link IDecodedTga.warnings}.
    */
   strictMode?: boolean;
+}
+
+/**
+ * A tga that has been successfully decoded.
+ */
+export interface IEncodedTga {
+  data: Uint8Array;
+
+  /**
+   * Any warnings that were encountered during encoding. Warnings typically fall into the following
+   * categories:
+   *
+   * - An explicitly provided color type must be changed in order to encode the image (eg.
+   * specifying Truecolor but having more than one transparent pixel).
+   *
+   * Strict mode can be enabled via {@link IEncodePngOptions.strictMode} which will throw an error
+   * when any warning is encountered.
+   */
+  warnings: EncodeWarning[];
+
+  /**
+   * Any informational messages when encoding. These are things of note but not important enough to
+   * be a warning.
+   */
+  info: string[];
+}
+
+/**
+ * A set of options to configure how encoding happens.
+ */
+export interface IEncodeTgaOptions {
+  /**
+   * The bit depth to encode with. When unspecified, the library will scan the image and determine
+   * the best value based on the content, it's best to pass this in if know to avoid the scan
+   * iterating over every pixel in the image.
+   *
+   * {@link imageType} must be specified when the bit depth is.
+   */
+  bitDepth?: BitDepth;
+
+  /**
+   * Defines how to encode the image.
+   *
+   * {@link bitDepth} must be specified when the image type is.
+   */
+  imageType?: ImageType;
+
+  /**
+   * Enabled strict encoding which will throw when warnings are encountered.
+   */
+  strictMode?: boolean;
+
+  /**
+   * Optional identifying information about the image.
+   *
+   * Field, 0-255 bytes
+   */
+  imageId?: string;
+  /**
+   * These bytes specify the absolute  coordinate for the lower left corner of the image as it is
+   * positioned on a display device having an origin at the lower left of the screen. This is
+   * typically ignored in modern software.
+   */
+  origin?: {
+    /**
+     * These bytes specify the absolute horizontal coordinate for the lower left corner of the image
+     * as it is positioned on a display device having an origin at the lower left of the screen. This
+     * is typically ignored in modern software.
+     *
+     * Field 5.1, 16 bit unsigned
+     */
+    x?: number;
+    /**
+     * These bytes specify the absolute vertical coordinate for the lower left corner of the image as
+     * it is positioned on a display device having an origin at the lower left of the screen. This is
+     * typically ignored in modern software.
+     *
+     * Field 5.2, 16 bit unsigned
+     */
+    y?: number;
+  };
+  /**
+   * The screen origin defines in what order the image data is encoded.
+   */
+  screenOrigin?: ScreenOrigin;
 }
 
 /**
@@ -391,6 +484,26 @@ export class DecodeError extends Error {
  * A warning occurred during decoding.
  */
 export class DecodeWarning extends Error {
+  /**
+   * The byte offset of the warning in the datastream.
+   */
+  offset: number;
+}
+
+/**
+ * A critical error occurred during encoding.
+ */
+export class EncodeError extends Error {
+  /**
+   * The byte offset of the error in the datastream.
+   */
+  offset: number;
+}
+
+/**
+ * A warning occurred during encoding.
+ */
+ export class EncodeWarning extends Error {
   /**
    * The byte offset of the warning in the datastream.
    */

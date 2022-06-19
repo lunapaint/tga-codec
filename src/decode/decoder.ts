@@ -10,26 +10,7 @@ import { DecodeError, DecodeWarning, handleWarning } from './assert.js';
 import { ByteStreamReader } from './byteStreamReader.js';
 import { readText } from './text.js';
 import { isValidBitDepth, isValidColorMapDepth, isValidImageType } from './validate.js';
-
-const enum ImageDescriptorMask {
-  AttributeBits = 0b00001111,
-  ScreenOrigin  = 0b00110000
-}
-
-const enum ImageDescriptorShift {
-  AttributeBits    = 0,
-  ScreenOrigin     = 4,
-  InterleavingFlag = 6
-}
-
-const enum ImageTypeMask {
-  RunLengthEncoded = 0b00001000
-}
-
-const enum RunLengthEncodingMask {
-  PixelCount = 0b01111111,
-  IsRle      = 0b10000000
-}
+import { ImageDescriptorMask, ImageDescriptorShift, ImageTypeMask, RunLengthEncodingMask } from '../shared/constants.js';
 
 export async function decodeTga(data: Readonly<Uint8Array>, options: IDecodeTgaOptions = {}): Promise<IDecodedTga> {
   const initialCtx: ITgaInitialDecodeContext = {
@@ -141,6 +122,14 @@ function parseHeader(ctx: ITgaInitialDecodeContext): ITgaHeader {
   const imageDescriptor = ctx.reader.readUint8();
   const attributeBitsPerPixel = (imageDescriptor & ImageDescriptorMask.AttributeBits) >> ImageDescriptorShift.AttributeBits;
   const screenOrigin = ((imageDescriptor & ImageDescriptorMask.ScreenOrigin) >> ImageDescriptorShift.ScreenOrigin) as ScreenOrigin;
+  // While the spec does defines TopRight and BottomRight, these are basically never used and
+  // often unsupported by image editors. Because of this a warning is added when they are used.
+  if (screenOrigin === ScreenOrigin.BottomRight) {
+    handleWarning(ctx, new DecodeWarning('This image is encoded using a bottom right screen origin, many image editors won\'t read this correctly', ctx.reader.offset - 1));
+  }
+  if (screenOrigin === ScreenOrigin.TopRight) {
+    handleWarning(ctx, new DecodeWarning('This image is encoded using a top right screen origin, many image editors won\'t read this correctly', ctx.reader.offset - 1));
+  }
   return {
     idLength,
     colorMap: colorMapType !== ColorMapType.NoColorMap ? {
@@ -233,25 +222,49 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
     view = new DataView(decoded.buffer, decoded.byteOffset, decoded.length);
     offset = 0;
   }
-  // While the spec does define TopRight and BottomRight, these are basically never used and
-  // seemingly never supported to save by image editors. It's also very difficult to find sample
-  // files to test against.
-  if (ctx.header.screenOrigin === ScreenOrigin.TopLeft) {
-    let imageOffset = 0;
-    for (let y = 0; y < image.height; y++) {
-      for (let x = 0; x < image.width; x++) {
-        offset += readPixel(image.data, imageOffset, view, offset);
-        imageOffset += 4;
+  switch (ctx.header.screenOrigin) {
+    case ScreenOrigin.BottomLeft: {
+      let imageOffset = 0;
+      for (let y = image.height - 1; y >= 0; y--) {
+        imageOffset = ctx.header.width * y * 4;
+        for (let x = 0; x < image.width; x++) {
+          offset += readPixel(image.data, imageOffset, view, offset);
+          imageOffset += 4;
+        }
       }
+      break;
     }
-  } else {
-    let imageOffset = 0;
-    for (let y = image.height - 1; y >= 0; y--) {
-      imageOffset = ctx.header.width * y * 4;
-      for (let x = 0; x < image.width; x++) {
-        offset += readPixel(image.data, imageOffset, view, offset);
-        imageOffset += 4;
+    case ScreenOrigin.BottomRight: {
+      let imageOffset = 0;
+      for (let y = image.height - 1; y >= 0; y--) {
+        imageOffset = (ctx.header.width * y + (ctx.header.width - 1)) * 4;
+        for (let x = 0; x < image.width; x++) {
+          offset += readPixel(image.data, imageOffset, view, offset);
+          imageOffset -= 4;
+        }
       }
+      break;
+    }
+    case ScreenOrigin.TopLeft: {
+      let imageOffset = 0;
+      for (let y = 0; y < image.height; y++) {
+        for (let x = 0; x < image.width; x++) {
+          offset += readPixel(image.data, imageOffset, view, offset);
+          imageOffset += 4;
+        }
+      }
+      break;
+    }
+    case ScreenOrigin.TopRight: {
+      let imageOffset = 0;
+      for (let y = 0; y < image.height; y++) {
+        imageOffset = (ctx.header.width * y + (ctx.header.width - 1)) * 4;
+        for (let x = 0; x < image.width; x++) {
+          offset += readPixel(image.data, imageOffset, view, offset);
+          imageOffset -= 4;
+        }
+      }
+      break;
     }
   }
   if (ctx.ambiguousAlpha && !ctx.options.strictMode && ctx.options.detectAmbiguousAlphaChannel) {
@@ -272,14 +285,14 @@ function parseImageData(ctx: ITgaDecodeContext, offset: number): IImage32 {
 }
 
 function decodeRunLengthEncoding(ctx: ITgaDecodeContext): Uint8Array {
-  // Decode the array into another array. This is a slow but simple approach, it would be better to
+  // Decode the array into another array. This is a slow but simple approach, it would be faster to
   // do this in-place.
   const bytesPerPixel = Math.ceil(ctx.header.bitDepth / 8);
   const result = new Uint8Array(ctx.header.width * ctx.header.height * bytesPerPixel);
   let byte = 0;
   let count = 0;
   let i = 0, j = 0, k = 0;
-  while (i < result.length - 1) {
+  while (i < result.length) {
     byte = ctx.reader.readUint8();
     count = (byte & RunLengthEncodingMask.PixelCount) + 1;
     if (byte & RunLengthEncodingMask.IsRle) {
@@ -312,7 +325,7 @@ function readPixel8BitGreyscale(imageData: Uint8Array, imageOffset: number, view
 }
 
 function readPixel16BitGreyscale(imageData: Uint8Array, imageOffset: number, view: DataView, viewOffset: number): number {
-  // Bits stored as 0bAAAAAAAA 0bGGGGGGGG
+  // Bits stored as 0bGGGGGGGG 0bAAAAAAAA
   imageData[imageOffset    ] = view.getUint8(viewOffset    );
   imageData[imageOffset + 1] = imageData[imageOffset    ];
   imageData[imageOffset + 2] = imageData[imageOffset    ];

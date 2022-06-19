@@ -77,6 +77,7 @@ Here are the details on what this codec supports:
     The `attributes type` field in the `extension area` is 0, 1 or 2
   )
 - The decode option `detectAmbiguousAlphaChannel` can be enabled which will detect images with ambiguous alpha and disable alpha is enabling it would result in a fully transparent image. Ambiguoius alpha is defined as when alpha is enabled as above and `attribute bits per pixel` is 0.
+- Top right and bottom right screen origins are supported. Image editors often can't read these so a warning is created when decoding these screen origins.
 
 ## References
 

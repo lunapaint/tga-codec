@@ -4,11 +4,11 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { deepStrictEqual, fail, strictEqual } from 'assert';
+import { deepStrictEqual, fail, ok, strictEqual } from 'assert';
 import * as fs from 'fs';
-import { decodeTga } from '../../out-dev/public/tga.js';
+import { decodeTga } from '../../public/tga.js';
 import { decodePng, encodePng } from '@lunapaint/png-codec';
-import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails, ITgaFooter, ITgaHeader } from '../../typings/api.js';
+import { IDecodedTga, IExtensionArea, IImage32, ITgaDetails, ITgaFooter, ITgaHeader } from '../../../typings/api.js';
 import { join } from 'path';
 
 async function getPngImage(path: string): Promise<IImage32> {
@@ -141,4 +141,19 @@ export function repeatArray(array: number[], times: number): number[] {
     result.push(...array);
   }
   return result;
+}
+
+export async function throwsAsync(block: () => unknown, message?: string | Error) {
+  let error;
+  try {
+    await block();
+  } catch (e: any) {
+    error = e;
+  }
+  ok(error, 'Missing expected exception.');
+  if (typeof message === 'string') {
+    strictEqual(error.message, message);
+  } else if (typeof message === 'object') {
+    deepStrictEqual(error, message);
+  }
 }
