@@ -151,8 +151,7 @@ describe('encoder', () => {
           await assertEncodeDecodeResult({ imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 },
             e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
             { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 }, {
-              customImage: testBadRleImage,
-              encodeWarnings: ['RLE encoded was used but it is larger than unencoded would be']
+              customImage: testBadRleImage
             }
           );
         });
