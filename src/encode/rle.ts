@@ -31,16 +31,15 @@ export function encodeRunLengthEncoding(ctx: IEncodeContext, data: Uint8Array): 
     }
     // If not equal, flush the current pixel to the result array
     if (notEqual) {
-      // TODO: Handle 127 max pixels per packet
-      if (currentPixelCount > 127) {
-        throw new Error('NYI'); // TODO: Implement
-      }
       // Flush the pixel(s) to the result array
-      result[resultIndex] = (currentPixelCount - 1) | (currentPixelCount > 1 ? RunLengthEncodingMask.IsRle : 0);
-      for (j = 0; j < bytesPerPixel; j++) {
-        result[resultIndex + j + 1] = data[currentPixelOffset + j];
+      while (currentPixelCount > 0) {
+        result[resultIndex] = (Math.min(currentPixelCount, 128) - 1) | (currentPixelCount > 1 ? RunLengthEncodingMask.IsRle : 0);
+        for (j = 0; j < bytesPerPixel; j++) {
+          result[resultIndex + j + 1] = data[currentPixelOffset + j];
+        }
+        resultIndex += bytesPerRlePacket;
+        currentPixelCount -= 128;
       }
-      resultIndex += bytesPerRlePacket;
       // Set new current pixel
       currentPixelOffset = i;
       currentPixelCount = 1;
@@ -50,11 +49,14 @@ export function encodeRunLengthEncoding(ctx: IEncodeContext, data: Uint8Array): 
   }
 
   // Flush the remaining pixel(s) to the result array
-  result[resultIndex] = (currentPixelCount - 1) | (currentPixelCount > 1 ? RunLengthEncodingMask.IsRle : 0);
-  for (j = 0; j < bytesPerPixel; j++) {
-    result[resultIndex + j + 1] = data[currentPixelOffset + j];
+  while (currentPixelCount > 0) {
+    result[resultIndex] = (Math.min(currentPixelCount, 128) - 1) | (currentPixelCount > 1 ? RunLengthEncodingMask.IsRle : 0);
+    for (j = 0; j < bytesPerPixel; j++) {
+      result[resultIndex + j + 1] = data[currentPixelOffset + j];
+    }
+    resultIndex += bytesPerRlePacket;
+    currentPixelCount -= 128;
   }
-  resultIndex += bytesPerRlePacket;
 
   if (resultIndex - 1 > data.length) {
     handleWarning(ctx, new EncodeWarning('RLE encoded was used but it is larger than unencoded would be', -1));
