@@ -16,7 +16,7 @@ async function encode(file) {
   console.log('Encoding: ' + file);
   const originalData = await fs.readFile(file);
   const decoded = await decoder.decodeTga(originalData);
-  const encoded = await encoder.encodeTga(decoded.image, { screenOrigin: 3 });
+  const encoded = await encoder.encodeTga(decoded.image);
   await fs.mkdir('out-test', { recursive: true });
   const filename = join('out-test', join(dirname(file), basename(file, '.tga')).replace(/[\\/]/g, '-') + '_tga-codec.tga');
   fs.writeFile(filename, encoded.data);

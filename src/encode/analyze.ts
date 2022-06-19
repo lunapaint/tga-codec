@@ -164,7 +164,7 @@ function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageTyp
       }
     }
     return {
-      imageType: ImageType.UncompressedColorMapped,
+      imageType: ImageType.RunLengthEncodedColorMapped,
       bitDepth: 8,
       colorMap
     };
