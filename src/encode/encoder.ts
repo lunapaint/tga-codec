@@ -72,8 +72,6 @@ function writeTgaHeader(ctx: IEncodeContext): Uint8Array {
   // Bit depth
   stream.writeUint8(ctx.bitDepth);
   // Image descriptor
-  // TODO: Support image origin
-  // TODO: Support other alpha channel bits
   const imageDescriptor = (
     // alpha channel bits
     (ctx.bitDepth === 32 ? 8 : 0) |
