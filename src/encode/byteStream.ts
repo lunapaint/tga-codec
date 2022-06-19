@@ -30,16 +30,6 @@ export class ByteStream implements IByteStream {
     this.offset += 2;
   }
 
-  writeUint32(value: number) {
-    this.view.setUint32(this.offset, value, this._le);
-    this.offset += 4;
-  }
-
-  writeArray(values: Uint8Array) {
-    this.array.set(values, this.array.byteOffset + this.offset);
-    this.offset += values.length;
-  }
-
   assertAtEnd() {
     if (this.offset !== this.array.length) {
       throw new Error('Writing finished before expected length of stream');

@@ -7,7 +7,7 @@
 const decoder = require('../out-dist/decode/decoder');
 const encoder = require('../out-dist/encode/encoder');
 const fs = require('fs/promises');
-const { dirname, basename, extname, join, sep } = require('path');
+const { dirname, basename, extname, join } = require('path');
 
 async function encode(file) {
   if (extname(file) !== '.tga') {
@@ -17,8 +17,14 @@ async function encode(file) {
   const originalData = await fs.readFile(file);
   const decoded = await decoder.decodeTga(originalData);
   const encoded = await encoder.encodeTga(decoded.image);
+
+  // Save in same folder
+  // const filename = join(dirname(file), `${basename(file, '.tga')}_tga-codec.tga`);
+
+  // Save in out-test/
   await fs.mkdir('out-test', { recursive: true });
   const filename = join('out-test', join(dirname(file), basename(file, '.tga')).replace(/[\\/]/g, '-') + '_tga-codec.tga');
+
   fs.writeFile(filename, encoded.data);
   console.log(`wrote ${encoded.data.length} bytes to ${filename}`);
 }

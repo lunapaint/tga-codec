@@ -88,8 +88,6 @@ export interface IByteStream {
   offset: number;
   writeUint8(value: number): void;
   writeUint16(value: number): void;
-  writeUint32(value: number): void;
-  writeArray(values: Uint8Array): void;
   assertAtEnd(): void;
 }
 
