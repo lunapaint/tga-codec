@@ -4,3 +4,6 @@
 [submodule "fixtures/pngsuite"]
 	path = fixtures/pngsuite
 	url = https://github.com/lunapaint/pngsuite
+[submodule "fixtures/imagetestsuite"]
+	path = fixtures/imagetestsuite
+	url = https://github.com/lunapaint/imagetestsuite
