@@ -40,7 +40,7 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
   if (options.screenOrigin === ScreenOrigin.TopRight) {
     handleWarning(partialCtx, new EncodeWarning('This image is encoded using a top right screen origin, many image editors won\'t read this correctly', 17));
   }
-  if (options.bitDepth !== undefined && options.imageType === undefined || options.bitDepth === undefined && options.imageType !== undefined) {
+  if (options.bitDepth !== undefined && options.imageType === undefined || options.bitDepth === undefined && options.imageType !== undefined && options.imageType >= 0) {
     throw new EncodeError('Bit depth and image type options must be used together', -1);
   }
 
