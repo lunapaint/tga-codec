@@ -75,8 +75,11 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
   }
 
   // Determine the best bit depth
-  if (!bitDepth) {
+  if (!bitDepth || imageTypeCompressionHint !== undefined) {
     const result = detectIdealImageTypeAndBitDepth(image, imageTypeCompressionHint);
+    if (bitDepth && bitDepth < result.bitDepth) {
+      throw new EncodeError(`Image cannot be encoded using specified bit depth`, -1);
+    }
     bitDepth = result.bitDepth;
     imageType = result.imageType;
     colorMap = result.colorMap;

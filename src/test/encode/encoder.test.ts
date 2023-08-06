@@ -4,8 +4,8 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { deepStrictEqual, strictEqual } from 'assert';
-import { IEncodedTga, ImageType } from '../../../typings/api.js';
+import { deepStrictEqual } from 'assert';
+import { ImageType, ImageTypeCompressionHint } from '../../../typings/api.js';
 import { decodeTga } from '../../decode/decoder.js';
 import { encodeTga } from '../../encode/encoder.js';
 import { IDecodedTga, IEncodeTgaOptions, IImage32, ScreenOrigin } from '../../shared/types.js';
@@ -32,6 +32,28 @@ const testGreyscaleImage: Readonly<IImage32> = {
     255, 255, 255, 255, 255, 255, 255, 255,
   ]),
   width: 4,
+  height: 2
+};
+
+const testGreyscaleImage512ColorData = [];
+for (let alpha = 64; alpha < 256; alpha += 128) {
+  for (let i = 0; i < 256; i++) {
+    testGreyscaleImage512ColorData.push(...[i, i, i, alpha]);
+  }
+}
+const testGreyscaleImage512Color: Readonly<IImage32> = {
+  data: new Uint8Array(testGreyscaleImage512ColorData),
+  width: 256,
+  height: 2
+};
+
+const testTruecolorImage512ColorData = [...testGreyscaleImage512ColorData];
+for (let i = 0; i < testTruecolorImage512ColorData.length; i += 4) {
+  testTruecolorImage512ColorData[i] = 255;
+}
+const testTruecolorImage512Color: Readonly<IImage32> = {
+  data: new Uint8Array(testTruecolorImage512ColorData),
+  width: 256,
   height: 2
 };
 
@@ -162,6 +184,46 @@ describe('encoder', () => {
               customImage: testGreyscaleImage
             }
           );
+        });
+        describe('ImageTypeCompressionHint', () => {
+          it('Uncompressed', async () => {
+            await assertEncodeDecodeResult({ imageType: ImageTypeCompressionHint.Uncompressed, bitDepth: 8 },
+              e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
+              { imageType: ImageType.UncompressedColorMapped, bitDepth: 8 }
+            );
+            await assertEncodeDecodeResult({ imageType: ImageTypeCompressionHint.Uncompressed, bitDepth: 16 },
+              e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
+              { imageType: ImageType.UncompressedGrayscale, bitDepth: 16 }, {
+                customImage: testGreyscaleImage512Color
+              }
+            );
+            await assertEncodeDecodeResult({ imageType: ImageTypeCompressionHint.Uncompressed, bitDepth: 32 },
+              e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
+              { imageType: ImageType.UncompressedTrueColor, bitDepth: 32 }, {
+                customImage: testTruecolorImage512Color
+              }
+            );
+          });
+          it('RunLengthEncoded', async () => {
+            await assertEncodeDecodeResult({ imageType: ImageTypeCompressionHint.RunLengthEncoded, bitDepth: 8 },
+              e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
+              { imageType: ImageType.RunLengthEncodedColorMapped, bitDepth: 8 }
+            );
+            await assertEncodeDecodeResult({ imageType: ImageTypeCompressionHint.RunLengthEncoded, bitDepth: 16 },
+              e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
+              { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 16 }, {
+                customImage: testGreyscaleImage512Color,
+                encodeWarnings: ['RLE encoded was used but it is larger than unencoded would be']
+              }
+            );
+            await assertEncodeDecodeResult({ imageType: ImageTypeCompressionHint.RunLengthEncoded, bitDepth: 32 },
+              e => ({ imageType: e.details.header.imageType, bitDepth: e.details.header.bitDepth }),
+              { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 }, {
+                customImage: testTruecolorImage512Color,
+                encodeWarnings: ['RLE encoded was used but it is larger than unencoded would be']
+              }
+            );
+          });
         });
       });
       it('origin', async () => {
