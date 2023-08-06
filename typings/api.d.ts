@@ -117,11 +117,12 @@ export interface IEncodeTgaOptions {
   bitDepth?: BitDepth;
 
   /**
-   * Defines how to encode the image.
+   * Defines how to encode the image. This can be an explicit {@link ImageType} or a hint
+   * {@link ImageTypeCompressionHint} which will detect with the given compression.
    *
    * {@link bitDepth} must be specified when the image type is.
    */
-  imageType?: ImageType;
+  imageType?: ImageType | ImageTypeCompressionHint;
 
   /**
    * Enabled strict encoding which will throw when warnings are encountered.
@@ -456,6 +457,11 @@ export const enum ImageType {
   RunLengthEncodedColorMapped = 9,
   RunLengthEncodedTrueColor = 10,
   RunLengthEncodedGrayscale = 11
+}
+
+export const enum ImageTypeCompressionHint {
+  Uncompressed = -1,
+  RunLengthEncoded = -2
 }
 
 export const enum ScreenOrigin {

@@ -4,7 +4,7 @@
  * Released under MIT license. See LICENSE in the project root for details.
  */
 
-import { BitDepth, IEncodeTgaOptions, ImageType, ScreenOrigin } from '../../typings/api.js';
+import { BitDepth, IEncodeTgaOptions, ImageType, ImageTypeCompressionHint, ScreenOrigin } from '../../typings/api.js';
 import { IColorMap, IEncodeContext, IImage32 } from '../shared/types.js';
 import { EncodeError, EncodeWarning, handleWarning } from './assert.js';
 
@@ -45,7 +45,16 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
   }
 
   // Analyze data
-  let imageType: ImageType | undefined = options.imageType;
+  const imageTypeOrHint = options.imageType;
+  let imageType: ImageType | undefined;
+  let imageTypeCompressionHint: ImageTypeCompressionHint | undefined;
+  if (imageTypeOrHint !== undefined) {
+    if (imageTypeOrHint === ImageTypeCompressionHint.RunLengthEncoded || imageTypeOrHint === ImageTypeCompressionHint.Uncompressed) {
+      imageTypeCompressionHint = imageTypeOrHint;
+    } else {
+      imageType = imageTypeOrHint;
+    }
+  }
   let bitDepth: BitDepth | undefined = options.bitDepth;
   let colorMap: IColorMap | undefined = undefined;
 
@@ -58,7 +67,7 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
   }
 
   if (imageType === ImageType.RunLengthEncodedColorMapped || imageType === ImageType.UncompressedColorMapped) {
-    const result = detectIdealImageTypeAndBitDepth(image);
+    const result = detectIdealImageTypeAndBitDepth(image, imageTypeCompressionHint);
     if (!result.colorMap) {
       throw new EncodeError(`Image has too many colors to encode using a color map`, -1);
     }
@@ -66,8 +75,11 @@ export function analyze(image: Readonly<IImage32>, options: IEncodeTgaOptions = 
   }
 
   // Determine the best bit depth
-  if (!bitDepth) {
-    const result = detectIdealImageTypeAndBitDepth(image);
+  if (!bitDepth || imageTypeCompressionHint !== undefined) {
+    const result = detectIdealImageTypeAndBitDepth(image, imageTypeCompressionHint);
+    if (bitDepth && bitDepth < result.bitDepth) {
+      throw new EncodeError(`Image cannot be encoded using specified bit depth`, -1);
+    }
     bitDepth = result.bitDepth;
     imageType = result.imageType;
     colorMap = result.colorMap;
@@ -100,7 +112,7 @@ function detectTransparencyOnly(image: IImage32): boolean {
   return hasTransparency;
 }
 
-function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageType, bitDepth: BitDepth, colorMap?: IColorMap } {
+function detectIdealImageTypeAndBitDepth(image: IImage32, imageTypeCompressionHint: ImageTypeCompressionHint | undefined): { imageType: ImageType, bitDepth: BitDepth, colorMap?: IColorMap } {
   const pixelCount = image.width * image.height;
   const indexCount = pixelCount * 4;
   let hasNon2BitTransparency = false;
@@ -157,30 +169,47 @@ function detectIdealImageTypeAndBitDepth(image: IImage32): { imageType: ImageTyp
       }
     }
     return {
-      imageType: ImageType.RunLengthEncodedColorMapped,
+      imageType: withCompressionHint(ImageType.RunLengthEncodedColorMapped, imageTypeCompressionHint),
       bitDepth: 8,
       colorMap
     };
   }
   if (!hasColor) {
     if (hasTransparency) {
-      return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 16 };
+      return { imageType: withCompressionHint(ImageType.RunLengthEncodedGrayscale, imageTypeCompressionHint), bitDepth: 16 };
     }
-    return { imageType: ImageType.RunLengthEncodedGrayscale, bitDepth: 8 };
+    return { imageType: withCompressionHint(ImageType.RunLengthEncodedGrayscale, imageTypeCompressionHint), bitDepth: 8 };
   }
   if (!cannotEncode5Bit) {
     if (hasTransparency) {
       if (hasNon2BitTransparency) {
-        return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 };
+        return { imageType: withCompressionHint(ImageType.RunLengthEncodedTrueColor, imageTypeCompressionHint), bitDepth: 32 };
       }
-      return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 16 };
+      return { imageType: withCompressionHint(ImageType.RunLengthEncodedTrueColor, imageTypeCompressionHint), bitDepth: 16 };
     }
-    return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 15 };
+    return { imageType: withCompressionHint(ImageType.RunLengthEncodedTrueColor, imageTypeCompressionHint), bitDepth: 15 };
   }
   if (hasTransparency) {
-    return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 32 };
+    return { imageType: withCompressionHint(ImageType.RunLengthEncodedTrueColor, imageTypeCompressionHint), bitDepth: 32 };
   }
-  return { imageType: ImageType.RunLengthEncodedTrueColor, bitDepth: 24 };
+  return { imageType: withCompressionHint(ImageType.RunLengthEncodedTrueColor, imageTypeCompressionHint), bitDepth: 24 };
+}
+
+function withCompressionHint(imageType: Exclude<ImageType, ImageType.NoImageData>, hint: ImageTypeCompressionHint | undefined): ImageType {
+  if (hint === undefined) {
+    return imageType;
+  }
+  switch (imageType) {
+    case ImageType.UncompressedColorMapped:
+    case ImageType.RunLengthEncodedColorMapped:
+      return hint === ImageTypeCompressionHint.RunLengthEncoded ? ImageType.RunLengthEncodedColorMapped : ImageType.UncompressedColorMapped;
+    case ImageType.UncompressedTrueColor:
+    case ImageType.RunLengthEncodedTrueColor:
+      return hint === ImageTypeCompressionHint.RunLengthEncoded ? ImageType.RunLengthEncodedTrueColor : ImageType.UncompressedTrueColor;
+    case ImageType.UncompressedGrayscale:
+    case ImageType.RunLengthEncodedGrayscale:
+      return hint === ImageTypeCompressionHint.RunLengthEncoded ? ImageType.RunLengthEncodedGrayscale : ImageType.UncompressedGrayscale;
+  }
 }
 
 /**

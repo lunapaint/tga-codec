@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -b ./tsconfig.json",
     "watch": "tsc -b -w ./tsconfig.json --preserveWatchOutput",
-    "lint": "eslint -c .eslintrc.json --max-warnings 0 --ext .ts src/ test/",
+    "lint": "eslint -c .eslintrc.json --max-warnings 0 --ext .ts src/",
     "test": "mocha ./out-dev/test/**/*.js --timeout 20000 --diff false --enable-source-maps",
     "coverage": "nyc npm run test",
     "decode": "node ./scripts/decode-image.js",
@@ -33,7 +33,7 @@
   "devDependencies": {
     "@lunapaint/png-codec": "^0.2.0",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^17.0.8",
+    "@types/node": "^16.18.39",
     "@types/pako": "^1.0.3",
     "@typescript-eslint/eslint-plugin": "^5.9.1",
     "@typescript-eslint/parser": "^5.9.1",

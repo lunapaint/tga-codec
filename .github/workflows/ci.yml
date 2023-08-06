@@ -2,9 +2,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -13,19 +13,21 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [16.x]
 
     steps:
       - uses: actions/checkout@v2
+      - name: Sync submodules
+        run: git submodule update --init --recursive
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install node dependencies
-        run: yarn
+        run: npm ci
       - name: Build
-        run: yarn build
+        run: npm run build
       - name: Lint
-        run: yarn lint
+        run: npm run lint
       - name: Unit tests
-        run: yarn test
+        run: npm run test
