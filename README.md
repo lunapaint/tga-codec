@@ -30,7 +30,7 @@ Alternatively, you could add the repo as a git submodule, or download the source
 Basic usage:
 
 ```ts
-import { decodeTga } from '@lunapaint/tga-codec';
+import { decodeTga, encodeTga } from '@lunapaint/tga-codec';
 import * as fs from 'fs/promises';
 
 async function decode(filepath) {
@@ -38,6 +38,13 @@ async function decode(filepath) {
   const decoded = await decodeTga(data);
   console.log('decoded image', decoded.image.data);
   // [r, g, b, a, ...]
+}
+
+async function encode(data, width, height, filepath) {
+  const encoded = await encodeTga({ data, width, height });
+  await fs.writeFile(filepath, encoded.data);
+  console.log('encoded image', encoded.data);
+  // [...binary data]
 }
 ```
 
