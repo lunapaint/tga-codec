@@ -1,6 +1,6 @@
 {
   "name": "@lunapaint/tga-codec",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Decode tga files in web or node",
   "main": "out-dist/public/tga.js",
   "typings": "typings/api.d.ts",
