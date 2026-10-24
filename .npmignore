@@ -2,6 +2,7 @@
 .nyc_output/
 .vscode/
 
+fixtures/
 out-dev/
 out-test/
 src/
